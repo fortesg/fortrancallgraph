@@ -1,0 +1,75 @@
+from utils import assertType
+from supertypes import SourceDumper
+from source import SubroutineFullName
+
+class SourceLineDumper(SourceDumper):
+
+    def dumpSubroutine(self, subroutineName):
+        assertType(subroutineName, 'subroutineName', SubroutineFullName)
+
+        subroutine = self._findSubroutine(subroutineName);
+        if subroutine is not None:
+            numberLength = len(str(subroutine.getLastLineNumber()));
+            for i, line in subroutine.getLines():
+                if (self._printLineNumbers):
+                    print str(i).zfill(numberLength) + '  ',;
+                print line,;
+
+    def dumpModule(self, moduleName):
+        assertType(moduleName, 'moduleName', str)
+
+        module = self._findModule(moduleName);
+        if module is not None:
+            numberLength = len(str(module.getLastLineNumber()));
+            for i, line in module.getLines():
+                if (self._printLineNumbers):
+                    print str(i).zfill(numberLength) + '  ',;
+                print line,;
+
+    def dumpSourceFile(self, fileName):
+        assertType(fileName, 'fileName', str)
+
+        sourceFile = self._findSourceFile(fileName);
+        if sourceFile is not None:
+            lines = sourceFile.getLines();
+            numberLength = len(str(len(lines)));
+            for i, line in lines:
+                if (self._printLineNumbers):
+                    print str(i).zfill(numberLength) + '  ',;
+                print line,;
+
+class SourceStatementDumper(SourceDumper):
+
+    def dumpSubroutine(self, subroutineName):
+        assertType(subroutineName, 'subroutineName', SubroutineFullName)
+
+        subroutine = self._findSubroutine(subroutineName);
+        if subroutine is not None:
+            numberLength = len(str(subroutine.getLastLineNumber()));
+            for i, statement, _ in subroutine.getStatements():
+                if (self._printLineNumbers):
+                    print str(i).zfill(numberLength) + '  ',;
+                print statement;
+
+    def dumpModule(self, moduleName):
+        assertType(moduleName, 'moduleName', str)
+
+        module = self._findModule(moduleName);
+        if module is not None:
+            numberLength = len(str(module.getLastLineNumber()));
+            for i, statement, _ in module.getStatements():
+                if (self._printLineNumbers):
+                    print str(i).zfill(numberLength) + '  ',;
+                print statement;
+
+    def dumpSourceFile(self, fileName):
+        assertType(fileName, 'fileName', str)
+
+        sourceFile = self._findSourceFile(fileName);
+        if sourceFile is not None:
+            statements = sourceFile.getStatements();
+            numberLength = len(str(len(statements)));
+            for i, statement, _ in statements:
+                if (self._printLineNumbers):
+                    print str(i).zfill(numberLength) + '  ',;
+                print statement;
