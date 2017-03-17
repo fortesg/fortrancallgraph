@@ -69,20 +69,32 @@ optional arguments:
 ##### Examples:
 
 * Print the call graph of the subroutine `my_subroutine` from module `my_module`:  
-`$> ./FortranCallgraph.py -p tree my_module my_subroutine`  
+```
+$> ./FortranCallgraph.py -p tree my_module my_subroutine
+```
 or  
-`$> ./FortranCallgraph.py -p tree __my_module_MOD_my_subroutine` 
+```
+$> ./FortranCallgraph.py -p tree __my_module_MOD_my_subroutine
+```
 
 * List all used global variables used in subroutine `my_subroutine` from module `my_module` or in directly and indirectly called subroutines and functions:  
-`$> ./FortranCallgraph.py -a globals my_module my_subroutine`  
+```
+$> ./FortranCallgraph.py -a globals my_module my_subroutine
+```  
 
 * List all basic type arguments and used members of derived type arguments:  
-`$> ./FortranCallgraph.py -a arguments my_module my_subroutine`  
+```
+$> ./FortranCallgraph.py -a arguments my_module my_subroutine
+```  
 
 * List all used members of derived type argument `arg1`:  
-`$> ./FortranCallgraph.py -a arguments -v arg1 my_module my_subroutine`  
+```
+$> ./FortranCallgraph.py -a arguments -v arg1 my_module my_subroutine
+```  
 
 * List both, used globals and arguments:  
-`$> ./FortranCallgraph.py -a all my_module my_subroutine`  
+```
+$> ./FortranCallgraph.py -a all my_module my_subroutine
+```
 
 Everything else you need to find out on your own, so far.
