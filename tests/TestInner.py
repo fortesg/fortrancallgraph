@@ -5,6 +5,9 @@ import os
 import sys
 
 TEST_FOLDER = os.path.dirname(os.path.realpath(__file__))
+SOURCE_FOLDER = TEST_FOLDER + '/samples/inner'
+ASSEMBLER_FOLDER = SOURCE_FOLDER
+
 FCG_FOLDER = TEST_FOLDER + '/..'
 sys.path.append(FCG_FOLDER)
 
@@ -16,13 +19,11 @@ from globals import GlobalVariablesCallGraphAnalysis
 class SampleTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
-        sourceFolder = TEST_FOLDER + '/samples'
-        assemblerFolder = sourceFolder
-        callGraphBuilder = FromAssemblerCallGraphBuilder(assemblerFolder, specialModuleFiles)
-        self.sourceFiles = SourceFiles(sourceFolder, specialModuleFiles);
+        callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_FOLDER, specialModuleFiles)
+        self.sourceFiles = SourceFiles(SOURCE_FOLDER, specialModuleFiles);
         
-        self.srcFile = sourceFolder + '/inner.f90'
-        self.assFile = assemblerFolder + '/inner.s'
+        self.srcFile = SOURCE_FOLDER + '/inner.f90'
+        self.assFile = ASSEMBLER_FOLDER + '/inner.s'
         self.filesExist = os.path.exists(self.srcFile) and os.path.exists(self.assFile)
         
         self.s0 = SubroutineFullName('__inner_MOD_s0')
