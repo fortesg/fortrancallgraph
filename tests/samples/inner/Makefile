@@ -22,5 +22,5 @@ innerprog.o: inner.o
 	$(FF) -S -g $(FFLAGS) $<
 
 clean:
-	rm -f *.o *.mod *.s	
+	rm -f *.o *.mod *.s	innerprog
  
