@@ -98,3 +98,8 @@ $> ./FortranCallgraph.py -a all my_module my_subroutine
 ```
 
 Everything else you need to find out on your own, so far.
+
+License
+=======
+
+[GNU General Public License v3.0](LICENSE)
