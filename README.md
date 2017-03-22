@@ -15,7 +15,14 @@ Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 Quick Start Guide
 =================
 
-#### 1. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
+#### 1. Clone this repo
+
+```
+$> git clone https://github.com/chovy1/fortrancallgraph.git
+$> cd fortrancallgraph
+```
+
+#### 2. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
 
 `FCG_FOLDER` : The location of FortranCallgraph (usually `os.path.dirname(os.path.realpath(__file__))`)
 
@@ -36,11 +43,11 @@ SPECIAL_MODULE_FILES = { 'mod_foo': 'bar.f90' }
 
 `IGNORE_DERIVED_TYPES` : A list of derived type which members shall not appear in the result
 
-#### 2. Create assembler files
+#### 3. Create assembler files
 
 Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` to generate assembler files.
 
-#### 3. Run `./FortranCallGraph.py`
+#### 4. Run `./FortranCallGraph.py`
 
 ```
 usage: FortranCallgraph.py [-h]
