@@ -27,7 +27,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         self.__interfaces = interfaces;
         self.__types = types;
         self.__excludeModules = map(str.lower, excludeModules)
-        self.__ignoredTypes = ignoredTypes
+        self.__ignoredTypes = map(str.lower, ignoredTypes)
     
     def setVariable(self, variable):
         assertType(variable, 'variable', Variable)

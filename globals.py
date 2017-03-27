@@ -26,9 +26,9 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
         
         self.__sourceFiles = sourceFiles;
         self.__callGraph = None
-        self.__excludeModules = excludeModules
-        self.__ignoredModules = ignoredModules;
-        self.__ignoredTypes = ignoredTypes;
+        self.__excludeModules = map(str.lower, excludeModules)
+        self.__ignoredModules = map(str.lower, ignoredModules)
+        self.__ignoredTypes = map(str.lower, ignoredTypes)
         self.__interfaces = interfaces;
         self.__types = types;
         self.__variableTracker = None
@@ -132,6 +132,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
         return variableReferences;  
     
     def __getModuleVariables(self, moduleName):
+        moduleName = moduleName.lower()
         if moduleName in self.__ignoredModules:
             return dict()
 
