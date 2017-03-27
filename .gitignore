@@ -1,3 +1,4 @@
 /config_fortrancallgraph.py
 *.pyc
 /cache/
+/.settings/
