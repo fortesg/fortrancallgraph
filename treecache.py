@@ -11,10 +11,10 @@ class CachedAssemblerCallGraphBuilder(CallGraphBuilder):
     
     FILE_SUFFIX = '.tree'
     
-    def __init__(self, cacheFolder, graphBuilder):
+    def __init__(self, cacheDir, graphBuilder):
         assertType(graphBuilder, 'graphBuilder', CallGraphBuilder)
         
-        self.__cacheFolder = cacheFolder;
+        self.__cacheDir = cacheDir;
         self.__graphBuilder = graphBuilder
 
     def buildCallGraph(self, rootSubroutine, clear = False):
@@ -39,7 +39,7 @@ class CachedAssemblerCallGraphBuilder(CallGraphBuilder):
         return self.__graphBuilder.getModuleFilePath(moduleName)
     
     def __getCacheFilePath(self, subroutineName):
-        return os.path.join(self.__cacheFolder, str(subroutineName) + CachedAssemblerCallGraphBuilder.FILE_SUFFIX)
+        return os.path.join(self.__cacheDir, str(subroutineName) + CachedAssemblerCallGraphBuilder.FILE_SUFFIX)
     
     def __clearGraph(self, subroutineName):
         cacheFilePath = self.__getCacheFilePath(subroutineName)
@@ -65,8 +65,8 @@ class CachedAssemblerCallGraphBuilder(CallGraphBuilder):
     def __saveGraph(self, callgraph):
         subroutineName = callgraph.getRoot()
 
-        if not os.path.exists(self.__cacheFolder):
-            os.makedirs(self.__cacheFolder) 
+        if not os.path.exists(self.__cacheDir):
+            os.makedirs(self.__cacheDir) 
 
         cacheFilePath = self.__getCacheFilePath(subroutineName)
         cacheFile = open(cacheFilePath, 'w')

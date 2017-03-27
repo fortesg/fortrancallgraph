@@ -1427,12 +1427,12 @@ class SourceFile(object):
         return cleanStatement
 
 class SourceFiles(object):
-    def __init__(self, baseFolder, specialModuleFiles={}):
+    def __init__(self, baseDir, specialModuleFiles={}):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
-        if not os.path.isdir(baseFolder):
-            raise IOError("Not a directory: " + baseFolder);
+        if not os.path.isdir(baseDir):
+            raise IOError("Not a directory: " + baseDir);
         
-        self.__baseFolder = baseFolder;
+        self.__baseDir = baseDir;
         self.__filesByPath = dict();
         self.setSpecialModuleFiles(specialModuleFiles)
         
@@ -1448,8 +1448,8 @@ class SourceFiles(object):
 
         self.__filesByModules = dict(); # Clear Module Cache
         
-    def getBaseFolder(self):
-        return self.__baseFolder
+    def getBaseDir(self):
+        return self.__baseDir
     
     def existsSubroutine(self, subroutineName):
         assertType(subroutineName, 'subroutineName', SubroutineName)
@@ -1517,7 +1517,7 @@ class SourceFiles(object):
             return moduleName + '.f90';
         
     def __findFile(self, fileName):
-        for root, _, files in os.walk(self.__baseFolder):
+        for root, _, files in os.walk(self.__baseDir):
             for name in files:
                 if name.replace('.F90', '.f90') == fileName.replace('.F90', '.f90'):
                     return os.path.join(root, name);

@@ -12,12 +12,12 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
     
     FILE_SUFFIX = '.s'
 
-    def __init__(self, baseFolder, specialModuleFiles = {}):
+    def __init__(self, baseDir, specialModuleFiles = {}):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
-        if not os.path.isdir(baseFolder):
-            raise IOError("Not a directory: " + baseFolder);
+        if not os.path.isdir(baseDir):
+            raise IOError("Not a directory: " + baseDir);
         
-        self.__baseFolder = baseFolder;
+        self.__baseDir = baseDir;
         self.setSpecialModuleFiles(specialModuleFiles);
         
     def setSpecialModuleFiles(self, specialModuleFiles):
@@ -73,7 +73,7 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
         else:
             path = moduleName + FromAssemblerCallGraphBuilder.FILE_SUFFIX;
         
-        return os.path.join(self.__baseFolder, path);
+        return os.path.join(self.__baseDir, path);
     
     def __findCalledSubroutines(self, subroutine, filePath):
         openFile = open(filePath);
