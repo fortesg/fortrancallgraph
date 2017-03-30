@@ -1430,10 +1430,11 @@ class SourceFiles(object):
     def __init__(self, baseDir, specialModuleFiles={}):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         if not os.path.isdir(baseDir):
-            raise IOError("Not a directory: " + baseDir);
+            raise IOError("Not a directory: " + baseDir)
         
-        self.__baseDir = baseDir;
-        self.__filesByPath = dict();
+        self.__baseDir = baseDir
+        self.__filesByPath = dict()
+        self.__filesByModules = dict()
         self.setSpecialModuleFiles(specialModuleFiles)
         
     def getSpecialModuleFiles(self):
@@ -1444,9 +1445,9 @@ class SourceFiles(object):
         
         self.__specialModuleFiles = dict()
         for module, file in specialModuleFiles.iteritems():
-            self.__specialModuleFiles[module.lower()] = file;
+            self.__specialModuleFiles[module.lower()] = file
 
-        self.__filesByModules = dict(); # Clear Module Cache
+        self.__filesByModules = dict() # Clear Module Cache
         
     def getBaseDir(self):
         return self.__baseDir
@@ -1454,43 +1455,43 @@ class SourceFiles(object):
     def existsSubroutine(self, subroutineName):
         assertType(subroutineName, 'subroutineName', SubroutineName)
         
-        sourceFile = self.findModuleFile(subroutineName.getModuleName());
+        sourceFile = self.findModuleFile(subroutineName.getModuleName())
         return sourceFile is not None and subroutineName in sourceFile
         
     def findSubroutine(self, subroutineName):    
         assertType(subroutineName, 'subroutineName', SubroutineName)
         
-        sourceFile = self.findModuleFile(subroutineName.getModuleName());
+        sourceFile = self.findModuleFile(subroutineName.getModuleName())
         if sourceFile is None:
-            print >> sys.stderr, '*** WARNING [SourceFiles]: Module file not found for subroutine: ' + str(subroutineName) + '. ***';
-            return None;
+            print >> sys.stderr, '*** WARNING [SourceFiles]: Module file not found for subroutine: ' + str(subroutineName) + '. ***'
+            return None
         else:
             return sourceFile.getSubroutine(subroutineName)
 
     def existsModule(self, moduleName):
         assertType(moduleName, 'moduleName', str)
         
-        sourceFile = self.findModuleFile(moduleName);
+        sourceFile = self.findModuleFile(moduleName)
         return sourceFile is not None and moduleName in sourceFile
         
     def findModule(self, moduleName):    
         assertType(moduleName, 'moduleName', str)
         
-        sourceFile = self.findModuleFile(moduleName);
+        sourceFile = self.findModuleFile(moduleName)
         if sourceFile is None:
             return None
         else:
-            return sourceFile.getModule(moduleName);
+            return sourceFile.getModule(moduleName)
         
     def findModuleFile(self, moduleName):
         assertType(moduleName, 'moduleName', str)
         
         if moduleName not in self.__filesByModules:
-            fileName = self.__getModuleFileName(moduleName);
+            fileName = self.__getModuleFileName(moduleName)
             sourceFile = self.findSourceFile(fileName)
-            self.__filesByModules[moduleName] = sourceFile;
+            self.__filesByModules[moduleName] = sourceFile
             
-        return self.__filesByModules[moduleName];
+        return self.__filesByModules[moduleName]
     
     def existsSourceFile(self, fileName):
         assertType(fileName, 'fileName', str)
@@ -1499,26 +1500,30 @@ class SourceFiles(object):
         return sourceFile is not None    
     
     def findSourceFile(self, fileName):
-        path = self.__findFile(fileName);
+        path = self.__findFile(fileName)
         if path is None:
             sourceFile = None
         elif path in self.__filesByPath:
-            sourceFile = self.__filesByPath[path];
+            sourceFile = self.__filesByPath[path]
         else:
             sourceFile = SourceFile(path) 
-            self.__filesByPath[path] = sourceFile;
+            self.__filesByPath[path] = sourceFile
         
         return sourceFile
         
     def __getModuleFileName(self, moduleName):
         if moduleName.lower() in self.__specialModuleFiles:
-            return self.__specialModuleFiles[moduleName.lower()];
+            return self.__specialModuleFiles[moduleName.lower()]
         else:
-            return moduleName + '.f90';
+            return moduleName + '.f90'
         
     def __findFile(self, fileName):
         for root, _, files in os.walk(self.__baseDir):
             for name in files:
                 if name.replace('.F90', '.f90') == fileName.replace('.F90', '.f90'):
-                    return os.path.join(root, name);
-        return None;
+                    return os.path.join(root, name)
+        return None
+    
+    def clearCache(self):
+        self.__filesByPath = dict()
+        self.__filesByModules = dict()
