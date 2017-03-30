@@ -12,8 +12,7 @@ Arguments of basic types will not be tracked but also listed in the results.
 So far, the documentation is very poor. If your interested in using `FortranCallgraph`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
-Quick Start Guide
-=================
+## Quick Start Guide
 
 #### 1. Clone this repo
 
@@ -106,7 +105,6 @@ $> ./FortranCallgraph.py -a all my_module my_subroutine
 
 Everything else you need to find out on your own, so far.
 
-License
-=======
+## License
 
 [GNU General Public License v3.0](LICENSE)
