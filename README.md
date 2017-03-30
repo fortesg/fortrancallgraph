@@ -23,13 +23,13 @@ $> cd fortrancallgraph
 
 #### 2. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
 
-`FCG_FOLDER` : The location of FortranCallgraph (usually `os.path.dirname(os.path.realpath(__file__))`)
+`FCG_DIR` : The location of FortranCallgraph (usually `os.path.dirname(os.path.realpath(__file__))`)
 
-`CACHE_FOLDER` : FCG is able to cache call graphs. This is folder for the cache files (usually `FCG_FOLDER + '/cache'').
+`CACHE_DIR` : FCG is able to cache call graphs. This is folder for the cache files (usually `FCG_DIR + '/cache'').
 
-`ASSEMBLER_FOLDER` : The location of the GCC assembler files you have created from your application's sources.
+`ASSEMBLER_DIR` : The location of the GCC assembler files you have created from your application's sources.
 
-`SOURCE_FOLDER` : The location of the source files of your application. Can be organized in subfolders.
+`SOURCE_DIR` : The location of the source files of your application. Can be organized in subfolders.
 
 `SPECIAL_MODULE_FILES` : FCG assumes that your code is organized in modules and the every module is in a file with the name <module>.f90. In this constant you can declare a dict with exceptions from this rule.
 Example:  
