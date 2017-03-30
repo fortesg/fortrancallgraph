@@ -7,7 +7,7 @@ import os
 ### EDIT HERE ###
 
 FCG_DIR = os.path.dirname(os.path.realpath(__file__))
-CACHE_DIR = FCG_FOLDER + '/cache'
+CACHE_DIR = FCG_DIR + '/cache'
 
 ASSEMBLER_DIR = ''
 SOURCE_DIR = ''
