@@ -31,7 +31,7 @@ $> cd fortrancallgraph
 
 `SOURCE_DIR` : The location of the source files of your application. Can be organized in subfolders.
 
-`SPECIAL_MODULE_FILES` : FCG assumes that your code is organized in modules and the every module is in a file with the name <module>.f90. In this constant you can declare a dict with exceptions from this rule.
+`SPECIAL_MODULE_FILES` : FCG assumes that your code is organized in modules and that every module is in a file with the name <module>.f90. In this constant you can declare a dict with exceptions from this rule.
 Example:  
 ```python
 SPECIAL_MODULE_FILES = { 'mod_foo': 'bar.f90' }
