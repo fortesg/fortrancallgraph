@@ -7,7 +7,7 @@ Therefore it creates a call graph by parsing [GCC assembler files](https://gcc.g
 The analysis result will be a list of used global variables and a list of used members of derived type arguments. 
 Arguments of basic types will not be tracked but also listed in the results.
 
-`FortranCallgraph` is written in Python and is able to analyze Fortran90+ source files.
+`FortranCallgraph` is written in Python and is able to analyze Fortran90+ source files. It was mainly built to support the `FortranTestGenerator`: https://github.com/fortesg/fortrantestgenerator, but also contains a command-line interface.
 
 So far, the documentation is very poor. If your interested in using `FortranCallgraph`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
