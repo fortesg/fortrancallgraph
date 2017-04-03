@@ -674,20 +674,20 @@ class SubroutineName(object):
 
 class SubroutineFullName(SubroutineName):
     
-    __fullNameRegEx = re.compile('^__[a-z0-9_]{1,63}_MOD_[a-z0-9_]{1,63}$', re.IGNORECASE)
+    __fullNameRegEx = re.compile('^__[a-zA-Z0-9_]{1,63}_MOD_[a-zA-Z0-9_]{1,63}$')
     
     def __init__(self, name):
         if not SubroutineFullName.validFullName(name):
             raise ValueError("Not a valid SubroutineFullName: " + name + " (type: " + str(type(name)) + ")");
         
-        super(SubroutineFullName, self).__init__(name.lower().replace('_mod_', '_MOD_'))
+        super(SubroutineFullName, self).__init__(name.lower()[::-1].replace('_dom_', '_DOM_', 1)[::-1])
         
     def getSimpleName(self):
-        modPos = self._name.find('_MOD_')
+        modPos = self._name.rfind('_MOD_')
         return self._name[modPos + 5:];
     
     def getModuleName(self):
-        modPos = self._name.find('_MOD_')
+        modPos = self._name.rfind('_MOD_')
         return self._name[2:modPos]        
     
     @staticmethod
