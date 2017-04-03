@@ -47,7 +47,16 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
                 print  >> sys.stderr, '*** WARNING [FromAssemblerCallGraphBuilder]: No Assembler file to start with for subroutine: ' + str(rootSubroutine) + ' ***';
                 return;
             elif not os.path.isfile(filePath):
-                print  >> sys.stderr, '*** WARNING [FromAssemblerCallGraphBuilder]: Assembler file not found for subroutine: ' + str(rootSubroutine) + '. Expected: ' + filePath + ' ***';
+                filename = os.path.basename(filePath).lower()
+                directory = os.path.dirname(filePath)
+                foundFile = False
+                for dirFile in os.listdir(directory):
+                    if dirFile.lower() == filename:
+                        filePath = os.path.join(directory, dirFile)
+                        foundFile = True
+                        break
+                if not foundFile:
+                    print  >> sys.stderr, '*** WARNING [FromAssemblerCallGraphBuilder]: Assembler file not found for subroutine: ' + str(rootSubroutine) + '. Expected: ' + filePath + ' ***';
                 return;
             else:  
                 for callTriple in self.__findCalledSubroutines(rootSubroutine, filePath):
