@@ -567,6 +567,15 @@ class VariableReference(object):
     def getLevelNVariable(self):
         return self.getVariable(self.getLevel())
 
+    def isPointer(self, level = 0):
+        var = self.getVariable(level)
+        if var is None:
+            return False
+        return var.isPointer()
+    
+    def isLevelNPointer(self):
+        return self.isPointer(self.getLevel())
+
     def getDimension(self, level = 0):
         var = self.getVariable(level)
         if var is None:

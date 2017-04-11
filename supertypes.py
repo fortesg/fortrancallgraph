@@ -37,6 +37,7 @@ class CallGraphAnalyzer(object):
     def __init__(self):
         self._ignoreRegex = None;
         self._minimalOutput = False;
+        self._pointersOnly = False;
 
     def setIgnoreRegex(self, regex):
         'Sets the regular expression for ignored routines and/or global variables'
@@ -49,6 +50,10 @@ class CallGraphAnalyzer(object):
     def setMinimalOutput(self, enabled):   
         assertType(enabled, 'enabled', bool)
         self._minimalOutput = enabled; 
+    
+    def setPointersOnly(self, enabled):   
+        assertType(enabled, 'enabled', bool)
+        self._pointersOnly = enabled; 
 
     def analyzeCallgraph(self, callGraph):
         'Analyzes the given Callgraph. The kind of analysis is defined by subclasses.'

@@ -53,6 +53,7 @@ def parseArguments():
     actionArg.add_argument('-d', '--dump', choices=SUBROUTINE_DUMPER.keys());
     actionArg.add_argument('-l', '--line', choices=LINE_NUMBER_FINDER.keys());
     argParser.add_argument('-v', '--variable', type=str);
+    argParser.add_argument('-po', '--pointersOnly', action="store_true");
     argParser.add_argument('-ln', '--lineNumbers', action="store_true");
     argParser.add_argument('-cc', '--clearCache', action="store_true");
     argParser.add_argument('-q', '--quiet', action="store_true");
@@ -118,6 +119,8 @@ def main():
         analysis = GRAPH_ANALYSIS[args.analysis]
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
+        if args.pointersOnly:
+            analysis.setPointersOnly(True)
         if args.quiet:
             analysis.setMinimalOutput(True)
         analysis.setIgnoreRegex(ignoreRegex)

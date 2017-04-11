@@ -63,18 +63,20 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 
         if self.__variableName is None : 
             variableNames = map(Variable.getName, variables)    
-            for argument in rootSubroutine.getArgumentNames():
-                if argument not in variableNames:
-                    print argument
+            for argument in rootSubroutine.getArguments():
+                if argument.getName() not in variableNames and (not self._pointersOnly or argument.isPointer()):
+                    print argument.getName()
         
         variableReferences = self.trackVariables(variables, callGraph)
         if not quiet:
             if not self._minimalOutput:
                 for variableReference in variableReferences:
-                    print str(variableReference);
+                    if not self._pointersOnly or variableReference.isPointer():
+                        print str(variableReference);
             else:
                 for variableReference in variableReferences:
-                    print variableReference.getExpression()
+                    if not self._pointersOnly or variableReference.isPointer():
+                        print variableReference.getExpression()
     
     def __findTypeArgument(self, argumentName, subroutine):
         argument = subroutine.findArgument(argumentName)

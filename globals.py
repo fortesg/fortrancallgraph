@@ -44,15 +44,17 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
         
         if not self._minimalOutput:
             for variableReference in variableReferences:
-                print str(variableReference);
+                if not self._pointersOnly or variableReference.isPointer():
+                    print str(variableReference);
         else:
             for variableReference in variableReferences:
-                if variableReference.getDeclaredIn() is not None:
-                    declaredIn = ' {' + variableReference.getDeclaredIn() + '}'
-                else:
-                    declaredIn = ''
-                    
-                print variableReference.getExpression() + declaredIn;
+                if not self._pointersOnly or variableReference.isPointer():
+                    if variableReference.getDeclaredIn() is not None:
+                        declaredIn = ' {' + variableReference.getDeclaredIn() + '}'
+                    else:
+                        declaredIn = ''
+                        
+                    print variableReference.getExpression() + declaredIn;
                     
     def trackGlobalVariables(self, callGraph):
         assertType(callGraph, 'callGraph', CallGraph)

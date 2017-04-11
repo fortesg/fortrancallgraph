@@ -51,7 +51,7 @@ Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) an
 ```
 usage: FortranCallGraph.py [-h]
                            (-p {list-modules,list-subroutines,tree,dot} | -a {all,globals,arguments} | -d {statements,lines} | -l {use,last,doc,contains,all,specs,first})
-                           [-v VARIABLE] [-ln] [-cc] [-q] [-i IGNORE]
+                           [-v VARIABLE] [-po] [-ln] [-cc] [-q] [-i IGNORE]
                            module [subroutine]
 
 Build and print call graph.

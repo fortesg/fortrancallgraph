@@ -35,9 +35,11 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
         argumentTracker = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types)
         argumentTracker.setIgnoreRegex(self._ignoreRegex)
         argumentTracker.setMinimalOutput(self._minimalOutput)
+        argumentTracker.setPointersOnly(self._pointersOnly)
         argumentTracker.analyzeCallgraph(callGraph)
         
         globalTracker = GlobalVariablesCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
         globalTracker.setIgnoreRegex(self._ignoreRegex)
         globalTracker.setMinimalOutput(self._minimalOutput)
+        globalTracker.setPointersOnly(self._pointersOnly)
         globalTracker.analyzeCallgraph(callGraph)
