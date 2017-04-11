@@ -71,11 +71,11 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if not quiet:
             if not self._minimalOutput:
                 for variableReference in variableReferences:
-                    if not self._pointersOnly or variableReference.isPointer():
+                    if not self._pointersOnly or variableReference.isLevelNPointer():
                         print str(variableReference);
             else:
                 for variableReference in variableReferences:
-                    if not self._pointersOnly or variableReference.isPointer():
+                    if not self._pointersOnly or variableReference.isLevelNPointer():
                         print variableReference.getExpression()
     
     def __findTypeArgument(self, argumentName, subroutine):
