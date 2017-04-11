@@ -21,7 +21,7 @@ $> git clone https://github.com/chovy1/fortrancallgraph.git
 $> cd fortrancallgraph
 ```
 
-#### 2. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
+#### 2. Fill out the configuration file [config_FortranCallGraph.py](config_FortranCallGraph.py):
 
 `FCG_DIR` : The location of FortranCallgraph (usually `os.path.dirname(os.path.realpath(__file__))`)
 
@@ -49,7 +49,7 @@ Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) an
 #### 4. Run `./FortranCallGraph.py`
 
 ```
-usage: FortranCallgraph.py [-h]
+usage: FortranCallGraph.py [-h]
                            (-p {list-modules,list-subroutines,tree,dot} | -a {all,globals,arguments} | -d {statements,lines} | -l {use,last,doc,contains,all,specs,first})
                            [-v VARIABLE] [-ln] [-cc] [-q] [-i IGNORE]
                            module [subroutine]
@@ -76,31 +76,31 @@ optional arguments:
 
 * Print the call graph of the subroutine `my_subroutine` from module `my_module`:  
 ```
-$> ./FortranCallgraph.py -p tree my_module my_subroutine
+$> ./FortranCallGraph.py -p tree my_module my_subroutine
 ```
 or  
 ```
-$> ./FortranCallgraph.py -p tree __my_module_MOD_my_subroutine
+$> ./FortranCallGraph.py -p tree __my_module_MOD_my_subroutine
 ```
 
 * List all used global variables used in subroutine `my_subroutine` from module `my_module` or in directly and indirectly called subroutines and functions:  
 ```
-$> ./FortranCallgraph.py -a globals my_module my_subroutine
+$> ./FortranCallGraph.py -a globals my_module my_subroutine
 ```  
 
 * List all basic type arguments and used members of derived type arguments:  
 ```
-$> ./FortranCallgraph.py -a arguments my_module my_subroutine
+$> ./FortranCallGraph.py -a arguments my_module my_subroutine
 ```  
 
 * List all used members of derived type argument `arg1`:  
 ```
-$> ./FortranCallgraph.py -a arguments -v arg1 my_module my_subroutine
+$> ./FortranCallGraph.py -a arguments -v arg1 my_module my_subroutine
 ```  
 
 * List both, used globals and arguments:  
 ```
-$> ./FortranCallgraph.py -a all my_module my_subroutine
+$> ./FortranCallGraph.py -a all my_module my_subroutine
 ```
 
 Everything else you need to find out on your own, so far.
