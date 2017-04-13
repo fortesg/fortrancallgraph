@@ -1,15 +1,15 @@
-# fortrancallgraph
+# FortranCallGraph
 
-`FortranCallgraph` (FCG) is a static source code analysis tool for Fortran. 
+`FortranCallGraph` (FCG) is a static source code analysis tool for Fortran. 
 It's main purpose is to track recursively the usage of variables within a subroutine and its called subroutines and functions.
 Therefore it creates a call graph by parsing [GCC assembler files](https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html#index-S) and then traverses this call graph while analyzing the original source code of the routines.
 
 The analysis result will be a list of used global variables and a list of used members of derived type arguments. 
 Arguments of basic types will not be tracked but also listed in the results.
 
-`FortranCallgraph` is written in Python and is able to analyze Fortran90+ source files. It was mainly built to support the `FortranTestGenerator`: https://github.com/fortesg/fortrantestgenerator, but also contains a command-line interface.
+`FortranCallGraph` is written in Python and is able to analyze Fortran90+ source files. It was mainly built to support the `FortranTestGenerator`: https://github.com/fortesg/fortrantestgenerator, but also contains a command-line interface.
 
-So far, the documentation is very poor. If your interested in using `FortranCallgraph`, please feel free to contact me:   
+So far, the documentation is very poor. If your interested in using `FortranCallGraph`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## Quick Start Guide
@@ -21,9 +21,9 @@ $> git clone https://github.com/chovy1/fortrancallgraph.git
 $> cd fortrancallgraph
 ```
 
-#### 2. Fill out the configuration file [config_FortranCallGraph.py](config_FortranCallGraph.py):
+#### 2. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
 
-`FCG_DIR` : The location of FortranCallgraph (usually `os.path.dirname(os.path.realpath(__file__))`)
+`FCG_DIR` : The location of `FortranCallGraph` (usually `os.path.dirname(os.path.realpath(__file__))`)
 
 `CACHE_DIR` : FCG is able to cache call graphs. This is folder for the cache files (usually `FCG_DIR + '/cache'`).
 
