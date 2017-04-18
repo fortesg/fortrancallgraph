@@ -28,13 +28,16 @@ GRAPH_PRINTERS = {'tree': TreeLikeCallGraphPrinter(),
                   'dot': DotFormatCallGraphPrinter(),
                   'list-subroutines': SubroutineListingCallGraphPrinter(),
                   'list-modules': ModuleListingCallGraphPrinter() } 
+graphPrintersHelp = 'tree: in a tree-like form; dot: in DOT format for Graphviz; list-subroutines: only list subroutines; list-modules: only list modules containing subroutines from the call graph'
 
 GRAPH_ANALYSIS = {'globals': GlobalVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES),
                   'arguments': TrackVariableCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_DERIVED_TYPES),
-                  'all': AllVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)} 
+                  'all': AllVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)}
+graphAnalysisHelp = 'arguments: only subroutine arguments; globals: only module variables; all: both arguments and globals'
 
 SUBROUTINE_DUMPER = {'lines': SourceLineDumper(SOURCE_FILES),
-                     'statements': SourceStatementDumper(SOURCE_FILES)} 
+                     'statements': SourceStatementDumper(SOURCE_FILES)}
+subroutineDumperHelp = 'lines: original source lines; statements: normalized source lines' 
 
 LINE_NUMBER_FINDER = {'first': DeclarationLineNumberFinder(SOURCE_FILES),
                      'last': EndStatementLineNumberFinder(SOURCE_FILES),
@@ -43,21 +46,22 @@ LINE_NUMBER_FINDER = {'first': DeclarationLineNumberFinder(SOURCE_FILES),
                      'use': LastUseLineFinder(SOURCE_FILES),
                      'contains': ContainsLineFinder(SOURCE_FILES),
                      'all': AllLineFinder(SOURCE_FILES)} 
+lineNumberFinderHelp = 'first: the first line, containing the SUBROUTINE/FUNCTION keyword; last: the last line, containing the END keyword; doc: the first line of the leading comment - the same as "first" when no comment exists; specs: the last variable specification; use - the last USE statement; contains: the CONTAINS statement - -1 when there is no such statement; all: all of the others' 
 
 
 def parseArguments():
-    argParser = argparse.ArgumentParser(description='Build and print call graph.');
+    argParser = argparse.ArgumentParser(description="Print or analyse a subroutine's call graph.");
     actionArg = argParser.add_mutually_exclusive_group(required=True)
-    actionArg.add_argument('-p', '--printer', choices=GRAPH_PRINTERS.keys());
-    actionArg.add_argument('-a', '--analysis', choices=GRAPH_ANALYSIS.keys());
-    actionArg.add_argument('-d', '--dump', choices=SUBROUTINE_DUMPER.keys());
-    actionArg.add_argument('-l', '--line', choices=LINE_NUMBER_FINDER.keys());
-    argParser.add_argument('-v', '--variable', type=str);
-    argParser.add_argument('-po', '--pointersOnly', action="store_true");
-    argParser.add_argument('-ln', '--lineNumbers', action="store_true");
-    argParser.add_argument('-cc', '--clearCache', action="store_true");
-    argParser.add_argument('-q', '--quiet', action="store_true");
-    argParser.add_argument('-i', '--ignore', type=str);
+    actionArg.add_argument('-p', '--printer', choices=GRAPH_PRINTERS.keys(), help='Print the callgraph (' + graphPrintersHelp + ').');
+    actionArg.add_argument('-a', '--analysis', choices=GRAPH_ANALYSIS.keys(), help='Analyze variable usage (' + graphAnalysisHelp + ').');
+    actionArg.add_argument('-d', '--dump', choices=SUBROUTINE_DUMPER.keys(), help='Dump subroutine or module source code (' + subroutineDumperHelp + '). When no subroutine is given, the whole module is dumped.');
+    actionArg.add_argument('-l', '--line', choices=LINE_NUMBER_FINDER.keys(), help='Show some interesting source lines of the subroutine (' + lineNumberFinderHelp + ').');
+    argParser.add_argument('-v', '--variable', type=str, help='Restrict the analysis to the given variable which has to be a subroutine argument and of a derived type. Applicable with -a arguments.');
+    argParser.add_argument('-po', '--pointersOnly', action="store_true", help='Limit result output to pointer variables. Applicable with -a.');
+    argParser.add_argument('-ln', '--lineNumbers', action="store_true", help='Add line numbers to the output. Applicable with -d.');
+    argParser.add_argument('-cc', '--clearCache', action="store_true", help='Create a new call graph instead of using a cached one. Applicable with -p or -a.');
+    argParser.add_argument('-q', '--quiet', action="store_true", help='Reduce the output. Applicable with -a and -l.');
+    argParser.add_argument('-i', '--ignore', type=str, help='Leave out subroutines matching a given regular expression. Applicable with -p and -a.');
     argParser.add_argument('module');
     argParser.add_argument('subroutine', nargs='?', default=None);
     return argParser.parse_args();
