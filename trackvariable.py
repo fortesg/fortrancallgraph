@@ -14,6 +14,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
 
     def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
+        assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
         assertType(interfaces, 'interfaces', dict, True)
         assertType(types, 'types', dict, True)
