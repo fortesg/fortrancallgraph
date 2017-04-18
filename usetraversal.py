@@ -4,9 +4,9 @@ import sys
 import re
 from utils import assertType
 from source import SubroutineFullName, SourceFiles
-from supertypes import UseTraversalPassenger
 from interfaces import InterfaceFinder
 from typefinder import TypeFinder
+from supertypes import UseTraversalPassenger
 
 class UseTraversal(object):
     

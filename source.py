@@ -1522,6 +1522,14 @@ class SourceFiles(object):
             self.__filesByPath[path] = sourceFile
         
         return sourceFile
+    
+    def getRelativePath(self, sourceFile):
+        assertType(sourceFile, 'sourceFile', SourceFile)
+        
+        path = sourceFile.getPath()
+        if path.startswith(self.__baseDir):
+            path = path[len(self.__baseDir):].lstrip('/')
+        return path
         
     def __getModuleFileName(self, moduleName):
         if moduleName.lower() in self.__specialModuleFiles:

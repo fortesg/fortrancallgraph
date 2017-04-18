@@ -1,4 +1,4 @@
-from utils import assertType, REGEX_TYPE
+from utils import assertType, REGEX_TYPE, assertTypeAll
 from source import SubroutineFullName, Subroutine, SourceFiles, Module
 from callgraph import CallGraph
 import re
@@ -145,6 +145,7 @@ class LineNumberFinder(object):
     
         raise NotImplementedError()    
 
+
 class UseTraversalPassenger(object):
     
     def reset(self):
@@ -158,4 +159,18 @@ class UseTraversalPassenger(object):
         assertType(statement, 'statement', str) 
         assertType(j, 'j', int)
         assertType(moduleName, 'moduleName', str)
+        raise NotImplementedError() 
+ 
+ 
+class UsePrinters(object):
+         
+    def __init__(self, sourceFiles, excludeModules = []):
+        assertType(sourceFiles, 'sourceFiles', SourceFiles)
+        assertTypeAll(excludeModules, 'excludeModules', str)
+         
+        self._sourceFiles = sourceFiles
+        self._excludeModules = excludeModules
+         
+    def printUses(self, rootSubroutine):
+        assertType(rootSubroutine, 'rootSubroutine', SubroutineFullName)
         raise NotImplementedError() 

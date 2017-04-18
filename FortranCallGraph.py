@@ -23,6 +23,7 @@ from linenumbers import DeclarationLineNumberFinder, EndStatementLineNumberFinde
 
 from config_fortrancallgraph import GRAPH_BUILDER, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES
 import re
+from useprinter import UsedModuleNamePrinter, UsedFileNamePrinter
 
 GRAPH_PRINTERS = {'tree': TreeLikeCallGraphPrinter(), 
                   'dot': DotFormatCallGraphPrinter(),
@@ -48,6 +49,9 @@ LINE_NUMBER_FINDER = {'first': DeclarationLineNumberFinder(SOURCE_FILES),
                      'all': AllLineFinder(SOURCE_FILES)} 
 lineNumberFinderHelp = 'first: the first line, containing the SUBROUTINE/FUNCTION keyword; last: the last line, containing the END keyword; doc: the first line of the leading comment - the same as "first" when no comment exists; specs: the last variable specification; use - the last USE statement; contains: the CONTAINS statement - -1 when there is no such statement; all: all of the others' 
 
+USE_PRINTERS = {'modules': UsedModuleNamePrinter(SOURCE_FILES),
+                'files': UsedFileNamePrinter(SOURCE_FILES)}
+usePrinterHelp = 'modules: module names; files: file pathes'
 
 def parseArguments():
     argParser = argparse.ArgumentParser(description="Print or analyse a subroutine's call graph.");
@@ -56,6 +60,7 @@ def parseArguments():
     actionArg.add_argument('-a', '--analysis', choices=GRAPH_ANALYSIS.keys(), help='Analyze variable usage (' + graphAnalysisHelp + ').');
     actionArg.add_argument('-d', '--dump', choices=SUBROUTINE_DUMPER.keys(), help='Dump subroutine or module source code (' + subroutineDumperHelp + '). When no subroutine is given, the whole module is dumped.');
     actionArg.add_argument('-l', '--line', choices=LINE_NUMBER_FINDER.keys(), help='Show some interesting source lines of the subroutine (' + lineNumberFinderHelp + ').');
+    actionArg.add_argument('-u', '--use', choices=USE_PRINTERS.keys(), help='Prints use dependencies of a subroutine (' + usePrinterHelp + ').');
     argParser.add_argument('-v', '--variable', type=str, help='Restrict the analysis to the given variable which has to be a subroutine argument and of a derived type. Applicable with -a arguments.');
     argParser.add_argument('-po', '--pointersOnly', action="store_true", help='Limit result output to pointer variables. Applicable with -a.');
     argParser.add_argument('-ln', '--lineNumbers', action="store_true", help='Add line numbers to the output. Applicable with -d.');
@@ -147,6 +152,9 @@ def main():
             lineNumberFinder.printLineNumber(subroutineFullName)
         else:
             lineNumberFinder.printLineNumber(moduleName)
+    elif args.use is not None:
+        usePrinter = USE_PRINTERS[args.use]
+        usePrinter.printUses(subroutineFullName)
 
 if __name__ == "__main__":
     main()
