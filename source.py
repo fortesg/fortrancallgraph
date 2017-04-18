@@ -991,17 +991,15 @@ class Subroutine(SubroutineContainer):
             return subroutines[name.getSimpleName()]
 
         return None
-
     
     def getLastSpecificationLineNumber(self):
-        useRegEx = re.compile(r'^USE\s+([a-z0-9_]+).*$', re.IGNORECASE); 
-        additionRegEx = re.compile(r'^((CONTIGUOUS)|(DIMENSION))\s*\:\:\s*([a-z0-9_]+).*$', re.IGNORECASE); 
+        additionalRegEx = re.compile(r'^((CONTIGUOUS)|(DIMENSION))\s*\:\:\s*([a-z0-9_]+).*$', re.IGNORECASE); 
         statements = self.getStatementsAfterUse()
         lastLine = self.getLastUseLineNumber()
         i = 2
         while i < len(statements):
             statement = statements[i - 1][1]
-            if Variable.validVariableDeclaration(statement) or useRegEx.match(statement) is not None or additionRegEx.match(statement) is not None:
+            if Variable.validVariableDeclaration(statement) or additionalRegEx.match(statement) is not None:
                 lastLine = statements[i - 1][2]
             else:
                 break;
@@ -1009,7 +1007,6 @@ class Subroutine(SubroutineContainer):
         
         return lastLine
     
-
     def getArgumentNames(self):
         declaration = self.getDeclaration()
         argumentsListing = declaration[(declaration.find('(') + 1):(declaration.find(')'))]
@@ -1135,6 +1132,12 @@ class Module(SubroutineContainer):
                 return True
 
         return True
+    
+    def getLastSpecificationLineNumber(self):
+        if self.getContainsLineNumber() > 0:
+            return self.getStatementsBeforeContains()[-1][2]
+        else: 
+            return self.getStatements()[-2][2]
 
     def hasVariable(self, name):
         return name.lower() in self.getVariables()

@@ -2,48 +2,48 @@
 
 from utils import assertType
 from supertypes import LineNumberFinder
-from source import SourceFiles, Subroutine
+from source import SourceFiles, Subroutine, Module
 
 class DeclarationLineNumberFinder(LineNumberFinder):
     
-    def _findLineNumber(self, subroutine):
-        assertType(subroutine, 'subroutine', Subroutine) 
+    def _findLineNumber(self, container):
+        assertType(container, 'container', [Subroutine, Module]) 
         
-        return subroutine.getDeclarationLineNumber()
+        return container.getDeclarationLineNumber()
 
 class EndStatementLineNumberFinder(LineNumberFinder):
     
-    def _findLineNumber(self, subroutine):
-        assertType(subroutine, 'subroutine', Subroutine) 
+    def _findLineNumber(self, container):
+        assertType(container, 'container', [Subroutine, Module]) 
         
-        return subroutine.getLastLineNumber()
+        return container.getLastLineNumber()
 
     
 class FirstDocumentationLineFinder(LineNumberFinder):
     
-    def _findLineNumber(self, subroutine):
-        assertType(subroutine, 'subroutine', Subroutine) 
+    def _findLineNumber(self, container):
+        assertType(container, 'container', [Subroutine, Module]) 
         
-        return subroutine.getFirstLineNumber()
+        return container.getFirstLineNumber()
     
 class LastSpecificationLineFinder(LineNumberFinder):
 
-    def _findLineNumber(self, subroutine):
-        assertType(subroutine, 'subroutine', Subroutine)
+    def _findLineNumber(self, container):
+        assertType(container, 'container', [Subroutine, Module])
         
-        return subroutine.getLastSpecificationLineNumber()
+        return container.getLastSpecificationLineNumber()
     
 class ContainsLineFinder(LineNumberFinder):
 
     def _findLineNumber(self, container):
-        assertType(container, 'container', Subroutine)
+        assertType(container, 'container', [Subroutine, Module])
         
         return container.getContainsLineNumber()
     
 class LastUseLineFinder(LineNumberFinder):
 
     def _findLineNumber(self, container):
-        assertType(container, 'container', Subroutine)
+        assertType(container, 'container', [Subroutine, Module])
         
         return container.getLastUseLineNumber()
     
@@ -72,10 +72,10 @@ class AllLineFinder(LineNumberFinder):
         for lineNumberFinder in self.__lineNumberFinders.values():
             lineNumberFinder.setMinimalOutput(enabled)
 
-    def _printLineNumber(self, subroutine):
-        assertType(subroutine, 'subroutine', Subroutine)
+    def _printLineNumber(self, block):
+        assertType(block, 'block', [Subroutine, Module])
         
         for description, lineNumberFinder in self.__lineNumberFinders.items():
             if not self._minimalOutput:
                 print description + ': '
-            lineNumberFinder._printLineNumber(subroutine)
+            lineNumberFinder._printLineNumber(block)

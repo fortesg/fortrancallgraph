@@ -79,9 +79,9 @@ def main():
     elif not subroutineName:
         if SubroutineFullName.validFullName(moduleName):
             subroutineFullName = SubroutineFullName(moduleName)
-        elif args.dump is not None:
+        elif args.dump is not None or args.line is not None:
             if not SubroutineFullName.validIdentifier(moduleName):
-                if moduleName.lower().endswith('.f90'):
+                if args.dump is not None and moduleName.lower().endswith('.f90'):
                     sourceFileName = moduleName
                 else:
                     print >> sys.stderr, 'Invalid Module name!';
@@ -143,7 +143,10 @@ def main():
         lineNumberFinder = LINE_NUMBER_FINDER[args.line]
         if args.quiet:
             lineNumberFinder.setMinimalOutput(True)
-        lineNumberFinder.printLineNumber(subroutineFullName)
+        if subroutineFullName is not None:
+            lineNumberFinder.printLineNumber(subroutineFullName)
+        else:
+            lineNumberFinder.printLineNumber(moduleName)
 
 if __name__ == "__main__":
     main()

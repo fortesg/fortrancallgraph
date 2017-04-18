@@ -1,5 +1,5 @@
 from utils import assertType, REGEX_TYPE
-from source import SubroutineFullName, Subroutine, SourceFiles
+from source import SubroutineFullName, Subroutine, SourceFiles, Module
 from callgraph import CallGraph
 import re
 
@@ -114,27 +114,34 @@ class LineNumberFinder(object):
         assertType(enabled, 'enabled', bool)
         self._minimalOutput = enabled; 
         
-    def printLineNumber(self, subroutineName):
-        'Print one specific line number for the Subroutine. What kind of line number is defined by subclasses.'
-        assertType(subroutineName, 'subroutineName', SubroutineFullName)
-        subroutine = self.__sourceFiles.findSubroutine(subroutineName);
-        if subroutine is None:
-            raise Exception('Routine ' + str(subroutineName) + 'not found!'); 
-        self._printLineNumber(subroutine)
+    def printLineNumber(self, name):
+        'Print one specific line number for the Subroutine or Module. What kind of line number is defined by subclasses.'
+        assertType(name, 'name', [SubroutineFullName, str])
+
+        if isinstance(name, SubroutineFullName):        
+            container = self.__sourceFiles.findSubroutine(name);
+            if container is None:
+                raise Exception('Routine ' + str(name) + 'not found!');
+        else:
+            container = self.__sourceFiles.findModule(name)
+            if container is None:
+                raise Exception('Module ' + str(name) + 'not found!');
+         
+        self._printLineNumber(container)
         
-    def _printLineNumber(self, subroutine):
-        'Print one specific line number for the Subroutine. What kind of line number is defined by subclasses.'
-        assertType(subroutine, 'subroutine', Subroutine) 
+    def _printLineNumber(self, container):
+        'Print one specific line number for the Subroutine or Module. What kind of line number is defined by subclasses.'
+        assertType(container, 'container', [Subroutine, Module]) 
         
-        line = self._findLineNumber(subroutine)
+        line = self._findLineNumber(container)
         print str(line),
         if line >= 0 and not self._minimalOutput:
-            print ' | ' + subroutine.getLine(line).rstrip(),
+            print ' | ' + container.getLine(line).rstrip(),
         print
     
     def _findLineNumber(self, container):
-        'Finds one specific line number for the Subroutine. What kind of line number is defined by subclasses.'
-        assertType(container, 'container', Subroutine) 
+        'Finds one specific line number for the Subroutine or Module. What kind of line number is defined by subclasses.'
+        assertType(container, 'container', [Subroutine, Module]) 
     
         raise NotImplementedError()    
 
