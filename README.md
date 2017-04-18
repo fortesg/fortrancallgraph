@@ -14,14 +14,14 @@ Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
 ## Quick Start Guide
 
-#### 1. Clone this repo
+### 1. Clone this repo
 
 ```
 $> git clone https://github.com/chovy1/fortrancallgraph.git
 $> cd fortrancallgraph
 ```
 
-#### 2. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
+### 2. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
 
 `FCG_DIR` : The location of `FortranCallGraph` (usually `os.path.dirname(os.path.realpath(__file__))`)
 
@@ -42,19 +42,19 @@ SPECIAL_MODULE_FILES = { 'mod_foo': 'bar.f90' }
 
 `IGNORE_DERIVED_TYPES` : A list of derived type which members shall not appear in the result
 
-#### 3. Create assembler files
+### 3. Create assembler files
 
 Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` to generate assembler files.
 
-#### 4. Run `./FortranCallGraph.py`
+### 4. Run `./FortranCallGraph.py`
 
 ```
 usage: FortranCallGraph.py [-h]
-                           (-p {list-modules,list-subroutines,tree,dot} | -a {all,globals,arguments} | -d {statements,lines} | -l {use,last,doc,contains,all,specs,first})
+                           (-p {list-modules,list-subroutines,tree,dot} | -a {all,globals,arguments} | -d {statements,lines} | -l {use,last,doc,contains,all,specs,first} | -u {files,modules})
                            [-v VARIABLE] [-po] [-ln] [-cc] [-q] [-i IGNORE]
                            module [subroutine]
 
-Build and print call graph.
+Print or analyse a subroutine's call graph.
 
 positional arguments:
   module
@@ -63,16 +63,47 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -p {list-modules,list-subroutines,tree,dot}, --printer {list-modules,list-subroutines,tree,dot}
+                        Print the callgraph (tree: in a tree-like form; dot:
+                        in DOT format for Graphviz; list-subroutines: only
+                        list subroutines; list-modules: only list modules
+                        containing subroutines from the call graph).
   -a {all,globals,arguments}, --analysis {all,globals,arguments}
+                        Analyze variable usage (arguments: only subroutine
+                        arguments; globals: only module variables; all: both
+                        arguments and globals).
   -d {statements,lines}, --dump {statements,lines}
+                        Dump subroutine or module source code (lines: original
+                        source lines; statements: normalized source lines).
+                        When no subroutine is given, the whole module is
+                        dumped.
   -l {use,last,doc,contains,all,specs,first}, --line {use,last,doc,contains,all,specs,first}
+                        Show some interesting source lines of the subroutine
+                        (first: the first line, containing the
+                        SUBROUTINE/FUNCTION keyword; last: the last line,
+                        containing the END keyword; doc: the first line of the
+                        leading comment - the same as "first" when no comment
+                        exists; specs: the last variable specification; use -
+                        the last USE statement; contains: the CONTAINS
+                        statement - -1 when there is no such statement; all:
+                        all of the others).
+  -u {files,modules}, --use {files,modules}
+                        Prints use dependencies of a subroutine (modules:
+                        module names; files: file pathes).
   -v VARIABLE, --variable VARIABLE
-  -ln, --lineNumbers
-  -cc, --clearCache
-  -q, --quiet
+                        Restrict the analysis to the given variable which has
+                        to be a subroutine argument and of a derived type.
+                        Applicable with -a arguments.
+  -po, --pointersOnly   Limit result output to pointer variables. Applicable
+                        with -a.
+  -ln, --lineNumbers    Add line numbers to the output. Applicable with -d.
+  -cc, --clearCache     Create a new call graph instead of using a cached one.
+                        Applicable with -p or -a.
+  -q, --quiet           Reduce the output. Applicable with -a and -l.
   -i IGNORE, --ignore IGNORE
+                        Leave out subroutines matching a given regular
+                        expression. Applicable with -p and -a.
 ```
-##### Examples:
+#### Examples:
 
 * Print the call graph of the subroutine `my_subroutine` from module `my_module`:  
 ```
@@ -106,7 +137,7 @@ $> ./FortranCallGraph.py -a arguments -v arg1 my_module my_subroutine
 $> ./FortranCallGraph.py -a all my_module my_subroutine
 ```
 
-Everything else you need to find out on your own, so far.
+Everything else you have to find out on your own, so far.
 
 ## License
 
