@@ -82,7 +82,10 @@ or
 ```
 $> ./FortranCallGraph.py -p tree __my_module_MOD_my_subroutine
 ```
-
+* Create a visual graph using [Graphviz](http://www.graphviz.org):
+```
+$> ./FortranCallGraph.py -p dot my_module my_subroutine | dot -Tpng > my_subroutine.png
+```
 * List all used global variables used in subroutine `my_subroutine` from module `my_module` or in directly and indirectly called subroutines and functions:  
 ```
 $> ./FortranCallGraph.py -a globals my_module my_subroutine
