@@ -1,8 +1,12 @@
 MODULE middle
 
+  IMPLICIT NONE
+
+  CONTAINS
+
   SUBROUTINE medium()
 
-    USE bottom, ONLY :: butt
+    USE bottom, ONLY : butt
 
     CALL butt
 

@@ -1,6 +1,10 @@
 MODULE top
 
-  USE middle, ONLY :: medium
+  USE middle, ONLY : medium
+
+  IMPLICIT NONE
+
+  CONTAINS
 
   SUBROUTINE tiptop()
 
