@@ -55,14 +55,18 @@ class SampleTest(unittest.TestCase):
         moduleFile = self.sourceFiles.findModuleFile('middle')
         self.assertIsNotNone(moduleFile)
         self.assertEqual(sourceFile, moduleFile)
-        self.assertEqual(1, len(sourceFile.getModules()))
+        self.assertEqual(2, len(sourceFile.getModules()))
 
-        module = sourceFile.getModule('middle')
-        self.assertIsNotNone(module)
-        self.assertEqual(1, len(module.getSubroutines()))
+        module1 = sourceFile.getModule('middle')
+        self.assertIsNotNone(module1)
+        self.assertEqual(2, len(module1.getSubroutines()))
         
-        simpleNames = module.getSubroutines().keys()
-        self.assertEqual(['medium'], simpleNames)
+        simpleNames = set(module1.getSubroutines().keys())
+        self.assertEqual({'medium', 'average'}, simpleNames)
+
+        module2 = sourceFile.getModule('next')
+        self.assertIsNotNone(module2)
+        self.assertEqual(0, len(module2.getSubroutines()))
         
 if __name__ == "__main__":
     unittest.main()
