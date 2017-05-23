@@ -24,6 +24,13 @@ MODULE next
 
   IMPLICIT NONE
 
+  TYPE :: kangaroo
+
+    INTEGER :: feet(2), pouch
+    REAL :: tail
+
+  END TYPE kangaroo
+
   INTEGER, PARAMETER :: skippy = 42
 
 ENDMODULE next
