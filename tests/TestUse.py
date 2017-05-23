@@ -65,6 +65,7 @@ class SampleTest(unittest.TestCase):
         module1 = sourceFile.getModule('middle')
         self.assertIsNotNone(module1)
         self.assertEqual(4, len(module1.getSubroutines()))
+        self.assertEqual(1, len(module1.getVariables()))
         
         simpleNames = set(module1.getSubroutines().keys())
         self.assertEqual({'medium', 'average_i', 'average_r', 'average_f'}, simpleNames)
@@ -72,6 +73,7 @@ class SampleTest(unittest.TestCase):
         module2 = sourceFile.getModule('next')
         self.assertIsNotNone(module2)
         self.assertEqual(0, len(module2.getSubroutines()))
+        self.assertEqual(1, len(module2.getVariables()))
                 
     def testUseCollector(self):
         if not self.filesExist:

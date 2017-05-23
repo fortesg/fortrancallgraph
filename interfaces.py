@@ -25,7 +25,7 @@ class InterfaceFinder(UseTraversalPassenger):
         assertType(moduleName, 'moduleName', str)
         
         interfaceRegEx = re.compile(r'^INTERFACE\s+(?P<interfacename>[a-z0-9_]+)$', re.IGNORECASE);
-        endInterfaceRegEx = re.compile(r'^END\s+INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        endInterfaceRegEx = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
         procedureRegEx = re.compile(r'^MODULE\s+PROCEDURE\s+(?P<procedurelist>[a-z0-9_\s\,]+)$', re.IGNORECASE);
         
         if self.__currentType is None:
