@@ -16,8 +16,9 @@ from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from globals import GlobalVariablesCallGraphAnalysis
 from usetraversal import UseTraversal
-from typefinder import TypeFinder
 from useprinter import UseCollector
+from typefinder import TypeFinder
+from interfaces import InterfaceFinder
 
 class SampleTest(unittest.TestCase):
     def setUp(self):
@@ -113,6 +114,31 @@ class SampleTest(unittest.TestCase):
         self.assertIsNone(foot.getExtends())
         self.assertEqual('bottom', foot.getDeclaredIn())
         self.assertEqual(4, len(foot.getMembers()))
+                
+    def testInterfaceFinder(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        interfaceFinder = InterfaceFinder()
+        self.useTraversal.addPassenger(interfaceFinder)
+        self.useTraversal.parseModules(self.root)
+        
+        result = interfaceFinder.getResult()
+        self.assertIsNotNone(result)
+        self.assertTrue(result)
+        self.assertEqual(2, len(result))
+        
+        self.assertIn('average', result)
+        average = result['average']
+        self.assertIsNotNone(average)
+        self.assertEqual('average', average.getName())
+        self.assertEqual(3, len(average.getProcedures()))
+        
+        self.assertIn('butt', result)
+        butt = result['butt']
+        self.assertIsNotNone(butt)
+        self.assertEqual('butt', butt.getName())
+        self.assertEqual(3, len(butt.getProcedures()))
         
 if __name__ == "__main__":
     unittest.main()
