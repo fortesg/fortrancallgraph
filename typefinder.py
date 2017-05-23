@@ -30,7 +30,6 @@ class TypeFinder(UseTraversalPassenger):
                     typE.setExtends(self.__types[extends])
             self.__extendedTypesSet = True
             
-        
         return self.__types
 
     def parseStatement(self, i, statement, j, moduleName):
