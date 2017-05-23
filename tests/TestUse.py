@@ -15,10 +15,13 @@ from tree import TreeLikeCallGraphPrinter
 from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from globals import GlobalVariablesCallGraphAnalysis
+from usetraversal import UseTraversal
+from typefinder import TypeFinder
+from useprinter import UseCollector
 
 class SampleTest(unittest.TestCase):
     def setUp(self):
-        specialModuleFiles = {}
+        specialModuleFiles = {'next' : 'middle.f90'}
         callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
         
@@ -26,11 +29,12 @@ class SampleTest(unittest.TestCase):
         self.assFile = ASSEMBLER_DIR + '/top.s'
         self.filesExist = os.path.exists(self.srcFile) and os.path.exists(self.assFile)
         
-        self.func = SubroutineFullName('__top_MOD_tiptop')
-        self.callGraph = callGraphBuilder.buildCallGraph(self.func)
+        self.root = SubroutineFullName('__top_MOD_tiptop')
+        self.callGraph = callGraphBuilder.buildCallGraph(self.root)
         
         self.printer = TreeLikeCallGraphPrinter()
         self.globalsTracker = GlobalVariablesCallGraphAnalysis(self.sourceFiles)
+        self.useTraversal = UseTraversal(self.sourceFiles)
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -67,6 +71,48 @@ class SampleTest(unittest.TestCase):
         module2 = sourceFile.getModule('next')
         self.assertIsNotNone(module2)
         self.assertEqual(0, len(module2.getSubroutines()))
+                
+    def testUseCollector(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        useCollector = UseCollector()
+        self.useTraversal.addPassenger(useCollector)
+        self.useTraversal.parseModules(self.root)
+        
+        result = useCollector.getResult()
+        self.assertIsNotNone(result)
+        self.assertTrue(result)
+        self.assertEqual({'top', 'middle', 'next', 'bottom'}, result)
+                
+    def testTypeFinder(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        typeFinder = TypeFinder()
+        self.useTraversal.addPassenger(typeFinder)
+        self.useTraversal.parseModules(self.root)
+        
+        result = typeFinder.getResult()
+        self.assertIsNotNone(result)
+        self.assertTrue(result)
+        self.assertEqual(2, len(result))
+        
+        self.assertIn('kangaroo', result)
+        kangaroo = result['kangaroo']
+        self.assertIsNotNone(kangaroo)
+        self.assertEqual('kangaroo', kangaroo.getName())
+        self.assertIsNone(kangaroo.getExtends())
+        self.assertEqual('next', kangaroo.getDeclaredIn())
+        self.assertEqual(3, len(kangaroo.getMembers()))
+        
+        self.assertIn('foot', result)
+        foot = result['foot']
+        self.assertIsNotNone(foot)
+        self.assertEqual('foot', foot.getName())
+        self.assertIsNone(foot.getExtends())
+        self.assertEqual('bottom', foot.getDeclaredIn())
+        self.assertEqual(4, len(foot.getMembers()))
         
 if __name__ == "__main__":
     unittest.main()
