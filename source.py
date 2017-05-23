@@ -1154,9 +1154,9 @@ class Module(SubroutineContainer):
      
     def __findVariables(self):
         typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*[A-Z]+(\([a-z0-9_]+\))?\s*)*((\:\:)|\s)\s*([a-z0-9_]+)$', re.IGNORECASE);
-        endTypeRegEx = re.compile(r'^END\s+TYPE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        endTypeRegEx = re.compile(r'^END\s*TYPE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
         interfaceRegEx = re.compile(r'^INTERFACE(\s+([a-z0-9_]+))?$', re.IGNORECASE);
-        endInterfaceRegEx = re.compile(r'^END\s+INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        endInterfaceRegEx = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
          
         moduleVariables = dict()        
         inType = False

@@ -39,7 +39,7 @@ class TypeFinder(UseTraversalPassenger):
         assertType(moduleName, 'moduleName', str)
         
         typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE);
-        endTypeRegEx = re.compile(r'^END\s+((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        endTypeRegEx = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE);
         
         if self.__currentType is None:
             typeRegExMatch = typeRegEx.match(statement)

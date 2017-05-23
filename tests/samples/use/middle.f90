@@ -8,7 +8,9 @@ MODULE middle
     MODULE PROCEDURE average_r
     MODULE PROCEDURE average_f
 
-  END INTERFACE average
+  ENDINTERFACE average
+
+  LOGICAL, PARAMETER :: test = .TRUE.
 
   CONTAINS
 
@@ -55,7 +57,7 @@ MODULE next
     INTEGER :: feet(2), pouch
     REAL :: tail
 
-  END TYPE kangaroo
+  ENDTYPE kangaroo
 
   INTEGER, PARAMETER :: skippy = 42
 
