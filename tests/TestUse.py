@@ -48,7 +48,7 @@ class SampleTest(unittest.TestCase):
         simpleNames = set()
         for name in self.callGraph.getAllSubroutineNames():
             simpleNames.add(name.getSimpleName())
-        self.assertEqual({'tiptop', 'medium', 'butt'}, simpleNames)
+        self.assertEqual({'tiptop', 'medium', 'butt_x'}, simpleNames)
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -63,10 +63,10 @@ class SampleTest(unittest.TestCase):
 
         module1 = sourceFile.getModule('middle')
         self.assertIsNotNone(module1)
-        self.assertEqual(2, len(module1.getSubroutines()))
+        self.assertEqual(4, len(module1.getSubroutines()))
         
         simpleNames = set(module1.getSubroutines().keys())
-        self.assertEqual({'medium', 'average'}, simpleNames)
+        self.assertEqual({'medium', 'average_i', 'average_r', 'average_f'}, simpleNames)
 
         module2 = sourceFile.getModule('next')
         self.assertIsNotNone(module2)

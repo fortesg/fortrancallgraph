@@ -2,6 +2,14 @@ MODULE middle
 
   IMPLICIT NONE
 
+  INTERFACE average
+
+    MODULE PROCEDURE average_i
+    MODULE PROCEDURE average_r
+    MODULE PROCEDURE average_f
+
+  END INTERFACE average
+
   CONTAINS
 
   SUBROUTINE medium()
@@ -12,11 +20,29 @@ MODULE middle
 
   ENDSUBROUTINE medium
 
-  SUBROUTINE average()
+  INTEGER FUNCTION average_i(numbers)
 
-    WRITE (*,*) "So random!"
+    INTEGER, DIMENSION(:) :: numbers
 
-  ENDSUBROUTINE average
+    average_i = 42
+
+  ENDFUNCTION average_i
+
+  REAL(kind=8) FUNCTION average_r(numbers)
+
+    REAL(kind=8), DIMENSION(:) :: numbers
+
+    average_r = 42
+
+  END FUNCTION average_r
+
+  REAL(kind=4) FUNCTION average_f(numbers)
+
+    REAL(kind=4), DIMENSION(:) :: numbers
+
+    average_f = 42
+
+  ENDFUNCTION average_f
 
 ENDMODULE middle
 
@@ -24,7 +50,7 @@ MODULE next
 
   IMPLICIT NONE
 
-  TYPE :: kangaroo
+  TYPE kangaroo
 
     INTEGER :: feet(2), pouch
     REAL :: tail
