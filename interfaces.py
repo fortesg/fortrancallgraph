@@ -26,7 +26,7 @@ class InterfaceFinder(UseTraversalPassenger):
         
         interfaceRegEx = re.compile(r'^INTERFACE\s+(?P<interfacename>[a-z0-9_]+)$', re.IGNORECASE);
         endInterfaceRegEx = re.compile(r'^END\s+INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
-        procedureRegEx = re.compile(r'^MODULE\s+PROCEDURE\s+(?P<procedurename>[a-z0-9_]+)$', re.IGNORECASE);
+        procedureRegEx = re.compile(r'^MODULE\s+PROCEDURE\s+(?P<procedurelist>[a-z0-9_\s\,]+)$', re.IGNORECASE);
         
         if self.__currentType is None:
             interfaceRegExMatch = interfaceRegEx.match(statement)
@@ -35,7 +35,8 @@ class InterfaceFinder(UseTraversalPassenger):
         else:
             procedureRegExMatch = procedureRegEx.match(statement)
             if procedureRegExMatch is not None:
-                self.__currentType.addProcedure(procedureRegExMatch.group('procedurename'))
+                for procedure in procedureRegExMatch.group('procedurelist').split(','):
+                    self.__currentType.addProcedure(procedure.strip())
             else:
                 endInterfaceRegExMatch = endInterfaceRegEx.match(statement)
                 if endInterfaceRegExMatch is not None:
