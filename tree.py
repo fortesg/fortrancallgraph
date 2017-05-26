@@ -14,14 +14,15 @@ class TreeLikeCallGraphPrinter(CallGraphPrinter):
             return
         
         level = len(callStack);
-        if rootSubroutine in callStack:
-            print self.__getTreeLine(level, rootSubroutine) + " [RECURSIVE]";
-            return;
-        else:
-            print self.__getTreeLine(level, rootSubroutine);
-            callStack = callStack + (rootSubroutine,);
-            for calledSubroutine in callGraph.getCallees(rootSubroutine):
-                    self.__printCallGraphRecursive(calledSubroutine, callGraph, callStack);
-    
+        if level <= self._maxLevel:
+            if rootSubroutine in callStack:
+                print self.__getTreeLine(level, rootSubroutine) + " [RECURSIVE]";
+                return;
+            else:
+                print self.__getTreeLine(level, rootSubroutine);
+                callStack = callStack + (rootSubroutine,);
+                for calledSubroutine in callGraph.getCallees(rootSubroutine):
+                        self.__printCallGraphRecursive(calledSubroutine, callGraph, callStack);
+
     def __getTreeLine(self, level, subroutine):
         return str(level) + ' ' + (level * '  ') + str(subroutine);

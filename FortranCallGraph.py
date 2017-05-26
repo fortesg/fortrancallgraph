@@ -62,6 +62,7 @@ def parseArguments():
     actionArg.add_argument('-l', '--line', choices=LINE_NUMBER_FINDER.keys(), help='Show some interesting source lines of the subroutine (' + lineNumberFinderHelp + ').');
     actionArg.add_argument('-u', '--use', choices=USE_PRINTERS.keys(), help='Prints use dependencies of a subroutine (' + usePrinterHelp + ').');
     argParser.add_argument('-v', '--variable', type=str, help='Restrict the analysis to the given variable which has to be a subroutine argument and of a derived type. Applicable with -a arguments.');
+    argParser.add_argument('-ml', '--maxLevel', type=int, help='Limits depth of callgraph output. Applicable with -p.');
     argParser.add_argument('-po', '--pointersOnly', action="store_true", help='Limit result output to pointer variables. Applicable with -a.');
     argParser.add_argument('-ln', '--lineNumbers', action="store_true", help='Add line numbers to the output. Applicable with -d.');
     argParser.add_argument('-cc', '--clearCache', action="store_true", help='Create a new call graph instead of using a cached one. Applicable with -p or -a.');
@@ -117,11 +118,16 @@ def main():
         except re.error:
             print >> sys.stderr, 'Invalid regular expression for -i/--ignore option!';
             exit(1);
+        
+    maxLevel = -1
+    if args.maxLevel is not None:
+        maxLevel = args.maxLevel
     
     if args.printer is not None:
         callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
         printer = GRAPH_PRINTERS[args.printer]
         printer.setIgnoreRegex(ignoreRegex)
+        printer.setMaxLevel(maxLevel)
         printer.printCallGraph(callGraph)
     elif args.analysis is not None:
         callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
