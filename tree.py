@@ -14,7 +14,7 @@ class TreeLikeCallGraphPrinter(CallGraphPrinter):
             return
         
         level = len(callStack);
-        if level <= self._maxLevel:
+        if self._maxLevel is None or level <= self._maxLevel:
             if rootSubroutine in callStack:
                 print self.__getTreeLine(level, rootSubroutine) + " [RECURSIVE]";
                 return;

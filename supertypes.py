@@ -17,7 +17,7 @@ class CallGraphPrinter(object):
     
     def __init__(self):
         self._ignoreRegex = None;
-        self._maxLevel = -1;
+        self._maxLevel = None;
 
     def setIgnoreRegex(self, regex):
         'Sets the regular expression for ignored routines'
@@ -30,7 +30,10 @@ class CallGraphPrinter(object):
     def setMaxLevel(self, level):
         'Sets the maximum depth to which the graph is printed. Negative values mean no limit.'
         assertType(level, 'level', int)
-        self._maxLevel = level
+        if level < 0:
+            self._maxLevel = None
+        else:
+            self._maxLevel = level
 
     def printCallGraph(self, callGraph):
         'Prints the given CallGraph to the standard output. The format is defined by subclasses.'
