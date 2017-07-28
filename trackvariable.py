@@ -159,10 +159,10 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                         accessRegExMatch = accessRegEx.match(statement) 
                         if accessRegExMatch is not None:
                             variableReferences.update(self.__analyzeAccess(accessRegExMatch, lineNumber))
-                        if subroutineCallRegEx.match(statement) is not None:
-                            variableReferences.update(self.__analyzeSubroutineCall(subroutine, statement, lineNumber))
-                        elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
+                        if functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
                             variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
+                        elif subroutineCallRegEx.match(statement) is not None:
+                            variableReferences.update(self.__analyzeSubroutineCall(subroutine, statement, lineNumber))
                     statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
                     
                 innerSubroutineCallRegExMatch = innerSubroutineCallRegEx.match(statement)
