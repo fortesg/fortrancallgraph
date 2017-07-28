@@ -17,5 +17,5 @@ assembler: RHS_mod.s
 	$(FF) -S -g $(FFLAGS) $<
 
 clean:
-	rm -f *.o *.mod *.s	innerprog
+	rm -f *.o *.mod *.s
  
