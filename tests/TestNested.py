@@ -66,6 +66,7 @@ class SampleTest(unittest.TestCase):
         module = sourceFile.getModule('nested')
         self.assertIsNotNone(module)
         self.assertEqual(4, len(module.getSubroutines()))
+        self.assertEqual(1, len(module.getVariables()))
          
         simpleNames = set((module.getSubroutines().keys()))
         self.assertEqual({'test', 'assertion', 'is_contained_in_e', 'is_contained_in_e_nd'}, simpleNames)
