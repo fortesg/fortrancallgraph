@@ -82,6 +82,14 @@ class SampleTest(unittest.TestCase):
     def testTrackVariables(self):
         if not self.filesExist:
             self.skipTest('Files not there')
+            
+        self.usetraversal.parseModules(self.root)
+        
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.usetraversal.getInterfaces(), self.usetraversal.getTypes())
+        expressions = set()
+        for varRef in tracker.trackDerivedTypeArguments(self.callGraph):
+            expressions.add(varRef.getExpression())
+        self.assertEqual({'dm_array%sub_arrays_global_desc%rect%first', 'dm_array%sub_arrays_global_desc%rect%size'}, expressions)    
         
 if __name__ == "__main__":
     unittest.main()
