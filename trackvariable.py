@@ -150,8 +150,8 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         subroutine = self.__sourceFiles.findSubroutine(subroutineName)
         if subroutine is not None:
             for lineNumber, statement, _ in subroutine.getStatements():
-                statement = self.__removeUnimportantParentheses(statement, variableRegEx)
                 while variableRegEx.match(statement) is not None:
+                    statement = self.__removeUnimportantParentheses(statement, variableRegEx)
                     assignmentRegExMatch = assignmentRegEx.match(statement)
                     if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
                         variableReferences.update(self.__analyzeAssignment(assignmentRegExMatch, subroutine, lineNumber))
