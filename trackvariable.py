@@ -139,7 +139,6 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         variableRegEx = re.compile(r'^((.*[^a-z0-9_])?)' + variableName + r'(([^a-z0-9_].*)?)$', re.IGNORECASE);
         assignmentRegEx = re.compile(r'(?P<alias>[a-z0-9_]+)\s*\=\>?\s*(?P<reference>' + variableName + r'(\([a-z0-9_\,\:]+\))?(%[a-z0-9_%]+)?)([^a-z0-9_].*)?$', re.IGNORECASE);
         accessRegEx = re.compile(r'(.*[^a-z0-9_])?(?P<reference>' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)+)', re.IGNORECASE);
-        subroutineCallRegEx = re.compile(r'^(.*\s+)?CALL\s*[a-z0-9_]+\s*\((.*[^a-z0-9_])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\)\s*$', re.IGNORECASE);
         functionCallRegEx = re.compile(r'^.*[^a-z0-9_]+[a-z0-9_]+\s*\((.*[^a-z0-9_])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
         declarationRegEx = re.compile(r'^[A-Z\s]*((SUBROUTINE)|(FUNCTION)).*?$', re.IGNORECASE);
         selectTypeRegEx = re.compile(r'^\s*SELECT\s+TYPE\s*\(\s*' + variableName + r'\s*\)\s*$', re.IGNORECASE);
@@ -161,8 +160,6 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                             variableReferences.update(self.__analyzeAccess(accessRegExMatch, lineNumber))
                         if functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
                             variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
-                        elif subroutineCallRegEx.match(statement) is not None:
-                            variableReferences.update(self.__analyzeSubroutineCall(subroutine, statement, lineNumber))
                     statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
                     
                 innerSubroutineCallRegExMatch = innerSubroutineCallRegEx.match(statement)
@@ -246,22 +243,12 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         return variable
     
-    def __analyzeSubroutineCall(self, subroutine, statement, lineNumber):
-        callRegEx = re.compile(r'^(.*\s+)?CALL\s*(?P<routine>[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\)\s*$', re.IGNORECASE);
-        callRegExMatch = callRegEx.match(statement)
-        if callRegExMatch is None:
-            return set()
-        
-        return self.__analysizeCallRegExMatch(callRegExMatch, subroutine, statement, lineNumber)
-    
     def __analyzeFunctionCall(self, subroutine, statement, lineNumber):
         #TODO Teste mehrere Function Calls in einem statement
         functionRegEx = re.compile(r'^.*[^a-z0-9_]+(?P<routine>[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
         functionRegExMatch = functionRegEx.match(statement)
         if functionRegExMatch is None:
             return set()
-#         if self.__variable.getName() == 'argt2':
-#             print '*** DEBUG *** ' + statement + ' // ' + functionRegExMatch.group('routine')
 
         before = functionRegExMatch.group('before')
         if before.count(')') == before.count('(') + 1:
@@ -277,7 +264,6 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
         variable = self.__findLevelNVariable(originalReference)
-#         print '*** DEBUG *** ' + regExMatch.string + ' // ' + calledRoutineName + ' // ' + str(variable)
         if variable is None or not variable.hasDerivedType():
             return set()
 
