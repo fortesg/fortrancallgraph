@@ -150,8 +150,8 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         subroutine = self.__sourceFiles.findSubroutine(subroutineName)
         if subroutine is not None:
             for lineNumber, statement, _ in subroutine.getStatements():
+                statement = self.__removeUnimportantParentheses(statement, variableRegEx)
                 while variableRegEx.match(statement) is not None:
-                    #TODO Assignement auch für Type-Member auf der LHS unterstützen, z.B. v1%m = arg%x%g
                     assignmentRegExMatch = assignmentRegEx.match(statement)
                     if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
                         variableReferences.update(self.__analyzeAssignment(assignmentRegExMatch, subroutine, lineNumber))
@@ -160,9 +160,6 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                         if accessRegExMatch is not None:
                             variableReferences.update(self.__analyzeAccess(accessRegExMatch, lineNumber))
                         if subroutineCallRegEx.match(statement) is not None:
-                            #TODO was wenn Teilausdruck als Parameter weitergegen wird
-                            #==> ggf. einfach rekursiv für alle Member mit Derived Type auch die Analyse laufen lassen
-                            #dann muss nur noch das mit den Aliases implementiert werden und sonst müsste alles funktionierennn 
                             variableReferences.update(self.__analyzeSubroutineCall(subroutine, statement, lineNumber))
                         elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
                             variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
@@ -175,6 +172,29 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             TrackVariableCallGraphAnalysis.__routineNotFoundWarning(subroutineName)
                 
         return variableReferences;
+    
+    def __removeUnimportantParentheses(self, statement, regEx):
+        clean = ''
+        pString = ''
+        pCount = 0
+        for c in statement:
+            if c == '(':
+                pCount += 1
+            
+            if pCount == 0:
+                clean += c
+            else:
+                pString += c
+                
+            if c == ')':
+                pCount -= 1
+                if pCount == 0:
+                    pString = pString[1:-1]
+                    if regEx.match(pString) is not None:
+                        clean += '(' + self.__removeUnimportantParentheses(pString, regEx) + ')'
+                    pString = ''
+        return clean
+        
     
     def __isAssignmentToDerivedType(self, regExMatch, subroutine, lineNumber):
         originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
@@ -240,6 +260,8 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         functionRegExMatch = functionRegEx.match(statement)
         if functionRegExMatch is None:
             return set()
+#         if self.__variable.getName() == 'argt2':
+#             print '*** DEBUG *** ' + statement + ' // ' + functionRegExMatch.group('routine')
 
         before = functionRegExMatch.group('before')
         if before.count(')') == before.count('(') + 1:
@@ -252,13 +274,15 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         calledRoutineName = regExMatch.group('routine').strip().lower()
         if self._ignoreRegex is not None and self._ignoreRegex.match(calledRoutineName):
             return set()
-                
+        
         originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
         variable = self.__findLevelNVariable(originalReference)
+#         print '*** DEBUG *** ' + regExMatch.string + ' // ' + calledRoutineName + ' // ' + str(variable)
         if variable is None or not variable.hasDerivedType():
             return set()
 
         calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
+
         
         if calledRoutineFullName is not None:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
