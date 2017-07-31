@@ -18,7 +18,7 @@ from trackvariable import TrackVariableCallGraphAnalysis
 from usetraversal import UseTraversal
 
 
-class SampleTest(unittest.TestCase):
+class TestNested(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
