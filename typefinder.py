@@ -46,7 +46,7 @@ class TypeFinder(UseTraversalPassenger):
             typeRegExMatch = typeRegEx.match(statement)
             if typeRegExMatch is not None and statement.upper() != 'CLASS DEFAULT':
                 typeName = typeRegExMatch.group('typename').lower()
-                self.__currentType = Type(typeName, moduleName)
+                self.__currentType = Type(typeName, module)
                 if 'extends' in typeRegExMatch.groupdict() and typeRegExMatch.group('extends') is not None:
                     self.__extends[self.__currentType] = typeRegExMatch.group('extends')
         else:

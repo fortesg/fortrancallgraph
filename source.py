@@ -12,7 +12,7 @@ class Type(object):
     
     def __init__(self, typeName, declaredIn, extends = None):
         assertType(typeName, 'typeName', str)
-        assertType(declaredIn, 'declaredIn', [str, SubroutineFullName])
+        assertType(declaredIn, 'declaredIn', [Module, SubroutineFullName])
         assertType(extends, 'extends', Type, True)
         
         self.__typeName = typeName
@@ -1380,6 +1380,9 @@ class SourceFile(object):
     
     @staticmethod
     def linesToStatements(lines):
+        if not lines:
+            return []
+        
         statements = [];
         statement = '';
         j = lines[0][0];
