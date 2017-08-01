@@ -1143,7 +1143,7 @@ class Module(SubroutineContainer):
         self.__sourceFile = sourceFile
         self.__variableList = None
         self.__publicElements = None
-        self.__useAliases = None
+        self.__uses = None
         
     def __eq__(self, other):
         if (other is None or not isinstance(other, Module)):
@@ -1258,16 +1258,24 @@ class Module(SubroutineContainer):
         return elements
     
     def getUseAliases(self):
-        if self.__useAliases is None:
-            self.__useAliases = self.__findUseAliases()
-        return self.__useAliases
+        aliases = dict()
+        for moduleName, imports in self.getUses().iteritems():
+            for imporT in imports:
+                if imporT[1]:
+                    aliases[imporT[0]] = (moduleName, imporT[1])
+        return aliases
+    
+    def getUses(self):
+        if self.__uses is None:
+            self.__uses = self.__findUses()
+        return self.__uses
         
-    def __findUseAliases(self):
+    def __findUses(self):
         
-        useOnlyRegEx = re.compile(r'^USE(\s*\,\s*INTRINSIC)?[\s\:]+(?P<modulename>[a-z0-9_]+)\s*\,\s*ONLY\s*\:\s*(?P<importlist>.*)$', re.IGNORECASE)
+        useOnlyRegEx = re.compile(r'^USE(\s*\,\s*INTRINSIC)?[\s\:]+(?P<modulename>[a-z0-9_]+)\s*(\,\s*ONLY\s*\:\s*(?P<importlist>.*))?$', re.IGNORECASE)
         lastUseLine = self.getLastUseLineNumber()
 
-        aliases = dict()
+        uses = dict()
         for _, statement, j in self.getStatements():
             if j > lastUseLine:
                 break
@@ -1275,13 +1283,25 @@ class Module(SubroutineContainer):
             useOnlyRegExMatch = useOnlyRegEx.match(statement) 
             if useOnlyRegExMatch is not None:
                 moduleName = useOnlyRegExMatch.group('modulename')
-                importList = useOnlyRegExMatch.group('importlist').split(',')
-                for imported in importList:
-                    if imported.find('=>') > -1:
-                        names = imported.split('=>')
-                        aliases[names[0].strip()] = (moduleName, names[1].strip())
+                if moduleName in uses:
+                    imports = uses[moduleName]
+                else:
+                    imports = []
+                onlyString = useOnlyRegExMatch.group('importlist')
+                if onlyString is not None:
+                    importList = onlyString.split(',')
+                    for imported in importList:
+                        imported = imported.strip()
+                        if imported.find('=>') > -1:
+                            names = imported.split('=>')
+                            imports.append((names[0].strip(), names[1].strip()))
+                        else:
+                            imports.append((imported, imported))
+                else:
+                    imports.add(('*', '*'))
+                uses[moduleName] = imports
                         
-        return aliases
+        return uses
     
     def _createSubroutineName(self, name):
         return SubroutineFullName.fromParts(self.getName(), name)
