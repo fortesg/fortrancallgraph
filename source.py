@@ -990,6 +990,18 @@ class Subroutine(SubroutineContainer):
         self.__name = name
         self.__container = container
         self.__variables = None
+        
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, Subroutine)):
+            return False;
+        else:
+            return self.__name == other.__name and self.__container == other.__container
+        
+    def __ne__(self, other):
+        return not self == other
+    
+    def __hash__(self):
+        return hash(self.__name) * hash(self.__container)
     
     def getName(self):
         return self.__name;
@@ -1132,6 +1144,18 @@ class Module(SubroutineContainer):
         self.__variableList = None
         self.__publicElements = None
         self.__useAliases = None
+        
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, Module)):
+            return False;
+        else:
+            return self.__name == other.__name and self.__sourceFile == other.__sourceFile
+        
+    def __ne__(self, other):
+        return not self == other
+    
+    def __hash__(self):
+        return hash(self.__name) * hash(self.__sourceFile)
         
     def getName(self):
         return self.__name;
@@ -1284,6 +1308,18 @@ class SourceFile(object):
                 return name in self.__modules[moduleName]
         
         return False
+    
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, SourceFile)):
+            return False;
+        else:
+            return self.__path == other.__path
+        
+    def __ne__(self, other):
+        return not self == other
+    
+    def __hash__(self):
+        return hash(self.__path)  
     
     def getPath(self):
         return self.__path
