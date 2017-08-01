@@ -12,7 +12,7 @@ class Type(object):
     
     def __init__(self, typeName, declaredIn, extends = None):
         assertType(typeName, 'typeName', str)
-        assertType(declaredIn, 'declaredIn', [Module, SubroutineFullName])
+        assertType(declaredIn, 'declaredIn', [Module, Subroutine])
         assertType(extends, 'extends', Type, True)
         
         self.__typeName = typeName
