@@ -1283,7 +1283,11 @@ class SourceFile(object):
     
     def getSubroutine(self, subroutineName):
         assertType(subroutineName, 'moduleName', SubroutineName)
-        return self.getModule(subroutineName.getModuleName()).getSubroutine(subroutineName);
+        module = self.getModule(subroutineName.getModuleName())
+        if module is not None: 
+            return module.getSubroutine(subroutineName);
+        
+        return None
     
     def __extractModules(self):
         moduleRegEx = re.compile(r'\s*MODULE\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
