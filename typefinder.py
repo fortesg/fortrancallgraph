@@ -86,4 +86,84 @@ class TypeFinder(UseTraversalPassenger):
                     element = ''
             
         return elements
+
+class TypeCollection:
+
+    def __init__(self):
+        self.__typeDict = dict()
+        self.__typeSet = set()
+        self.__memberTypesSet = False
+        self.__extends = dict()
+        self.__extendedTypesSet = False
+        
+    def __contains__(self, name):
+        return name in self.__typeDict and len(self.__typeDict[name]) > 0
     
+    def __iter__(self):
+        return iter(self.__typeSet);
+        
+    def addType(self, typE):
+        assertType(typE, 'typE', Type)
+        
+        name = typE.getName()
+        if name not in self:
+            self.__typeDict[name] = [typE]
+        else:
+            self.__typeDict[name].append(typE)
+        self.__typeSet.add(typE)
+
+    def getTypeByName(self, name, index = 0):
+        assertType(name, 'name', str)
+        assertType(index, 'index', int)
+        
+        if name in self.__typeDict:
+            types = self.__typeDict[name]
+            if index < len(types):
+                return types[index]
+        
+        return None
+
+    def getTypeOfVariable(self, var, module = None):
+        assertType(var, 'var', Variable)
+        assertType(module, 'module', [Module, str], True)
+        
+        #TODO Testen!!!
+        
+        if var.isTypeAvailable():
+            return var.getType()
+        elif var.hasDerivedType() and var.getDerivedTypeName() in self:
+            types = self.__typeDict[var.getDerivedTypeName()]
+            if len(types) > 1:
+                if module is None:
+                    module = self.__findModuleNameForVariable(var)
+                if isinstance(module, str):
+                    for typE in types:
+                        if typE.getDeclaredIn() == module:
+                            return typE
+                elif isinstance(module, Module):
+                    for typE in types:
+                        if typE.getDeclaredIn() == module.getName():
+                            return typE
+                        #TODO USE statements durchsuchen
+                #TODO Warning
+            return types[0]
+            
+        return None
+    
+    def __findModuleNameForVariable(self, var):
+        if var.isModuleVar():
+            return var.getDeclaredIn()
+        elif var.isLocalVar():
+            return var.getDeclaredIn().getModuleName()
+        elif var.isMemberVar():
+            return var.getDeclaredIn().getDeclaredIn()
+        
+        return None
+    
+    def setMemberTypes(self):
+        for typE in self:
+            for member in typE.getMembers():
+                memberType = self.getTypeOfVariable(member, typE.getDeclaredIn())
+                if memberType is not None:
+                    member.setType(self.__typeDict[member.getDerivedTypeName()])
+            
