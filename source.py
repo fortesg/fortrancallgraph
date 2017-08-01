@@ -280,12 +280,12 @@ class Variable(object):
         return self.__private
     
     def setDeclaredIn(self, declaredIn, debugModuleName = '', debugLineNumber = 0):
-        assertType(declaredIn, 'declaredIn', [str, SubroutineFullName, Type])
+        assertType(declaredIn, 'declaredIn', [Module, Subroutine, Type])
         assertType(debugModuleName, 'debugModuleName', str)    
         assertType(debugLineNumber, 'debugLineNumber', int)   
         
-        if self.isArgument() and not isinstance(declaredIn, SubroutineFullName):
-            msg = 'Arguments can only be declared in subroutines! Var: ' + str(self) + ", declaredIn: " + str(declaredIn) + " (" + debugModuleName + ":"
+        if self.isArgument() and not isinstance(declaredIn, Subroutine):
+            msg = 'Arguments can only be declared in subroutines! Var: ' + str(self) + ", declaredIn: " + declaredIn.getName() + " (" + debugModuleName + ":"
             if debugLineNumber > 0:
                 msg += str(debugLineNumber)
             msg += ")"
@@ -294,7 +294,13 @@ class Variable(object):
         self.__declaredIn = declaredIn
         
     def isModuleVar(self):
-        return isinstance(self.__declaredIn, str)
+        return isinstance(self.__declaredIn, Module)
+        
+    def isLocalVar(self):
+        return isinstance(self.__declaredIn, Subroutine)
+        
+    def isTypeMember(self):
+        return isinstance(self.__declaredIn, Type)
     
     def getDeclaredIn(self):
         return self.__declaredIn
@@ -1079,7 +1085,7 @@ class Subroutine(SubroutineContainer):
                 break;
                 
         for variable in variables:
-            variable.setDeclaredIn(self.getName(), self.getModuleName(), i)
+            variable.setDeclaredIn(self, self.getModuleName(), i)
             if not variable.isArgument() and variable.getName() in argumentNames:
                 variable.setIntent('inout')
         return variables
@@ -1172,7 +1178,7 @@ class Module(SubroutineContainer):
                 inInterface = False
             elif not inType and not inInterface and Variable.validVariableDeclaration(statement):
                 for variable in Variable.fromDeclarationStatement(statement):
-                    variable.setDeclaredIn(self.getName(), self.getName(), i)
+                    variable.setDeclaredIn(self, self.getName(), i)
                     moduleVariables[variable.getName().lower()] = variable
                      
         return moduleVariables

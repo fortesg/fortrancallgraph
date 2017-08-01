@@ -50,7 +50,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
             for variableReference in variableReferences:
                 if not self._pointersOnly or variableReference.isPointer():
                     if variableReference.getDeclaredIn() is not None:
-                        declaredIn = ' {' + variableReference.getDeclaredIn() + '}'
+                        declaredIn = ' {' + variableReference.getDeclaredIn().getName() + '}'
                     else:
                         declaredIn = ''
                         

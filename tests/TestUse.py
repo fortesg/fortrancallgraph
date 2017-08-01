@@ -106,7 +106,7 @@ class SampleTest(unittest.TestCase):
         self.assertIsNotNone(kangaroo)
         self.assertEqual('kangaroo', kangaroo.getName())
         self.assertIsNone(kangaroo.getExtends())
-        self.assertEqual('next', kangaroo.getDeclaredIn())
+        self.assertEqual('next', kangaroo.getDeclaredIn().getName())
         self.assertEqual(3, len(kangaroo.getMembers()))
         
         self.assertIn('foot', result)
@@ -114,7 +114,7 @@ class SampleTest(unittest.TestCase):
         self.assertIsNotNone(foot)
         self.assertEqual('foot', foot.getName())
         self.assertIsNone(foot.getExtends())
-        self.assertEqual('bottom', foot.getDeclaredIn())
+        self.assertEqual('bottom', foot.getDeclaredIn().getName())
         self.assertEqual(4, len(foot.getMembers()))
                 
     def testInterfaceFinder(self):
