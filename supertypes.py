@@ -163,11 +163,11 @@ class UseTraversalPassenger(object):
     def getResult(self):
         raise NotImplementedError()
     
-    def parseStatement(self, i, statement, j, moduleName):
+    def parseStatement(self, i, statement, j, module):
         assertType(i, 'i', int) 
         assertType(statement, 'statement', str) 
         assertType(j, 'j', int)
-        assertType(moduleName, 'moduleName', str)
+        assertType(module, 'module', Module)
         raise NotImplementedError() 
  
  

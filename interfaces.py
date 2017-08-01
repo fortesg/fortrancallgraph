@@ -18,11 +18,10 @@ class InterfaceFinder(UseTraversalPassenger):
         self.__types = dict()
         self.__currentType = None
     
-    def parseStatement(self, i, statement, j, moduleName):
+    def parseStatement(self, i, statement, j, module):
         assertType(i, 'i', int) 
         assertType(statement, 'statement', str) 
         assertType(j, 'j', int)
-        assertType(moduleName, 'moduleName', str)
         
         interfaceRegEx = re.compile(r'^INTERFACE\s+(?P<interfacename>[a-z0-9_]+)$', re.IGNORECASE);
         endInterfaceRegEx = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);

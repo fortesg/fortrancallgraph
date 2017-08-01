@@ -50,7 +50,7 @@ class UseTraversal(object):
                     if usedModuleName.lower() not in self.__excludeModules: 
                         usedModules.add(usedModuleName)
                 else:
-                    self.__parseStatement(i, statement, j, moduleName)
+                    self.__parseStatement(i, statement, j, module)
         elif moduleName not in UseTraversal.__moduleWarnings:
             UseTraversal.__moduleWarnings.add(moduleName)
             print  >> sys.stderr, '*** WARNING [UseTraversal] Source file not found for module: ' + moduleName + ' ***';

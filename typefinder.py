@@ -2,7 +2,7 @@
 
 import re
 from utils import assertType
-from source import Type, Variable
+from source import Type, Variable, Module
 from supertypes import UseTraversalPassenger
 
 class TypeFinder(UseTraversalPassenger):
@@ -32,12 +32,13 @@ class TypeFinder(UseTraversalPassenger):
             
         return self.__types
 
-    def parseStatement(self, i, statement, j, moduleName):
+    def parseStatement(self, i, statement, j, module):
         assertType(i, 'i', int) 
         assertType(statement, 'statement', str) 
         assertType(j, 'j', int)
-        assertType(moduleName, 'moduleName', str)
+        assertType(module, 'module', Module)
         
+        moduleName = module.getName()
         typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE))\s*)?(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE))\s*)?((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE);
         endTypeRegEx = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE);
         
@@ -57,7 +58,15 @@ class TypeFinder(UseTraversalPassenger):
             else:
                 endTypeRegExMatch = endTypeRegEx.match(statement)
                 if endTypeRegExMatch is not None:
-                    self.__types[self.__currentType.getName()] = self.__currentType
+                    name = self.__currentType.getName()
+#                     if name in self.__types:
+#                         if isinstance(self.__types[name], list):
+#                             self.__types[name].append(self.__currentType)
+#                         else:
+#                             self.__types[name] = [self.__types[name], self.__currentType]
+#                     else:
+                    self.__types[name] = self.__currentType
+                        
                     self.__currentType = None
 
     def __extractListedElements(self, spec):
@@ -77,3 +86,4 @@ class TypeFinder(UseTraversalPassenger):
                     element = ''
             
         return elements
+    

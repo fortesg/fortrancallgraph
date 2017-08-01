@@ -1,7 +1,7 @@
 # coding=utf8
 from supertypes import UsePrinters, UseTraversalPassenger
 from utils import assertTypeAll, assertType
-from source import SourceFiles, SubroutineFullName
+from source import SourceFiles, SubroutineFullName, Module
 from usetraversal import UseTraversal
 
 class UseCollector(UseTraversalPassenger):
@@ -15,10 +15,10 @@ class UseCollector(UseTraversalPassenger):
     def getResult(self):
         return self.__moduleNames
  
-    def parseStatement(self, i, statement, j, moduleName):
-        assertType(moduleName, 'moduleName', str)
+    def parseStatement(self, i, statement, j, module):  # @UnusedVariable
+        assertType(module, 'module', Module)
          
-        self.__moduleNames.add(moduleName)
+        self.__moduleNames.add(module.getName())
         
 
 class UsedModuleNamePrinter(UsePrinters):
