@@ -29,6 +29,7 @@ class Type(object):
         
     def addMember(self, member):
         assertType(member, 'member', Variable)
+        member.setDeclaredIn(self)
         self.__members[member.getName().lower()] = member
         
     def addMembers(self, members):
@@ -67,6 +68,11 @@ class Type(object):
         if self.__declaredIn is None:
             return None
         return self.__declaredIn.getName()
+    
+    def getModule(self):
+        if self.__declaredIn is None:
+            return None
+        return self.__declaredIn.getModule()
     
     def getMembers(self):
         return self.__members.values()    
@@ -314,6 +320,12 @@ class Variable(object):
         if self.__declaredIn is None:
             return None
         return self.__declaredIn.getName()
+    
+    
+    def getModule(self):
+        if self.__declaredIn is None:
+            return None
+        return self.__declaredIn.getModule()
     
     def setOriginalName(self, originalName):
         self.__originalName = originalName
