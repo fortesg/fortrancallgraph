@@ -63,6 +63,11 @@ class Type(object):
     def getDeclaredIn(self):
         return self.__declaredIn
     
+    def getDeclaredInName(self):
+        if self.__declaredIn is None:
+            return None
+        return self.__declaredIn.getName()
+    
     def getMembers(self):
         return self.__members.values()    
 
@@ -304,6 +309,11 @@ class Variable(object):
     
     def getDeclaredIn(self):
         return self.__declaredIn
+    
+    def getDeclaredInName(self):
+        if self.__declaredIn is None:
+            return None
+        return self.__declaredIn.getName()
     
     def setOriginalName(self, originalName):
         self.__originalName = originalName
