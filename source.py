@@ -564,6 +564,12 @@ class VariableReference(object):
             return None
         return self.__level0Variable.getDeclaredIn()
     
+    def getDeclaredInName(self):
+        declaredIn = self.getDeclaredIn()
+        if declaredIn is None:
+            return None
+        return declaredIn.getName()
+    
     def getVariable(self, level = 0):
         if level < 0 or level > self.getLevel():
             raise ValueError('Level out of range')
