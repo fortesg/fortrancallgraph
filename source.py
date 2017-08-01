@@ -1108,6 +1108,9 @@ class Module(SubroutineContainer):
     def getName(self):
         return self.__name;
     
+    def getModule(self):
+        return self
+    
     def hasContainer(self):
         return False
     
