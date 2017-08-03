@@ -84,6 +84,18 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('type2', type2.getName())
         self.assertEqual('REAL', type2.getMember('member').getTypeName())
         self.assertEqual('modb', type2.getModule().getName())
+            
+    def testWildcardType3FromModC(self):
+        var3 = self.module.getVariable('var3')
+        self.assertIsNotNone(var3)
+        self.assertEqual('TYPE(type3)', var3.getTypeName())
+        self.assertTrue(var3.hasDerivedType())
+        self.assertEqual('type3', var3.getDerivedTypeName())
+        type3 = self.types.getTypeOfVariable(var3)
+        self.assertIsNotNone(type3)
+        self.assertEqual('type3', type3.getName())
+        self.assertEqual('TYPE(typeA)', type3.getMember('member1').getTypeName())
+        self.assertEqual('modc', type3.getModule().getName())
         
 if __name__ == "__main__":
     unittest.main()
