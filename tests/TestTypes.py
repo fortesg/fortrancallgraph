@@ -53,9 +53,24 @@ class TestTypes(unittest.TestCase):
     def testVar0FromModA(self):
         var0 = self.module.getVariable('var0')
         self.assertIsNotNone(var0)
+        self.assertEqual('TYPE(type0)', var0.getTypeName())
+        self.assertTrue(var0.hasDerivedType())
+        self.assertEqual('type0', var0.getDerivedTypeName())
         type0 = self.types.getTypeOfVariable(var0)
-        self.assertIsNone(type0)
-    
+        self.assertIsNotNone(type0)
+        self.assertEqual('INTEGER', type0.getMember('member').getTypeName())
+        self.assertEqual('modA', type0.getModule().getName())
+            
+    def testVar1FromModB(self):
+        var1 = self.module.getVariable('var1')
+        self.assertIsNotNone(var1)
+        self.assertEqual('TYPE(type1)', var1.getTypeName())
+        self.assertTrue(var1.hasDerivedType())
+        self.assertEqual('type1', var1.getDerivedTypeName())
+        type1 = self.types.getTypeOfVariable(var1)
+        self.assertIsNotNone(type1)
+        self.assertEqual('REAL', type1.getMember('member').getTypeName())
+        self.assertEqual('modB', type1.getModule().getName())
         
 if __name__ == "__main__":
     unittest.main()
