@@ -1293,7 +1293,7 @@ class Module(SubroutineContainer):
                         else:
                             uses.append((moduleName, imported))
                 else:
-                    uses.append((moduleName))
+                    uses.append((moduleName, ))
                         
         return uses
     
