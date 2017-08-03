@@ -78,7 +78,7 @@ class TestTypes(unittest.TestCase):
         self.assertIsNotNone(var2)
         self.assertEqual('TYPE(typeB)', var2.getTypeName())
         self.assertTrue(var2.hasDerivedType())
-        self.assertEqual('typeB', var2.getDerivedTypeName())
+        self.assertEqual('typeb', var2.getDerivedTypeName())
         type2 = self.types.getTypeOfVariable(var2)
         self.assertIsNotNone(type2)
         self.assertEqual('type2', type2.getName())

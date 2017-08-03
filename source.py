@@ -15,7 +15,7 @@ class Type(object):
         assertType(declaredIn, 'declaredIn', [Module, Subroutine])
         assertType(extends, 'extends', Type, True)
         
-        self.__typeName = typeName
+        self.__typeName = typeName.lower()
         self.__declaredIn = declaredIn
         self.__extends = extends
         self.__members = {}
@@ -209,14 +209,12 @@ class Variable(object):
     def getDerivedTypeName(self):
         if not self.hasDerivedType():
             return None 
-        return self.__typeName[self.__typeName.find('(') + 1:-1]
+        return self.__typeName[self.__typeName.find('(') + 1:-1].lower()
     
     def setType(self, typE):
         assertType(typE, 'typE', Type)
         if not self.hasDerivedType():
             raise ValueError("You are only allowed to set derived types.")
-        if not typE.getName() == self.getDerivedTypeName():
-            raise ValueError("Type doesn't match type name.")
         
         self.__type = typE
     

@@ -86,7 +86,7 @@ class TypeCollection:
         assertType(typE, 'typE', Type)
         assertType(extendsName, 'extendsName', str, True)
         
-        name = typE.getName()
+        name = typE.getName().lower()
         if name not in self:
             self.__typeDict[name] = [typE]
         else:
@@ -94,7 +94,7 @@ class TypeCollection:
         self.__typeSet.add(typE)
         
         if extendsName is not None:
-            self.__extends[typE] = extendsName
+            self.__extends[typE] = extendsName.lower()
         
     def finalize(self):
         self.__setMemberTypes()
@@ -104,13 +104,15 @@ class TypeCollection:
         assertType(typeName, 'typeName', str)
         assertType(usingModule, 'usingModule', Module, True)
         
+        typeName = typeName.lower()
+        
         # Type imported with alias?
         if usingModule is not None:
             for alias, (usedModuleName, original) in usingModule.getUseAliases().iteritems():
                 if alias == typeName:
                     if original in self:
                         for typE in self.__typeDict[original]:
-                            if typE.getModule() == usedModuleName:
+                            if typE.getModule().getName() == usedModuleName:
                                 return typE
         # Else
         if typeName in self:
