@@ -122,7 +122,7 @@ class TypeCollection:
             elif usingModule is not None:
                 # Declared in the same usingModule?
                 for typE in types:
-                    if typE.getModule().getName() == usingModule:
+                    if typE.getModule().getName() == usingModule.getName():
                         return typE
                 # Type imported?
                 for use in usingModule.getUses():
@@ -137,7 +137,6 @@ class TypeCollection:
     def getTypeOfVariable(self, var):
         assertType(var, 'var', Variable)
 
-        #TODO Testen!!!
         if var.isTypeAvailable():
             return var.getType()
         elif var.hasDerivedType():
