@@ -11,4 +11,9 @@ MODULE types
   TYPE(typeB) :: var2
   TYPE(type3) :: var3
 
+  CONTAINS
+
+  SUBROUTINE test()
+  END SUBROUTINE test()
+
 END MODULE types
