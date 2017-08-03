@@ -3,9 +3,9 @@ FFLAGS =
 
 all: modules
 
-modules: test.o
+modules: types.o
 
-test.o: modA.o modB.o modC.o
+types.o: modA.o modB.o modC.o
 
 %: %.o
 	$(FF) -o $@ $<

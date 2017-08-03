@@ -1,4 +1,4 @@
-MODULE test
+MODULE types
 
   USE modA, ONLY: type0
   USE modB, ONLY: type1, typeB => type2
@@ -11,4 +11,4 @@ MODULE test
   TYPE(typeB) :: var2
   TYPE(type3) :: var3
 
-END MODULE test
+END MODULE types
