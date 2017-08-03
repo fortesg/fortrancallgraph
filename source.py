@@ -1259,10 +1259,9 @@ class Module(SubroutineContainer):
     
     def getUseAliases(self):
         aliases = dict()
-        for moduleName, imports in self.getUses().iteritems():
-            for imporT in imports:
-                if imporT[1]:
-                    aliases[imporT[0]] = (moduleName, imporT[1])
+        for use in self.getUses():
+            if len(use) == 3:
+                aliases[use[2]] = (use[0], use[1])
         return aliases
     
     def getUses(self):
@@ -1275,31 +1274,28 @@ class Module(SubroutineContainer):
         useOnlyRegEx = re.compile(r'^USE(\s*\,\s*INTRINSIC)?[\s\:]+(?P<modulename>[a-z0-9_]+)\s*(\,\s*ONLY\s*\:\s*(?P<importlist>.*))?$', re.IGNORECASE)
         lastUseLine = self.getLastUseLineNumber()
 
-        uses = dict()
+        uses = []
         for _, statement, j in self.getStatements():
             if j > lastUseLine:
                 break
             
             useOnlyRegExMatch = useOnlyRegEx.match(statement) 
             if useOnlyRegExMatch is not None:
-                moduleName = useOnlyRegExMatch.group('modulename')
-                if moduleName in uses:
-                    imports = uses[moduleName]
-                else:
-                    imports = []
+                moduleName = useOnlyRegExMatch.group('modulename').lower()
                 onlyString = useOnlyRegExMatch.group('importlist')
                 if onlyString is not None:
                     importList = onlyString.split(',')
                     for imported in importList:
-                        imported = imported.strip()
+                        imported = imported.strip().lower()
                         if imported.find('=>') > -1:
                             names = imported.split('=>')
-                            imports.append((names[0].strip(), names[1].strip()))
+                            alias = names[0].strip()
+                            original = names[1].strip()
+                            uses.append((moduleName, original, alias))
                         else:
-                            imports.append((imported, imported))
+                            uses.append((moduleName, imported))
                 else:
-                    imports.append(('*', '*'))
-                uses[moduleName] = imports
+                    uses.append((moduleName))
                         
         return uses
     

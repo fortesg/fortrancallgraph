@@ -106,36 +106,33 @@ class TypeCollection:
         
         # Type imported with alias?
         if usingModule is not None:
-            for useModuleName, useImports in usingModule.getUses().iteritems():
-                for alias, original in useImports:
-                    if alias == typeName:
-                        if original in self:
-                            for typE in self.__typeDict[original]:
-                                if typE.getModule() == usingModule:
-                                    return typE
+            for alias, (usedModuleName, original) in usingModule.getUseAliases().iteritems():
+                if alias == typeName:
+                    if original in self:
+                        for typE in self.__typeDict[original]:
+                            if typE.getModule() == usedModuleName:
+                                return typE
         # Else
         if typeName in self:
             types = self.__typeDict[typeName]
             if len(types) == 1:
                 return types[0]
-            else:
-                if usingModule is not None:
-                    # Declared in the same usingModule?
-                    for typE in types:
-                        if typE.getModule() == usingModule:
-                            return typE
-                    # Type imported?
-                    for useModuleName, useImports in usingModule.getUses().iteritems():
-                        for alias, original in useImports:
-                            if alias == '*' or original == typeName: 
-                                for typE in types:
-                                    if typE.getModule() == useModuleName:
-                                        return typE 
-                elif isinstance(usingModule, Module):
-                    for typE in types:
-                        if typE.getDeclaredIn() == usingModule.getName():
-                            return typE
-                #TODO Warning
+            elif usingModule is not None:
+                # Declared in the same usingModule?
+                for typE in types:
+                    if typE.getModule() == usingModule:
+                        return typE
+                # Type imported?
+                for use in usingModule.getUses():
+                    if len(use) == 1 or use[1] == typeName: 
+                        for typE in types:
+                            if typE.getModule().getName() == use[0]:
+                                return typE 
+            elif isinstance(usingModule, Module):
+                for typE in types:
+                    if typE.getDeclaredIn() == usingModule.getName():
+                        return typE
+            #TODO Warning
             
         return None
 
