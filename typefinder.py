@@ -77,7 +77,10 @@ class TypeCollection:
         return name in self.__typeDict and len(self.__typeDict[name]) > 0
     
     def __iter__(self):
-        return iter(self.__typeSet);
+        return iter(self.__typeSet)
+     
+    def __len__(self):
+        return len(self.__typeSet)
         
     def addType(self, typE, extendsName = None):
         assertType(typE, 'typE', Type)
