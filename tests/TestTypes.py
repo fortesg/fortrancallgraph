@@ -59,7 +59,7 @@ class TestTypes(unittest.TestCase):
         type0 = self.types.getTypeOfVariable(var0)
         self.assertIsNotNone(type0)
         self.assertEqual('INTEGER', type0.getMember('member').getTypeName())
-        self.assertEqual('modA', type0.getModule().getName())
+        self.assertEqual('moda', type0.getModule().getName())
             
     def testVar1FromModB(self):
         var1 = self.module.getVariable('var1')
@@ -70,7 +70,7 @@ class TestTypes(unittest.TestCase):
         type1 = self.types.getTypeOfVariable(var1)
         self.assertIsNotNone(type1)
         self.assertEqual('REAL', type1.getMember('member').getTypeName())
-        self.assertEqual('modB', type1.getModule().getName())
+        self.assertEqual('modb', type1.getModule().getName())
         
 if __name__ == "__main__":
     unittest.main()
