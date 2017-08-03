@@ -122,7 +122,7 @@ class TypeCollection:
             elif usingModule is not None:
                 # Declared in the same usingModule?
                 for typE in types:
-                    if typE.getModule() == usingModule:
+                    if typE.getModule().getName() == usingModule:
                         return typE
                 # Type imported?
                 for use in usingModule.getUses():
@@ -130,10 +130,6 @@ class TypeCollection:
                         for typE in types:
                             if typE.getModule().getName() == use[0]:
                                 return typE 
-            elif isinstance(usingModule, Module):
-                for typE in types:
-                    if typE.getDeclaredIn() == usingModule.getName():
-                        return typE
             #TODO Warning
             
         return None
