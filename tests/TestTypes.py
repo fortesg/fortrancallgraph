@@ -96,6 +96,11 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('type3', type3.getName())
         self.assertEqual('TYPE(typeA)', type3.getMember('member1').getTypeName())
         self.assertEqual('modc', type3.getModule().getName())
+
+        type2 = type3.getExtends()
+        self.assertIsNotNone(type2)
+        self.assertEqual('type2', type2.getName())
+        self.assertEqual('modc', type2.getModule().getName())
         
 if __name__ == "__main__":
     unittest.main()
