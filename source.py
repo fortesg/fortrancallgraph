@@ -1298,7 +1298,7 @@ class Module(SubroutineContainer):
                         else:
                             imports.append((imported, imported))
                 else:
-                    imports.add(('*', '*'))
+                    imports.append(('*', '*'))
                 uses[moduleName] = imports
                         
         return uses

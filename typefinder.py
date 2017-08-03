@@ -106,7 +106,7 @@ class TypeCollection:
         
         # Type imported with alias?
         if usingModule is not None:
-            for useModuleName, useImports in usingModule.getUses():
+            for useModuleName, useImports in usingModule.getUses().iteritems():
                 for alias, original in useImports:
                     if alias == typeName:
                         if original in self:
@@ -125,7 +125,7 @@ class TypeCollection:
                         if typE.getModule() == usingModule:
                             return typE
                     # Type imported?
-                    for useModuleName, useImports in usingModule.getUses():
+                    for useModuleName, useImports in usingModule.getUses().iteritems():
                         for alias, original in useImports:
                             if alias == '*' or original == typeName: 
                                 for typE in types:
