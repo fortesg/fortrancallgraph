@@ -153,17 +153,10 @@ class TypeCollection:
                             for typE in types:
                                 if typE.getModule() == module:
                                     return typE
-                            # Type explictly imported in variable's module?
+                            # Type imported?
                             for useModuleName, useImports in module.getUses():
                                 for alias, original in useImports:
-                                    if original == typeName:
-                                        for typE in types:
-                                            if typE.getModule() == useModuleName:
-                                                return typE 
-                            # Type imported by wildcard in variable's module?
-                            for useModuleName, useImports in module.getUses():
-                                for alias, original in useImports:
-                                    if alias == '*':
+                                    if alias == '*' or original == typeName: 
                                         for typE in types:
                                             if typE.getModule() == useModuleName:
                                                 return typE 
