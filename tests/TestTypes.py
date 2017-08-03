@@ -50,7 +50,7 @@ class TestTypes(unittest.TestCase):
         self.assertEqual(0, len(self.usetraversal.getInterfaces()))
         self.assertEqual(10, len(self.usetraversal.getTypes()))
             
-    def testVar0FromModA(self):
+    def testType0FromModA(self):
         var0 = self.module.getVariable('var0')
         self.assertIsNotNone(var0)
         self.assertEqual('TYPE(type0)', var0.getTypeName())
@@ -61,7 +61,7 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('INTEGER', type0.getMember('member').getTypeName())
         self.assertEqual('moda', type0.getModule().getName())
             
-    def testVar1FromModB(self):
+    def testType1FromModB(self):
         var1 = self.module.getVariable('var1')
         self.assertIsNotNone(var1)
         self.assertEqual('TYPE(type1)', var1.getTypeName())
@@ -69,8 +69,21 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('type1', var1.getDerivedTypeName())
         type1 = self.types.getTypeOfVariable(var1)
         self.assertIsNotNone(type1)
+        self.assertEqual('type1', type1.getName())
         self.assertEqual('REAL', type1.getMember('member').getTypeName())
         self.assertEqual('modb', type1.getModule().getName())
+            
+    def testAliasTypeBFromModB(self):
+        var2 = self.module.getVariable('var2')
+        self.assertIsNotNone(var2)
+        self.assertEqual('TYPE(typeB)', var2.getTypeName())
+        self.assertTrue(var2.hasDerivedType())
+        self.assertEqual('typeB', var2.getDerivedTypeName())
+        type2 = self.types.getTypeOfVariable(var2)
+        self.assertIsNotNone(type2)
+        self.assertEqual('type2', type2.getName())
+        self.assertEqual('REAL', type2.getMember('member').getTypeName())
+        self.assertEqual('modb', type2.getModule().getName())
         
 if __name__ == "__main__":
     unittest.main()
