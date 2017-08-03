@@ -7,6 +7,7 @@ from supertypes import CallGraphAnalyzer
 from source import SourceFiles, Variable, VariableReference, SubroutineFullName, InnerSubroutineName
 from callgraph import CallGraph
 from usetraversal import UseTraversal
+from typefinder import TypeCollection
 
 class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
 
@@ -17,7 +18,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
         assertType(interfaces, 'interfaces', dict, True)
-        assertType(types, 'types', dict, True)
+        assertType(types, 'types', TypeCollection, True)
 
         super(TrackVariableCallGraphAnalysis, self).__init__()
 
@@ -108,10 +109,9 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             self.__interfaces = useTraversal.getInterfaces()
             self.__types = useTraversal.getTypes()
         
-        
         for variable in variables:
             if not variable.isTypeAvailable() and variable.getDerivedTypeName() in self.__types:
-                variable.setType(self.__types[variable.getDerivedTypeName()])
+                variable.setType(self.__types.getTypeOfVariable(variable))
         
         variableReferences = [];
         for variable in variables:
@@ -230,15 +230,18 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         variable = variableReference.getLevel0Variable()
         if variableReference.getLevel() > 0:
             for level in range(1, variableReference.getLevel() + 1):
-                typeName = variable.getDerivedTypeName()
-                if typeName in self.__types:
-                    typE = self.__types[typeName] # typE because type is built-in symbol 
-                    variableName = variableReference.getVariableName(level)
-                    if typE.hasMember(variableName):
-                        variable = typE.getMember(variableName)
+                if variable.isTypeAvailable():
+                    typE = variable.getType()
+                else: 
+                    typeName = variable.getDerivedTypeName()
+                    if typeName in self.__types:
+                        typE = self.__types.getTypeOfVariable(variable) # typE because type is built-in symbol
                     else:
                         return None
-                else: 
+                variableName = variableReference.getVariableName(level)
+                if typE.hasMember(variableName):
+                    variable = typE.getMember(variableName)
+                else:
                     return None
         
         return variable

@@ -66,7 +66,7 @@ class TypeFinder(UseTraversalPassenger):
             
         return elements
 
-class TypeCollection:
+class TypeCollection(object):
 
     def __init__(self):
         self.__typeDict = dict()

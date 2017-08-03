@@ -8,6 +8,7 @@ from source import SourceFiles
 from callgraph import CallGraph
 from trackvariable import TrackVariableCallGraphAnalysis, VariableReference
 from usetraversal import UseTraversal
+from typefinder import TypeCollection
 
 class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
 
@@ -20,7 +21,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
         assertTypeAll(ignoredModules, 'ignoredModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
         assertType(interfaces, 'interfaces', dict, True)
-        assertType(types, 'types', dict, True)
+        assertType(types, 'types', TypeCollection, True)
         
         super(GlobalVariablesCallGraphAnalysis, self).__init__()
         

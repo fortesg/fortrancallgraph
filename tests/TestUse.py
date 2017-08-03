@@ -102,7 +102,7 @@ class SampleTest(unittest.TestCase):
         self.assertEqual(2, len(result))
         
         self.assertIn('kangaroo', result)
-        kangaroo = result['kangaroo']
+        kangaroo = result.getType('kangaroo')
         self.assertIsNotNone(kangaroo)
         self.assertEqual('kangaroo', kangaroo.getName())
         self.assertIsNone(kangaroo.getExtends())
@@ -110,7 +110,7 @@ class SampleTest(unittest.TestCase):
         self.assertEqual(3, len(kangaroo.getMembers()))
         
         self.assertIn('foot', result)
-        foot = result['foot']
+        foot = result.getType('foot')
         self.assertIsNotNone(foot)
         self.assertEqual('foot', foot.getName())
         self.assertIsNone(foot.getExtends())
