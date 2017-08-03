@@ -14,6 +14,6 @@ MODULE types
   CONTAINS
 
   SUBROUTINE test()
-  END SUBROUTINE test()
+  END SUBROUTINE test
 
 END MODULE types
