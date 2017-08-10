@@ -5,19 +5,24 @@ import os.path;
 import re
 from source import SubroutineFullName, InnerSubroutineName
 from callgraph import CallGraph
-from utils import assertType
+from utils import assertType, assertTypeAll
 from supertypes import CallGraphBuilder
 
 class FromAssemblerCallGraphBuilder(CallGraphBuilder):
     
     FILE_SUFFIX = '.s'
 
-    def __init__(self, baseDir, specialModuleFiles = {}):
+    def __init__(self, baseDirs, specialModuleFiles = {}):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
-        if not os.path.isdir(baseDir):
-            raise IOError("Not a directory: " + baseDir);
+        if isinstance(baseDirs, str):
+            baseDirs = [baseDirs]
+        assertTypeAll(baseDirs, 'baseDirs', str)
+
+        for baseDir in baseDirs:    
+            if not os.path.isdir(baseDir):
+                raise IOError("Not a directory: " + baseDir);
         
-        self.__baseDir = baseDir;
+        self.__baseDirs = baseDirs;
         self.setSpecialModuleFiles(specialModuleFiles);
         
     def setSpecialModuleFiles(self, specialModuleFiles):
@@ -82,7 +87,12 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
         else:
             path = moduleName + FromAssemblerCallGraphBuilder.FILE_SUFFIX;
         
-        return os.path.join(self.__baseDir, path);
+        for baseDir in self.__baseDirs:
+            fullPath = os.path.join(baseDir, path);
+            if os.path.isfile(fullPath):
+                return fullPath
+            
+        return None
     
     def __findCalledSubroutines(self, subroutine, filePath):
         openFile = open(filePath);

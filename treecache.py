@@ -57,7 +57,7 @@ class CachedAssemblerCallGraphBuilder(CallGraphBuilder):
         cacheTime = os.path.getmtime(cacheFilePath)
         for module in callgraph.getAllModuleNames():
             moduleFilePath = self.getModuleFilePath(module)
-            if os.path.isfile(moduleFilePath) and os.path.getmtime(moduleFilePath) > cacheTime:
+            if moduleFilePath is not None and os.path.getmtime(moduleFilePath) > cacheTime:
                 return None
         
         return callgraph 
