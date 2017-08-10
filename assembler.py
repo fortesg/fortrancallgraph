@@ -14,10 +14,10 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
 
     def __init__(self, baseDirs, specialModuleFiles = {}):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
+       
         if isinstance(baseDirs, str):
             baseDirs = [baseDirs]
         assertTypeAll(baseDirs, 'baseDirs', str)
-
         for baseDir in baseDirs:    
             if not os.path.isdir(baseDir):
                 raise IOError("Not a directory: " + baseDir);
