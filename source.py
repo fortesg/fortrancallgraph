@@ -1623,8 +1623,9 @@ class SourceFiles(object):
         assertType(sourceFile, 'sourceFile', SourceFile)
         
         path = sourceFile.getPath()
-        if path.startswith(self.__baseDirs):
-            path = path[len(self.__baseDirs):].lstrip('/')
+        for baseDir in self.__baseDirs:
+            if path.startswith(baseDir):
+                return path[len(baseDir):].lstrip('/')
         return path
         
     def __getModuleFileName(self, moduleName):
