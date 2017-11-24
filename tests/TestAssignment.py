@@ -11,10 +11,10 @@ ASSEMBLER_DIR = SOURCE_DIR
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
-from tree import TreeLikeCallGraphPrinter
 from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
-from globals import GlobalVariablesCallGraphAnalysis
+from trackvariable import TrackVariableCallGraphAnalysis
+from usetraversal import UseTraversal
 
 ''' 
 Tests wether assignment are tracked correctly
@@ -32,8 +32,7 @@ class SampleTest(unittest.TestCase):
         self.func = SubroutineFullName('__assignment_MOD_stest')
         self.callGraph = callGraphBuilder.buildCallGraph(self.func)
         
-        self.printer = TreeLikeCallGraphPrinter()
-        self.globalsTracker = GlobalVariablesCallGraphAnalysis(self.sourceFiles)
+        self.useTraversal = UseTraversal(self.sourceFiles, [])
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -66,6 +65,19 @@ class SampleTest(unittest.TestCase):
         
         simpleNames = module.getSubroutines().keys()
         self.assertEqual(['stest'], simpleNames)
+                
+    def testVariables(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        self.useTraversal.parseModules(self.func)
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        
+        members = set()
+        for ref in tracker.trackDerivedTypeArguments(self.callGraph):
+            members.add(ref.getLevelNVariable().getName())
+        self.assertEqual({'first', 'second'}, members)
+                
         
 if __name__ == "__main__":
     unittest.main()
