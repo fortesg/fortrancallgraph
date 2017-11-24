@@ -211,7 +211,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             aliasVar = subroutine.getVariable(alias)
             originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
             variable = self.__findLevelNVariable(originalReference)
-            if variable is not None and variable.hasDerivedType() and variable not in self.__excludeFromRecursion:
+            if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursion:
                 newSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, self.__excludeFromRecursion);
                 newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                 variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph);
