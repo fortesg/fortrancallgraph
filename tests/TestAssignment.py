@@ -29,9 +29,12 @@ class SampleTest(unittest.TestCase):
         self.assFile = ASSEMBLER_DIR + '/assignment.s'
         self.filesExist = os.path.exists(self.srcFile) and os.path.exists(self.assFile)
         
-        self.func = SubroutineFullName('__assignment_MOD_stest')
-        self.callGraph = callGraphBuilder.buildCallGraph(self.func)
-        
+        self.direct = SubroutineFullName('__assignment_MOD_testDirect')
+        self.callGraphDirect = callGraphBuilder.buildCallGraph(self.direct)
+
+        self.indirect = SubroutineFullName('__assignment_MOD_testIndirect')
+        self.callGraphIndirect = callGraphBuilder.buildCallGraph(self.indirect)
+
         self.useTraversal = UseTraversal(self.sourceFiles, [])
         
     def testAssemberFileExists(self):
@@ -43,10 +46,15 @@ class SampleTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        simpleNames = []
-        for name in self.callGraph.getAllSubroutineNames():
-            simpleNames.append(name.getSimpleName())
-        self.assertEqual(['stest'], simpleNames)
+        simpleNames = set()
+        for name in self.callGraphDirect.getAllSubroutineNames():
+            simpleNames.add(name.getSimpleName())
+        self.assertEqual({'testdirect'}, simpleNames)
+        
+        simpleNames = set()
+        for name in self.callGraphIndirect.getAllSubroutineNames():
+            simpleNames.add(name.getSimpleName())
+        self.assertEqual({'testindirect'}, simpleNames)
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -61,20 +69,20 @@ class SampleTest(unittest.TestCase):
 
         module = sourceFile.getModule('assignment')
         self.assertIsNotNone(module)
-        self.assertEqual(1, len(module.getSubroutines()))
+        self.assertEqual(2, len(module.getSubroutines()))
         
-        simpleNames = module.getSubroutines().keys()
-        self.assertEqual(['stest'], simpleNames)
+        simpleNames = set(module.getSubroutines().keys())
+        self.assertEqual({'testdirect', 'testindirect'}, simpleNames)
                 
     def testVariables(self):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.useTraversal.parseModules(self.func)
+        self.useTraversal.parseModules(self.direct)
         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
         members = set()
-        for ref in tracker.trackDerivedTypeArguments(self.callGraph):
+        for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect):
             members.add(ref.getLevelNVariable().getName())
         self.assertEqual({'first', 'second'}, members)
                 

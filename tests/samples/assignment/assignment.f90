@@ -14,23 +14,40 @@ PROGRAM assignment
   test%second = 42
   test%third = 109
 
-  CALL stest(test)
+  CALL testDirect(test)
+
+  CALL testIndirect(test)
 
 CONTAINS
 
-  SUBROUTINE stest(inarg)
+  SUBROUTINE testDirect(inarg)
 
-    TYPE(ttest), INTENT(in) :: inarg
+    TYPE(ttest), INTENT(inout) :: inarg
     TYPE(ttest) :: var
 
     WRITE (*,*) 'first: ', inarg%first
 
     var = inarg
 
-    WRITE (*,*) 'second: ', var%second
-
     inarg = inarg
 
-  END SUBROUTINE stest
+    WRITE (*,*) 'second: ', var%second
+
+  END SUBROUTINE testDirect
+
+  SUBROUTINE testIndirect(inarg)
+
+    TYPE(ttest), INTENT(inout) :: inarg
+    TYPE(ttest) :: var
+
+    WRITE (*,*) 'first: ', inarg%first
+
+    var = inarg
+
+    inarg = var
+
+    WRITE (*,*) 'second: ', var%second
+
+  END SUBROUTINE testIndirect
 
 END PROGRAM assignment
