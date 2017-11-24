@@ -480,13 +480,13 @@ class VariableReference(object):
         assertType(lineNumber, 'lineNumber', int)
         assertType(level0Variable, 'level0Variable', Variable)
 
-        self.expression = re.sub(r'\([^\)]*\)', '', expression)
+        self.expression = re.sub(r'\([^\)]*\)', '', expression).lower()
         self.level = self.expression.count('%');
         self.__subroutine = subroutine;
         self.__lineNumber = lineNumber;
         self.__originalName = None
 
-        if level0Variable.getName() != self.getVariableName(0):
+        if level0Variable.getName().lower() != self.getVariableName(0):
             raise ValueError("Variable name doesn't match: " + level0Variable.getName() + ' != ' + self.getVariableName(0))
         self.__level0Variable = level0Variable
     
