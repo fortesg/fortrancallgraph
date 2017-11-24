@@ -34,6 +34,9 @@ class SampleTest(unittest.TestCase):
 
         self.indirect = SubroutineFullName('__assignment_MOD_testIndirect')
         self.callGraphIndirect = callGraphBuilder.buildCallGraph(self.indirect)
+
+        self.member = SubroutineFullName('__assignment_MOD_testMember')
+        self.callGraphMember = callGraphBuilder.buildCallGraph(self.member)
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -53,6 +56,11 @@ class SampleTest(unittest.TestCase):
         for name in self.callGraphIndirect.getAllSubroutineNames():
             simpleNames.add(name.getSimpleName())
         self.assertEqual({'testindirect'}, simpleNames)
+        
+        simpleNames = set()
+        for name in self.callGraphMember.getAllSubroutineNames():
+            simpleNames.add(name.getSimpleName())
+        self.assertEqual({'testmember'}, simpleNames)
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -67,10 +75,9 @@ class SampleTest(unittest.TestCase):
 
         module = sourceFile.getModule('assignment')
         self.assertIsNotNone(module)
-        self.assertEqual(2, len(module.getSubroutines()))
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'testdirect', 'testindirect'}, simpleNames)
+        self.assertEqual({'testdirect', 'testindirect', 'testmember'}, simpleNames)
                 
     def testDirect(self):
         if not self.filesExist:
@@ -97,6 +104,20 @@ class SampleTest(unittest.TestCase):
         for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect):
             members.add(ref.getLevelNVariable().getName())
         self.assertEqual({'first', 'second'}, members)
+                
+# TODO: Doesn't work yet            
+#     def testMember(self):
+#         if not self.filesExist:
+#             self.skipTest('Files not there')
+#         
+#         useTraversal = UseTraversal(self.sourceFiles, [])
+#         useTraversal.parseModules(self.member)
+#         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+#         
+#         members = set()
+#         for ref in tracker.trackDerivedTypeArguments(self.callGraphMember):
+#             members.add(ref.getLevelNVariable().getName())
+#         self.assertEqual({'first', 'second'}, members)
                 
         
 if __name__ == "__main__":
