@@ -13,14 +13,12 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
 
     __routineWarnings = set()
 
-    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None, excludeFromRecursion = set()):
+    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
         assertType(interfaces, 'interfaces', dict, True)
         assertType(types, 'types', TypeCollection, True)
-        assertType(excludeFromRecursion, 'excludeFromRecursion', set)
-        assertTypeAll(excludeFromRecursion, 'excludeFromRecursion', Variable)
 
         super(TrackVariableCallGraphAnalysis, self).__init__()
 
@@ -32,7 +30,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         self.__types = types;
         self.__excludeModules = map(str.lower, excludeModules)
         self.__ignoredTypes = map(str.lower, ignoredTypes)
-        self.__excludeFromRecursion = excludeFromRecursion
+        self.__excludeFromRecursion = set()
     
     def setVariable(self, variable):
         assertType(variable, 'variable', Variable)
@@ -113,22 +111,23 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             self.__types = useTraversal.getTypes()
         
         for variable in variables:
-            self.__excludeFromRecursion.add(variable)
             if not variable.isTypeAvailable() and variable.getDerivedTypeName() in self.__types:
                 variable.setType(self.__types.getTypeOfVariable(variable))
                 
         variableReferences = [];
         for variable in variables:
-            variableReferences += self.__trackVariable(variable, callGraph);
+            variableReferences += self.__trackVariable(variable, callGraph, set());
         
         return variableReferences;
     
-    def __trackVariable(self, variable, callGraph):
+    def __trackVariable(self, variable, callGraph, excludeFromRecursion = set()):
         self.__variable = variable;
         if self.__variable.hasDerivedType and self.__variable.getDerivedTypeName() in self.__ignoredTypes:
             return set()
         
+        self.__excludeFromRecursion = excludeFromRecursion
         self.__excludeFromRecursion.add(variable)
+        
         
         self.__callGraph = callGraph;
         subroutine = callGraph.getRoot();
@@ -212,9 +211,9 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
             variable = self.__findLevelNVariable(originalReference)
             if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursion:
-                newSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, self.__excludeFromRecursion);
+                newSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                 newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph);
+                variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursion);
                 for variableReference in variableReferences:
                     variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                     
