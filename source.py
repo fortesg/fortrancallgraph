@@ -1377,8 +1377,8 @@ class SourceFile(object):
         return None
     
     def __extractModules(self):
-        moduleRegEx = re.compile(r'\s*MODULE\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
-        endRegEx = re.compile(r'\s*END\s*MODULE', re.IGNORECASE);
+        moduleRegEx = re.compile(r'\s*((MODULE)|(PROGRAM))\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
+        endRegEx = re.compile(r'\s*END\s*((MODULE)|(PROGRAM))', re.IGNORECASE);
         
         lines = self.getLines()
         statements = SourceFile.linesToStatements(lines)
