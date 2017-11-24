@@ -16,6 +16,9 @@ from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from globals import GlobalVariablesCallGraphAnalysis
 
+''' 
+Tests wether subroutine names are correctly handled when module names end on "_mod" 
+'''
 class SampleTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
