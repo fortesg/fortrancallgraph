@@ -116,7 +116,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 
         variableReferences = [];
         for variable in variables:
-            variableReferences += self.__trackVariable(variable, callGraph, set());
+            variableReferences += self.__trackVariable(variable, callGraph);
         
         return variableReferences;
     
@@ -125,9 +125,8 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if self.__variable.hasDerivedType and self.__variable.getDerivedTypeName() in self.__ignoredTypes:
             return set()
         
-        self.__excludeFromRecursion = excludeFromRecursion
+        self.__excludeFromRecursion = set(excludeFromRecursion) # Copy set, otherwise empty optional will not work (https://stackoverflow.com/questions/25204126/python-function-optional-argument-evaluated-once) 
         self.__excludeFromRecursion.add(variable)
-        
         
         self.__callGraph = callGraph;
         subroutine = callGraph.getRoot();
