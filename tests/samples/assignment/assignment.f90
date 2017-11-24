@@ -1,4 +1,4 @@
-PROGRAM nested
+PROGRAM assignment
 
   IMPLICIT NONE
 
@@ -24,4 +24,4 @@ CONTAINS
 
   END SUBROUTINE stest
 
-END PROGRAM nested
+END PROGRAM assignment
