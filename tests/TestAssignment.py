@@ -34,8 +34,6 @@ class SampleTest(unittest.TestCase):
 
         self.indirect = SubroutineFullName('__assignment_MOD_testIndirect')
         self.callGraphIndirect = callGraphBuilder.buildCallGraph(self.indirect)
-
-        self.useTraversal = UseTraversal(self.sourceFiles, [])
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -74,12 +72,26 @@ class SampleTest(unittest.TestCase):
         simpleNames = set(module.getSubroutines().keys())
         self.assertEqual({'testdirect', 'testindirect'}, simpleNames)
                 
-    def testVariables(self):
+    def testDirect(self):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.useTraversal.parseModules(self.direct)
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.direct)
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        
+        members = set()
+        for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect):
+            members.add(ref.getLevelNVariable().getName())
+        self.assertEqual({'first', 'second'}, members)
+                
+    def testIndirect(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.indirect)
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
         members = set()
         for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect):
