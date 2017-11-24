@@ -94,7 +94,7 @@ class SampleTest(unittest.TestCase):
         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
         members = set()
-        for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect):
+        for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect):
             members.add(ref.getLevelNVariable().getName())
         self.assertEqual({'first', 'second'}, members)
                 
