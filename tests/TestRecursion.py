@@ -39,7 +39,6 @@ class RecursionTest(unittest.TestCase):
         self.assertTrue(os.path.exists(self.assFile), 'Test will fail. Assembler file not found: ' + self.assFile)
 
     def testCallGraphs(self):
-        # TODO Auch mit serialisiertem CallGraph testen
         if not self.filesExist:
             self.skipTest('Files not there')
         
@@ -76,6 +75,8 @@ class RecursionTest(unittest.TestCase):
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphDirect)))
         self.assertEqual({'var%counter'}, expressions)
 
+    #TODO Functions
+    #TODO indirekte Rekursion
         
 if __name__ == "__main__":
     unittest.main()
