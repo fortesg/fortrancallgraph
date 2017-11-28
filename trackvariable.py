@@ -30,7 +30,8 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         self.__types = types;
         self.__excludeModules = map(str.lower, excludeModules)
         self.__ignoredTypes = map(str.lower, ignoredTypes)
-        self.__excludeFromRecursion = set()
+        self.__excludeFromRecursionVariables = set()
+        self.__excludeFromRecursionRoutines = set()
     
     def setVariable(self, variable):
         assertType(variable, 'variable', Variable)
@@ -120,17 +121,20 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         return variableReferences;
     
-    def __trackVariable(self, variable, callGraph, excludeFromRecursion = set()):
+    def __trackVariable(self, variable, callGraph, excludeFromRecursionVariables = set(), excludeFromRecursionRoutines = set()):
         self.__variable = variable;
         if self.__variable.hasDerivedType and self.__variable.getDerivedTypeName() in self.__ignoredTypes:
             return set()
         
-        self.__excludeFromRecursion = set(excludeFromRecursion) # Copy set, otherwise empty optional will not work (https://stackoverflow.com/questions/25204126/python-function-optional-argument-evaluated-once) 
-        self.__excludeFromRecursion.add(variable)
-        
         self.__callGraph = callGraph;
-        subroutine = callGraph.getRoot();
-        variableReferences = self.__analyzeSubroutine(subroutine)
+        subroutineFullName = callGraph.getRoot();
+        
+        self.__excludeFromRecursionVariables = set(excludeFromRecursionVariables) # Copy set, otherwise empty optional will not work (https://stackoverflow.com/questions/25204126/python-function-optional-argument-evaluated-once) 
+        self.__excludeFromRecursionVariables.add(variable)
+        self.__excludeFromRecursionRoutines = set(excludeFromRecursionRoutines) 
+        self.__excludeFromRecursionRoutines.add(subroutineFullName)
+        
+        variableReferences = self.__analyzeSubroutine(subroutineFullName)
         variableReferences = VariableReference.sort(variableReferences)
         
         return variableReferences;    
@@ -209,10 +213,10 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             aliasVar = subroutine.getVariable(alias)
             originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
             variable = self.__findLevelNVariable(originalReference)
-            if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursion:
+            if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
                 newSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                 newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursion);
+                variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines);
                 for variableReference in variableReferences:
                     variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                     
@@ -277,7 +281,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
 
         
-        if calledRoutineFullName is not None:
+        if calledRoutineFullName is not None and calledRoutineFullName not in self.__excludeFromRecursionRoutines:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
             
             before = regExMatch.group('before').strip();
@@ -297,7 +301,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 if variableInCalledSubroutine is not None:
                     calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                     calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                    variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph);
+                    variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
     
@@ -347,7 +351,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
                 calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
             
-                return calledSubroutineAnalyzer.__trackVariable(self.__variable, subGraph)
+                return calledSubroutineAnalyzer.__trackVariable(self.__variable, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines)
             else:
                 TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledInnerSubroutineName, subroutine.getName(), lineNumber, text = 'Inner Subroutine not found')
                 
