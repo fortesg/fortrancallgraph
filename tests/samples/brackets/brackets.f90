@@ -126,4 +126,10 @@ MODULE brackets
 
 CONTAINS
 
+    SUBROUTINE dummy()
+
+        WRITE (*,*) 'NOTHING'
+
+    END SUBROUTINE dummy
+
 END MODULE brackets
