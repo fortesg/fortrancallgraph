@@ -17,9 +17,9 @@ from trackvariable import TrackVariableCallGraphAnalysis
 from usetraversal import UseTraversal
 
 ''' 
-Tests wether assignment are tracked correctly
+Tests whether assignment are tracked correctly
 '''
-class SampleTest(unittest.TestCase):
+class AssignmentTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
