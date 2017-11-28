@@ -1056,6 +1056,9 @@ class Subroutine(SubroutineContainer):
     
     def getArgumentNames(self):
         declaration = self.getDeclaration()
+        name = self.getSimpleName().lower()
+        nameEnd = declaration.lower().find(name) + len(name)
+        declaration = declaration[nameEnd:]
         argumentsListing = declaration[(declaration.find('(') + 1):(declaration.find(')'))]
         arguments = argumentsListing.split(',')
         arguments = map(str.strip, arguments)
@@ -1473,7 +1476,7 @@ class SourceFile(object):
         for i, line in lines:
             line = SourceFile.__removeCommentFromLine(line).strip();
             if line and not line.startswith('#'):
-                statement += ' ' + line.strip('&').strip()
+                statement += ' ' + line.strip('&').strip().strip(';').strip()
                 if not line.endswith('&'):
                     statement = statement.lstrip();
                     statement = SourceFile.__removeUnnecessaryBlanksFromStatement(statement)
