@@ -1,15 +1,10 @@
-PROGRAM assignment
+MODULE recursion
 
   IMPLICIT NONE
 
   TYPE :: test
     INTEGER :: counter
   END TYPE test
-
-  TYPE(test) :: var
-  var%counter = 0
-
-  CALL recurse(var)
 
 CONTAINS
 
@@ -26,4 +21,4 @@ CONTAINS
 
   END SUBROUTINE recurse
 
-END PROGRAM assignment
+END MODULE recursion
