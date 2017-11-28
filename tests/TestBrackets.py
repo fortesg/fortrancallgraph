@@ -10,26 +10,19 @@ ASSEMBLER_DIR = SOURCE_DIR
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
-from tree import TreeLikeCallGraphPrinter
-from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, Type
-from globals import GlobalVariablesCallGraphAnalysis
-from trackvariable import TrackVariableCallGraphAnalysis
 from usetraversal import UseTraversal
 
 
 class TestBrackets(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
-        callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
         
         self.srcFile = SOURCE_DIR + '/brackets.f90'
         self.assFile = ASSEMBLER_DIR + '/brackets.s'
         self.filesExist = os.path.exists(self.srcFile) and os.path.exists(self.assFile)
-        
         self.root = SubroutineFullName('__brackets_MOD_dummy')
-        
         self.usetraversal = UseTraversal(self.sourceFiles)
         
     def testAssemberFileExists(self):
