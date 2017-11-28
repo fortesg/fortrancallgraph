@@ -442,14 +442,17 @@ class Variable(object):
     def __extractListedElements(spec):
         spec = spec.strip(' :')
         elements = []
-        bracketCount = 0
+        roundBracketCount = 0
+        squareBracketCount = 0
         element = ''
         for part in spec.split(','):
             for c in part:
-                if c == '(': bracketCount += 1
-                if c == ')': bracketCount -= 1
+                if c == '(': roundBracketCount += 1
+                if c == ')': roundBracketCount -= 1
+                if c == '[': squareBracketCount += 1
+                if c == ']': squareBracketCount -= 1
             element += ',' + part
-            if bracketCount == 0:
+            if roundBracketCount == 0 and squareBracketCount == 0:
                 element = element.strip(' ,')
                 if element != '':
                     elements.append(element)
@@ -1116,7 +1119,7 @@ class Subroutine(SubroutineContainer):
         variables = []
         for i, statement, _ in self.getStatements():
             if Variable.validVariableDeclaration(statement):
-                for variable in Variable.fromDeclarationStatement(statement):
+                for variable in Variable.fromDeclarationStatement(statement, self.getModuleName(), i):
                     variables.append(variable)
                 foundOne = True
             elif foundOne == True:
@@ -1230,7 +1233,7 @@ class Module(SubroutineContainer):
             elif endInterfaceRegEx.match(statement) is not None:
                 inInterface = False
             elif not inType and not inInterface and Variable.validVariableDeclaration(statement):
-                for variable in Variable.fromDeclarationStatement(statement):
+                for variable in Variable.fromDeclarationStatement(statement, self.getName(), i):
                     variable.setDeclaredIn(self, self.getName(), i)
                     moduleVariables[variable.getName().lower()] = variable
                      
