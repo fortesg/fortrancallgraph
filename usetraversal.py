@@ -33,7 +33,7 @@ class UseTraversal(object):
         self.__reset()
         self.__parseModulesRecursive(rootSubroutine.getModuleName())
         
-    def __parseModulesRecursive(self, moduleName):
+    def __parseModulesRecursive(self, moduleName, parent = ''):
         useRegEx = re.compile(r'^USE[\s\:]+(?P<modulename>[a-z0-9_]+)\s*(\,.*)?$', re.IGNORECASE);
         usedModules = set()
         
@@ -53,10 +53,14 @@ class UseTraversal(object):
                     self.__parseStatement(i, statement, j, module)
         elif moduleName not in UseTraversal.__moduleWarnings:
             UseTraversal.__moduleWarnings.add(moduleName)
-            print  >> sys.stderr, '*** WARNING [UseTraversal] Source file not found for module: ' + moduleName + ' ***';
+            warning = '*** WARNING [UseTraversal] Source file not found for module: ' + moduleName
+            if parent:
+                warning += ' (in: ' + parent + ')'
+            warning += ' ***'
+            print  >> sys.stderr, warning;
 
         for usedModule in usedModules:
-            self.__parseModulesRecursive(usedModule)
+            self.__parseModulesRecursive(usedModule, moduleName)
             
     def __parseStatement(self, i, statement, j, moduleName):
         for passenger in self.__passengers:
