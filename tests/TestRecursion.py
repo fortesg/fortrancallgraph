@@ -32,6 +32,9 @@ class RecursionTest(unittest.TestCase):
         self.direct = SubroutineFullName('__recursion_MOD_recurse')
         self.callGraphDirect = callGraphBuilder.buildCallGraph(self.direct)
         
+        self.indirect = SubroutineFullName('__recursion_MOD_indirect1')
+        self.callGraphIndirect = callGraphBuilder.buildCallGraph(self.indirect)
+        
         sys.tracebacklimit = 0
         
     def testAssemberFileExists(self):
@@ -46,6 +49,11 @@ class RecursionTest(unittest.TestCase):
         for name in self.callGraphDirect.getAllSubroutineNames():
             simpleNames.add(name.getSimpleName())
         self.assertEqual({'recurse'}, simpleNames)
+        
+        simpleNames = set()
+        for name in self.callGraphIndirect.getAllSubroutineNames():
+            simpleNames.add(name.getSimpleName())
+        self.assertEqual({'indirect1', 'indirect2'}, simpleNames)
         
     def testSourceFiles(self):
         if not self.filesExist:
@@ -62,7 +70,7 @@ class RecursionTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'recurse'}, simpleNames)
+        self.assertEqual({'recurse', 'indirect1', 'indirect2'}, simpleNames)
                 
     def testDirect(self):
         if not self.filesExist:
@@ -73,7 +81,18 @@ class RecursionTest(unittest.TestCase):
         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphDirect)))
-        self.assertEqual({'var%counter'}, expressions)
+        self.assertEqual({'var%first'}, expressions)
+                
+    def testIndirect(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.indirect)
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        
+        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphIndirect)))
+        self.assertEqual({'var%first', 'var%second'}, expressions)
 
     #TODO Functions
     #TODO indirekte Rekursion

@@ -3,7 +3,8 @@ MODULE recursion
   IMPLICIT NONE
 
   TYPE :: test
-    INTEGER :: counter
+    INTEGER :: first
+    INTEGER :: second
   END TYPE test
 
 CONTAINS
@@ -12,13 +13,39 @@ CONTAINS
 
     TYPE(test), INTENT(inout) :: var
 
-    WRITE (*,*) var%counter
+    WRITE (*,*) 'recurse: ', var%first
 
-    IF (var%counter < 42) THEN
-      var%counter = var%counter + 1
+    IF (var%first < 8) THEN
+      var%first = var%first + 1
       CALL recurse(var)
     END IF
 
   END SUBROUTINE recurse
+
+  SUBROUTINE indirect1(var)
+
+    TYPE(test), INTENT(inout) :: var
+
+    WRITE (*,*) 'indirect1: ', var%first
+
+    IF (var%first < 12) THEN
+      var%first = var%first + 1
+      CALL indirect2(var)
+    END IF
+
+  END SUBROUTINE indirect1
+
+  SUBROUTINE indirect2(var)
+
+    TYPE(test), INTENT(inout) :: var
+
+    WRITE (*,*) 'indirect2: ', var%second
+
+    IF (var%second < 12) THEN
+      var%second = var%second + 1
+      CALL indirect1(var)
+    END IF
+
+  END SUBROUTINE indirect2
 
 END MODULE recursion
