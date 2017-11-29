@@ -869,7 +869,7 @@ class SubroutineContainer(object):
     
     def __findSubroutines(self):
         subroutineRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE))\s+)*SUBROUTINE\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
-        functionRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE)|(INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL(\(.*\))?)|(CHARACTER(\(.*\))?)|(TYPE(\(.*\))?)|(CLASS(\(.*\))?))\s+)*FUNCTION\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
+        functionRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE)|(INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))\s*(\(.*\))?\s+)*FUNCTION\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
         endRegEx = re.compile(r'\s*END\s*((SUBROUTINE)|(FUNCTION))', re.IGNORECASE);
         
         lines = self.getLines()
@@ -881,6 +881,8 @@ class SubroutineContainer(object):
         subroutineLines = None;
         firstLine = -1
         statements = self.getStatementsAfterContains()
+        
+        
         for i, (sn, line, _) in enumerate(statements):
             regExMatch = subroutineRegEx.match(line);
             if regExMatch is None:
