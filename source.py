@@ -1182,9 +1182,10 @@ class Module(SubroutineContainer):
             host = self.getSubroutine(name.getHostName())
             if host is not None:
                 return host.getSubroutine(name)
-        elif name.getSimpleName() in subroutines:
-            return subroutines[name.getSimpleName()]
-
+        else:
+            simpleName = name.getSimpleName().lower()
+            if simpleName in subroutines:
+                return subroutines[simpleName]
         return None
 
     def getSourceFile(self):
@@ -1371,7 +1372,7 @@ class SourceFile(object):
         assertType(moduleName, 'moduleName', str)
         moduleName = moduleName.lower()
         if moduleName in self.__modules:
-            return self.__modules[moduleName.lower()];
+            return self.__modules[moduleName];
         
         return None
     
