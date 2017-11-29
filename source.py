@@ -1060,7 +1060,7 @@ class Subroutine(SubroutineContainer):
         nameEnd = declaration.lower().find(name) + len(name)
         declaration = declaration[nameEnd:]
         argumentsListing = declaration[(declaration.find('(') + 1):(declaration.find(')'))]
-        arguments = argumentsListing.split(',')
+        arguments = argumentsListing.lower().split(',')
         arguments = map(str.strip, arguments)
         return arguments
     
@@ -1069,7 +1069,7 @@ class Subroutine(SubroutineContainer):
         arguments = len(argumentNames) * [None]
         for variable in self.getVariables():
             if variable.isArgument():
-                arguments[argumentNames.index(variable.getName())] = variable
+                arguments[argumentNames.index(variable.getName().lower())] = variable
         return arguments
     
     def findArgument(self, name):
@@ -1077,8 +1077,9 @@ class Subroutine(SubroutineContainer):
         if not Variable.validIdentifier(name):
             raise ValueError("Not a valid identifier: " + name);
 
+        name = name.lower()
         for argument in self.getArguments():
-            if argument.getName() == name:
+            if argument.getName().lower() == name:
                 return argument
         return None
     
@@ -1130,7 +1131,7 @@ class Subroutine(SubroutineContainer):
                 
         for variable in variables:
             variable.setDeclaredIn(self, self.getModuleName(), i)
-            if not variable.isArgument() and variable.getName() in argumentNames:
+            if not variable.isArgument() and variable.getName().lower() in argumentNames:
                 variable.setIntent('inout')
         return variables
     
