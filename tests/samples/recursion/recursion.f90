@@ -61,4 +61,18 @@ CONTAINS
 
   END SUBROUTINE indirect2
 
+  RECURSIVE SUBROUTINE position(var1, var2, i)
+
+    TYPE(test), INTENT(in) :: var1, var2
+    INTEGER, INTENT(in) :: i
+
+    IF (MOD(i, 2) == 1) THEN
+      WRITE (*,*) 'first: ', var1%first
+      WRITE (*,*) 'second: ', var2%second
+    ELSE
+      CALL position(var2, var1, i + 1)
+    END IF
+
+  END SUBROUTINE position
+
 END MODULE recursion
