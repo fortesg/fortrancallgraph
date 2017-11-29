@@ -35,25 +35,14 @@ class RecursionTest(unittest.TestCase):
         self.indirect = SubroutineFullName('__recursion_MOD_indirect1')
         self.callGraphIndirect = callGraphBuilder.buildCallGraph(self.indirect)
         
+        self.func = SubroutineFullName('__recursion_MOD_refunc')
+        self.callGraphFunc = callGraphBuilder.buildCallGraph(self.func)
+        
         sys.tracebacklimit = 0
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
         self.assertTrue(os.path.exists(self.assFile), 'Test will fail. Assembler file not found: ' + self.assFile)
-
-    def testCallGraphs(self):
-        if not self.filesExist:
-            self.skipTest('Files not there')
-        
-        simpleNames = set()
-        for name in self.callGraphDirect.getAllSubroutineNames():
-            simpleNames.add(name.getSimpleName())
-        self.assertEqual({'recurse'}, simpleNames)
-        
-        simpleNames = set()
-        for name in self.callGraphIndirect.getAllSubroutineNames():
-            simpleNames.add(name.getSimpleName())
-        self.assertEqual({'indirect1', 'indirect2'}, simpleNames)
         
     def testSourceFiles(self):
         if not self.filesExist:
@@ -70,8 +59,16 @@ class RecursionTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'recurse', 'indirect1', 'indirect2'}, simpleNames)
-                
+        self.assertEqual({'recurse', 'indirect1', 'indirect2', 'refunc'}, simpleNames)
+
+    def testCallGraphs(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        self.assertEqual({'recurse'}, set(map(SubroutineFullName.getSimpleName, self.callGraphDirect.getAllSubroutineNames())))
+        self.assertEqual({'indirect1', 'indirect2'}, set(map(SubroutineFullName.getSimpleName, self.callGraphIndirect.getAllSubroutineNames())))
+        self.assertEqual({'refunc'}, set(map(SubroutineFullName.getSimpleName, self.callGraphFunc.getAllSubroutineNames())))
+        
     def testDirect(self):
         if not self.filesExist:
             self.skipTest('Files not there')
@@ -80,8 +77,7 @@ class RecursionTest(unittest.TestCase):
         useTraversal.parseModules(self.direct)
         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphDirect)))
-        self.assertEqual({'var%first'}, expressions)
+        self.assertEqual({'var%first'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphDirect))))
                 
     def testIndirect(self):
         if not self.filesExist:
@@ -91,11 +87,19 @@ class RecursionTest(unittest.TestCase):
         useTraversal.parseModules(self.indirect)
         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphIndirect)))
-        self.assertEqual({'var%first', 'var%second'}, expressions)
+        self.assertEqual({'var%first', 'var%second'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphIndirect))))
+        
+    def testFunc(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.func)
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        
+        self.assertEqual({'var%first'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphFunc))))
 
     #TODO Functions
-    #TODO indirekte Rekursion
     #TODO andere Argumentposition
         
 if __name__ == "__main__":

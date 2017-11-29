@@ -22,6 +22,19 @@ CONTAINS
 
   END SUBROUTINE recurse
 
+  RECURSIVE INTEGER FUNCTION refunc(var, start) RESULT(r)
+
+    TYPE(test), INTENT(inout) :: var
+    INTEGER, INTENT(in) :: start
+
+    IF (start < var%first) THEN
+      r = refunc(var, start * 2)
+    ELSE
+      r = start
+    END IF
+
+  END FUNCTION refunc
+
   SUBROUTINE indirect1(var)
 
     TYPE(test), INTENT(inout) :: var
