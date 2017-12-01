@@ -11,7 +11,6 @@ class TypeFinder(UseTraversalPassenger):
         self.reset()
         
     def reset(self):      
-        self.__types = dict()
         self.__currentType = None
         self.__currentExtends = None
         self.__collection = TypeCollection()
@@ -29,6 +28,7 @@ class TypeFinder(UseTraversalPassenger):
         moduleName = module.getName()
         typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE);
         endTypeRegEx = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        procedureRegEx = re.compile(r'^PROCEDURE\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*\=\>\s*(?P<procedure>[a-z0-9_]+)')
         
         if self.__currentType is None:
             typeRegExMatch = typeRegEx.match(statement)
@@ -37,16 +37,22 @@ class TypeFinder(UseTraversalPassenger):
                 self.__currentType = Type(typeName, module)
                 if 'extends' in typeRegExMatch.groupdict() and typeRegExMatch.group('extends') is not None:
                     self.__currentExtends = typeRegExMatch.group('extends')
+        elif Variable.validVariableDeclaration(statement):
+            members = Variable.fromDeclarationStatement(statement, moduleName, i)
+            self.__currentType.addMembers(members)
         else:
-            if Variable.validVariableDeclaration(statement):
-                members = Variable.fromDeclarationStatement(statement, moduleName, i)
-                self.__currentType.addMembers(members)
+            procedureRegExMatch = procedureRegEx.match(statement)
+            if procedureRegExMatch is not None:
+                alias = procedureRegExMatch.group('alias')
+                procedure = procedureRegExMatch.group('procedure')
+                self.__currentType.addProcedure(alias, procedure)
             else:
                 endTypeRegExMatch = endTypeRegEx.match(statement)
                 if endTypeRegExMatch is not None:
                     self.__collection.addType(self.__currentType, self.__currentExtends)
                     self.__currentType = None
                     self.__currentExtends = None
+                
 
     def __extractListedElements(self, spec):
         spec = spec.strip(' :')
