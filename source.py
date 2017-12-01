@@ -19,6 +19,7 @@ class Type(object):
         self.__declaredIn = declaredIn
         self.__extends = extends
         self.__members = {}
+        self.__procedures = {}
         
     def __str__(self, *args, **kwargs):
         string = 'TYPE ' + self.__typeName + '\n'
@@ -50,6 +51,24 @@ class Type(object):
             return self.__members[name]
         else:
             return self.__extends.getMember(name)
+        
+    def addProcedure(self, alias, procedure):
+        assertType(alias, 'alias', str)
+        assertType(procedure, 'procedure', str)
+        self.__procedures[alias.lower()] = procedure.lower()
+        
+    def hasProcedure(self, alias):
+        return alias.lower() in self.__procedures or ( self.__extends is not None and self.__extends.hasProcedure(alias)) 
+        
+    def getProcedure(self, name):
+        name = name.lower()
+        if not self.hasProcedure(name):
+            return None
+        
+        if name in self.__procedures:
+            return self.__procedures[name]
+        else:
+            return self.__extends.getProcedure(name)
         
     def getName(self):
         return self.__typeName
