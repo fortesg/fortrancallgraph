@@ -145,7 +145,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         variableName = self.__variable.getName()
         variableRegEx = re.compile(r'^((.*[^a-z0-9_])?)' + variableName + r'(([^a-z0-9_].*)?)$', re.IGNORECASE);
-        assignmentRegEx = re.compile(r'(?P<alias>[a-z0-9_]+)\s*\=\>?\s*(?P<reference>' + variableName + r'(\([a-z0-9_\,\:]+\))?(%[a-z0-9_%]+)?)([^a-z0-9_].*)?$', re.IGNORECASE);
+        assignmentRegEx = re.compile(r'(?P<alias>[a-z0-9_]+)\s*\=\>?\s*(?P<reference>' + variableName + r'(\([a-z0-9_\,\:]+\))?(%[a-z0-9_%]+)?)$', re.IGNORECASE);
         accessRegEx = re.compile(r'(.*[^a-z0-9_])?(?P<reference>' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)+)', re.IGNORECASE);
         functionCallRegEx = re.compile(r'^.*[^a-z0-9_]+[a-z0-9_]+\s*\((.*[^a-z0-9_])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
         declarationRegEx = re.compile(r'^[A-Z\s]*((SUBROUTINE)|(FUNCTION)).*?$', re.IGNORECASE);
