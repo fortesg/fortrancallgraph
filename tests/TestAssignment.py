@@ -106,7 +106,6 @@ class AssignmentTest(unittest.TestCase):
         useTraversal.parseModules(self.operator)
         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
          
-        members = set()
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphOperator)))
         self.assertNotIn('tt1%second', expressions)
         self.assertNotIn('tt2%second', expressions)
