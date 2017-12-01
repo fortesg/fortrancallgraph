@@ -1,19 +1,21 @@
 FF = gfortran
 FFLAGS = 
 
-all: assembler run
+all: modules assembler
 
-run: assignment.x
-	./assignment.x
+modules: assignment.o
 
 assembler: assignment.s
 
-%.x: %.f90
-	$(FF) -g -O0 $(FFLAGS) -o $@ $<
+%: %.o
+	$(FF) -o $@ $<
 
-%.s: %.f90
-	$(FF) -S -g -O0 $(FFLAGS) $<
+%.o: %.f90
+	$(FF) -c -cpp -g -O0 $(FFLAGS) $<
+
+%.s: %.f90 %.o
+	$(FF) -S -cpp -g -O0 $(FFLAGS) $<
 
 clean:
-	rm -f *.x *.s
+	rm -f *.o *.mod *.s *.x
  
