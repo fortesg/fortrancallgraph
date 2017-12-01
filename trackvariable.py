@@ -236,6 +236,8 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         ref = regExMatch.group('reference').strip()
         ref = re.sub(r'\([^\)]*\)', '', ref)
         variableReference = VariableReference(ref, subroutine.getName(), lineNumber, self.__variable)
+        if variableReference.getExpression().startswith('latbc%prev'):
+            print >> sys.stderr, '*** DEBUG *** ' + str(variableReference) + ' : ' + str(variableReference.containsProcedure())
         if not variableReference.containsProcedure():
             variable = self.__findLevelNVariable(variableReference)
             if variable is None or not variable.hasDerivedType():
@@ -269,7 +271,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                     return variableReferences
                 
                 elif warnIfNotFound:
-                    print  >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
+                    print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
             elif warnIfNotFound:
                 TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
@@ -323,6 +325,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         variable0Name = procedure[:procedure.find('%')]
         if subroutine.hasVariable(variable0Name):
             variable0 = subroutine.getVariable(variable0Name) 
+            variable0.setType(self.__types.getTypeOfVariable(variable0))
             reference = VariableReference(procedure, subroutine.getName(), lineNumber, variable0)
             if reference.lastIsProcedure():
                 calledRoutineName = reference.findFirstProcedure()
@@ -377,6 +380,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 variableInCalledSubroutine = self.__findTypeArgument(variableNameInCalledSubroutine, calledSubroutine)
     
                 if variableInCalledSubroutine is not None and (calledRoutineFullName, variableInCalledSubroutine) not in self.__excludeFromRecursionRoutines:
+                    variableInCalledSubroutine.setType(self.__types.getTypeOfVariable(variable))
                     calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                     calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                     variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
