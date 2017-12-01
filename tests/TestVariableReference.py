@@ -24,12 +24,14 @@ class VariableReferenceTest(unittest.TestCase):
         
         self.var1 = Variable('first', 'INTEGER')
         ttest.addMember(self.var1)
+        ttest.addProcedure('proc', 'procedure')
         self.var2 = Variable('t', 'TYPE(ttest)')
         self.var2.setType(ttest)
         self.var4 = Variable('unbekanntes', 'TYPE(u)')
         self.ref2 = VariableReference('t%first', subroutineName, 23, self.var2)
 
         self.ref4 = VariableReference('unbekanntes%pferd(1)%lauf%heim', subroutineName, 42, self.var4)
+        self.proc = VariableReference('t%proc(1)%test', subroutineName, 109, self.var2)
         
     def testExpression(self):
         self.assertEqual('unbekanntes%pferd%lauf%heim', self.ref4.getExpression())
@@ -41,6 +43,11 @@ class VariableReferenceTest(unittest.TestCase):
         self.assertEqual('t%first', self.ref2.getExpression())
         self.assertEqual('t', self.ref2.getExpression(0))
         self.assertEqual('t%first', self.ref2.getExpression(1))
+
+        self.assertEqual('t%proc%test', self.proc.getExpression())
+        self.assertEqual('t', self.proc.getExpression(0))
+        self.assertEqual('t%proc', self.proc.getExpression(1))
+        self.assertEqual('t%proc%test', self.proc.getExpression(2))
         
     def testVariable(self):
         self.assertEqual(self.var4, self.ref4.getVariable(0))
@@ -51,6 +58,8 @@ class VariableReferenceTest(unittest.TestCase):
         self.assertEqual(self.var2, self.ref2.getVariable(0))
         self.assertEqual(self.var1, self.ref2.getVariable(1))
         
+    def testProcedure(self):
+        self.assertTrue(self.proc.containsProcedure())
         
 if __name__ == "__main__":
     unittest.main()
