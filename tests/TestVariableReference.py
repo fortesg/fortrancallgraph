@@ -60,6 +60,8 @@ class VariableReferenceTest(unittest.TestCase):
         
     def testProcedure(self):
         self.assertTrue(self.proc.containsProcedure())
+        self.assertEqual('procedure', self.proc.findFirstProcedure())
+        self.assertEqual('t', self.proc.getSubReferenceBeforeFirstProcedure().getExpression())
         
 if __name__ == "__main__":
     unittest.main()
