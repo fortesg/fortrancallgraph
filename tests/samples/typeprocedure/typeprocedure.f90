@@ -8,6 +8,7 @@ MODULE typeprocedure
   CONTAINS
     PROCEDURE :: third => dump
     PROCEDURE, PASS :: fourth => addInt
+    PROCEDURE :: fifth => addAnother
   END TYPE ttest
 
 CONTAINS
@@ -24,6 +25,12 @@ CONTAINS
 
     addInt = test%second(2) + var
   END FUNCTION addInt
+
+  INTEGER FUNCTION addAnother(test1, test2)
+    CLASS(ttest), INTENT(in) :: test1, test2
+
+    addAnother = test1%second(2) + test2%second(3)
+  END FUNCTION addAnother
 
   SUBROUTINE test(t)
 
@@ -43,5 +50,15 @@ CONTAINS
     WRITE (*,*) 'fourth: ',  t%fourth(4)
 
   END SUBROUTINE testAdd
+
+  SUBROUTINE testAnother(t1, t2)
+
+    TYPE(ttest), INTENT(in) :: t1, t2
+
+    WRITE (*,*) 'firstA: ',  t1%first(1)
+    WRITE (*,*) 'firstB: ',  t2%first(2)
+    WRITE (*,*) 'fifth: ',  t1%fifth(t2)
+
+  END SUBROUTINE testAnother
 
 END MODULE typeprocedure
