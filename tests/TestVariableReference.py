@@ -9,7 +9,7 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
-from source import SubroutineFullName, VariableReference, Subroutine, Variable, Module, SourceFile, Type
+from source import SubroutineFullName, VariableReference, Variable, Module, SourceFile, Type
 
 ''' 
 Tests whether assignment are tracked correctly
