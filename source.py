@@ -1141,13 +1141,14 @@ class Subroutine(SubroutineContainer):
         return InnerSubroutineName(name, self.getName())
     
 class Module(SubroutineContainer):
-    def __init__(self, name, lines, sourceFile):
+    def __init__(self, name, lines, sourceFile, index):
         assertType(sourceFile, 'sourceFile', SourceFile)
         
         super(Module, self).__init__(lines)
         
         self.__name = name.lower()
         self.__sourceFile = sourceFile
+        self.__index = index
         self.__variableList = None
         self.__publicElements = None
         self.__uses = None
@@ -1161,6 +1162,26 @@ class Module(SubroutineContainer):
     def __ne__(self, other):
         return not self == other
     
+    def __lt__(self, other):
+        if self == other:
+            return False
+        return ((self.__sourceFile.getPath(), self.__index) < (other.__sourceFile.getPath(), other.__index))
+
+    def __le__(self, other):
+        if self == other:
+            return True
+        return ((self.__sourceFile.getPath(), self.__index) < (other.__sourceFile.getPath(), other.__index))
+    
+    def __gt__(self, other):
+        if self == other:
+            return False
+        return ((self.__sourceFile.getPath(), self.__index) > (other.__sourceFile.getPath(), other.__index))
+
+    def __ge__(self, other):
+        if self == other:
+            return True
+        return ((self.__sourceFile.getPath(), self.__index) > (other.__sourceFile.getPath(), other.__index))
+
     def __hash__(self):
         return hash(self.__name) * hash(self.__sourceFile)
         
@@ -1397,6 +1418,7 @@ class SourceFile(object):
         inModule = False
         name = None
         firstLine = -1
+        index = 0
         for i, (sn, line, _) in enumerate(statements):
             if not inModule:
                 regExMatch = moduleRegEx.match(line);
@@ -1421,7 +1443,8 @@ class SourceFile(object):
                 if endRegEx.match(line) is not None:
                     inModule = False;
                     moduleLines = lines[firstLine - 1:sn]
-                    modules[name.lower()] = Module(name, moduleLines, self)
+                    modules[name.lower()] = Module(name, moduleLines, self, index)
+                    index = index + 1
 
         return modules;
 
