@@ -42,6 +42,14 @@ CONTAINS
 
   END SUBROUTINE test
 
+  SUBROUTINE testIndirect(t)
+
+    TYPE(ttest), INTENT(in) :: t
+
+    CALL test(t)
+
+  END SUBROUTINE testIndirect
+
   SUBROUTINE testAdd(t)
 
     TYPE(ttest), INTENT(in) :: t
