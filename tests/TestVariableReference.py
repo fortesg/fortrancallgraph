@@ -24,44 +24,56 @@ class VariableReferenceTest(unittest.TestCase):
         
         self.var1 = Variable('first', 'INTEGER')
         ttest.addMember(self.var1)
-        ttest.addProcedure('proc', 'procedure')
-        self.var2 = Variable('t', 'TYPE(ttest)')
-        self.var2.setType(ttest)
-        self.var4 = Variable('unbekanntes', 'TYPE(u)')
-        self.ref2 = VariableReference('t%first', subroutineName, 23, self.var2)
+        ttest.addProcedure('proc2', 'procedure')
+        self.var0 = Variable('t', 'TYPE(ttest)')
+        self.var0.setType(ttest)
+        self.var3 = Variable('unbekanntes', 'TYPE(u)')
+        self.ref1 = VariableReference('t%first', subroutineName, 23, self.var0)
 
-        self.ref4 = VariableReference('unbekanntes%pferd(1)%lauf%heim', subroutineName, 42, self.var4)
-        self.proc = VariableReference('t%proc(1)%test', subroutineName, 109, self.var2)
+        self.ref3 = VariableReference('unbekanntes%pferd(1)%lauf%heim', subroutineName, 42, self.var3)
+        self.proc2 = VariableReference('t%proc2(1)%test', subroutineName, 109, self.var0)
+        self.proc1 = VariableReference('t%proc2', subroutineName, 109, self.var0)
         
+    def testLevel(self):
+        self.assertEqual(1, self.ref1.getLevel())
+        self.assertEqual(3, self.ref3.getLevel())
+        self.assertEqual(2, self.proc2.getLevel())
+        self.assertEqual(1, self.proc1.getLevel())
+    
     def testExpression(self):
-        self.assertEqual('unbekanntes%pferd%lauf%heim', self.ref4.getExpression())
-        self.assertEqual('unbekanntes', self.ref4.getExpression(0))
-        self.assertEqual('unbekanntes%pferd', self.ref4.getExpression(1))
-        self.assertEqual('unbekanntes%pferd%lauf', self.ref4.getExpression(2))
-        self.assertEqual('unbekanntes%pferd%lauf%heim', self.ref4.getExpression(3))
+        self.assertEqual('unbekanntes%pferd%lauf%heim', self.ref3.getExpression())
+        self.assertEqual('unbekanntes', self.ref3.getExpression(0))
+        self.assertEqual('unbekanntes%pferd', self.ref3.getExpression(1))
+        self.assertEqual('unbekanntes%pferd%lauf', self.ref3.getExpression(2))
+        self.assertEqual('unbekanntes%pferd%lauf%heim', self.ref3.getExpression(3))
 
-        self.assertEqual('t%first', self.ref2.getExpression())
-        self.assertEqual('t', self.ref2.getExpression(0))
-        self.assertEqual('t%first', self.ref2.getExpression(1))
+        self.assertEqual('t%first', self.ref1.getExpression())
+        self.assertEqual('t', self.ref1.getExpression(0))
+        self.assertEqual('t%first', self.ref1.getExpression(1))
 
-        self.assertEqual('t%proc%test', self.proc.getExpression())
-        self.assertEqual('t', self.proc.getExpression(0))
-        self.assertEqual('t%proc', self.proc.getExpression(1))
-        self.assertEqual('t%proc%test', self.proc.getExpression(2))
+        self.assertEqual('t%proc2%test', self.proc2.getExpression())
+        self.assertEqual('t', self.proc2.getExpression(0))
+        self.assertEqual('t%proc2', self.proc2.getExpression(1))
+        self.assertEqual('t%proc2%test', self.proc2.getExpression(2))
         
     def testVariable(self):
-        self.assertEqual(self.var4, self.ref4.getVariable(0))
-        self.assertIsNone(self.ref4.getVariable(1))
-        self.assertEqual(self.var4, self.ref4.getLevel0Variable())
-        self.assertIsNone(self.ref4.getLevelNVariable())
+        self.assertEqual(self.var3, self.ref3.getVariable(0))
+        self.assertIsNone(self.ref3.getVariable(1))
+        self.assertEqual(self.var3, self.ref3.getLevel0Variable())
+        self.assertIsNone(self.ref3.getLevelNVariable())
         
-        self.assertEqual(self.var2, self.ref2.getVariable(0))
-        self.assertEqual(self.var1, self.ref2.getVariable(1))
+        self.assertEqual(self.var0, self.ref1.getVariable(0))
+        self.assertEqual(self.var1, self.ref1.getVariable(1))
         
     def testProcedure(self):
-        self.assertTrue(self.proc.containsProcedure())
-        self.assertEqual('procedure', self.proc.findFirstProcedure())
-        self.assertEqual('t', self.proc.getSubReferenceBeforeFirstProcedure().getExpression())
+        self.assertTrue(self.proc2.containsProcedure())
+        self.assertEqual('procedure', self.proc2.findFirstProcedure())
+        self.assertEqual('t', self.proc2.getSubReferenceBeforeFirstProcedure().getExpression())
+        
+        self.assertFalse(self.ref1.lastIsProcedure())
+        self.assertFalse(self.ref3.lastIsProcedure())
+        self.assertFalse(self.proc2.lastIsProcedure())
+        self.assertTrue(self.proc1.lastIsProcedure())
         
 if __name__ == "__main__":
     unittest.main()

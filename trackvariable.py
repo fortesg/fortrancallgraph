@@ -143,40 +143,48 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if (self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None) or (subroutineName.getModuleName().lower() in self.__excludeModules):
             return set()
         
+        variableReferences = set()
+        subroutine = self.__sourceFiles.findSubroutine(subroutineName)
+        if subroutine is not None:
+            for lineNumber, statement, _ in subroutine.getStatements():
+                variableReferences |= self.__analyzeStatement(statement, subroutine, lineNumber)
+        else:
+            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(subroutineName)
+                
+        return variableReferences;
+    
+    def __analyzeStatement(self, statement, subroutine, lineNumber):
         variableName = self.__variable.getName()
         variableRegEx = re.compile(r'^((.*[^a-z0-9_])?)' + variableName + r'(([^a-z0-9_].*)?)$', re.IGNORECASE);
         assignmentRegEx = re.compile(r'(?P<alias>[a-z0-9_]+)\s*\=\>?\s*(?P<reference>' + variableName + r'(\([a-z0-9_\,\:]+\))?(%[a-z0-9_%]+)?)$', re.IGNORECASE);
         accessRegEx = re.compile(r'(.*[^a-z0-9_])?(?P<reference>' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)+)', re.IGNORECASE);
         functionCallRegEx = re.compile(r'^.*[^a-z0-9_]+[a-z0-9_]+\s*\((.*[^a-z0-9_])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
+        typeBoundFunctionCallRegEx = re.compile(r'^.*\%[a-z0-9_]+\s*\((.*[^a-z0-9_])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
         declarationRegEx = re.compile(r'^[A-Z\s]*((SUBROUTINE)|(FUNCTION)).*?$', re.IGNORECASE);
         selectTypeRegEx = re.compile(r'^\s*SELECT\s+TYPE\s*\(\s*' + variableName + r'\s*\)\s*$', re.IGNORECASE);
         innerSubroutineCallRegEx = re.compile(r'^(.*\s+)?CALL\s*(?P<routine>[a-z0-9_]+)\s*\(.*\)$', re.IGNORECASE);
-        #TODO auch Inner Functions, aber wie?
         
-        variableReferences = set();
-        subroutine = self.__sourceFiles.findSubroutine(subroutineName)
-        if subroutine is not None:
-            for lineNumber, statement, _ in subroutine.getStatements():
-                while variableRegEx.match(statement) is not None:
-                    statement = self.__removeUnimportantParentheses(statement, variableRegEx)
-                    assignmentRegExMatch = assignmentRegEx.match(statement)
-                    if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
-                        variableReferences.update(self.__analyzeAssignment(assignmentRegExMatch, subroutine, lineNumber))
-                    else:
-                        accessRegExMatch = accessRegEx.match(statement) 
-                        if accessRegExMatch is not None:
-                            variableReferences.update(self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber))
-                        if functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                            variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
-                    statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
-                    
-                innerSubroutineCallRegExMatch = innerSubroutineCallRegEx.match(statement)
-                if innerSubroutineCallRegExMatch is not None:
-                    self.__analyzeInnerSubroutineCall(innerSubroutineCallRegExMatch, subroutine, statement, lineNumber)
-        else:
-            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(subroutineName)
-                
-        return variableReferences;
+        variableReferences = set()
+        while variableRegEx.match(statement) is not None:
+            statement = self.__removeUnimportantParentheses(statement, variableRegEx)
+            assignmentRegExMatch = assignmentRegEx.match(statement)
+            if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
+                variableReferences.update(self.__analyzeAssignment(assignmentRegExMatch, subroutine, lineNumber))
+            else:
+                accessRegExMatch = accessRegEx.match(statement) 
+                if accessRegExMatch is not None:
+                    variableReferences.update(self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber))
+                if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
+                    variableReferences.update(self.__analyzeTypeBoundFunctionCall(subroutine, statement, lineNumber))
+                elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
+                    variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
+            statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
+            
+        innerSubroutineCallRegExMatch = innerSubroutineCallRegEx.match(statement)
+        if innerSubroutineCallRegExMatch is not None:
+            self.__analyzeInnerSubroutineCall(innerSubroutineCallRegExMatch, subroutine, statement, lineNumber)
+            
+        return variableReferences
     
     def __removeUnimportantParentheses(self, statement, regEx):
         clean = ''
@@ -290,6 +298,40 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         return variable
     
+    def __analyzeTypeBoundFunctionCall(self, subroutine, statement, lineNumber):
+        #TODO Teste mehrere Function Calls in einem statement
+        functionRegEx = re.compile(r'^(?P<procedure>.*\%[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
+        functionRegExMatch = functionRegEx.match(statement)
+        if functionRegExMatch is None:
+            return set()
+
+        procedurePrefix = functionRegExMatch.group('procedure').lower()
+        procedure = ''
+        paranthesisCount = 0
+        for c in reversed(procedurePrefix):
+            if c == ')':
+                paranthesisCount += 1
+            elif paranthesisCount > 0 and c == '(':
+                paranthesisCount -= 1
+            elif paranthesisCount == 0:
+                if c.isalnum() or c == '_' or c == '%':
+                    procedure += c
+                else:
+                    break
+        procedure = procedure[::-1]        
+        
+        variable0Name = procedure[:procedure.find('%')]
+        if subroutine.hasVariable(variable0Name):
+            variable0 = subroutine.getVariable(variable0Name) 
+            reference = VariableReference(procedure, subroutine.getName(), lineNumber, variable0)
+            if reference.lastIsProcedure():
+                calledRoutineName = reference.findFirstProcedure()
+                originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
+                before = functionRegExMatch.group('before').strip()
+                return self.__analysizeCallRegExMatch(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
+            
+        return set() 
+    
     def __analyzeFunctionCall(self, subroutine, statement, lineNumber):
         #TODO Teste mehrere Function Calls in einem statement
         functionRegEx = re.compile(r'^.*[^a-z0-9_]+(?P<routine>[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
@@ -301,15 +343,16 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if before.count(')') == before.count('(') + 1:
             return set()
         
-        return self.__analysizeCallRegExMatch(functionRegExMatch, subroutine, statement, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
+        calledRoutineName = functionRegExMatch.group('routine').strip().lower()
+        originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
+        before = functionRegExMatch.group('before').strip()
+        return self.__analysizeCallRegExMatch(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
     
-    def __analysizeCallRegExMatch(self, regExMatch, subroutine, statement, lineNumber, warnIfNotFound = True):
-        subroutineName = subroutine.getName()
-        calledRoutineName = regExMatch.group('routine').strip().lower()
+    def __analysizeCallRegExMatch(self, calledRoutineName, originalReference, before, subroutine, lineNumber, warnIfNotFound = True):
         if self._ignoreRegex is not None and self._ignoreRegex.match(calledRoutineName):
             return set()
         
-        originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
+        subroutineName = subroutine.getName()
         variable = self.__findLevelNVariable(originalReference)
         if variable is None or not variable.hasDerivedType():
             return set()
@@ -320,7 +363,6 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if calledRoutineFullName is not None:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
             
-            before = regExMatch.group('before').strip();
             parathesisRegEx = re.compile(r'\([^\(\)]*\)');
             before = parathesisRegEx.sub('', before);
             

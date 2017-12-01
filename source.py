@@ -590,6 +590,16 @@ class VariableReference(object):
         
         return None
     
+    def lastIsProcedure(self):
+        level = self.getLevel()
+        if level < 1:
+            return False
+        var = self.getVariable(level - 1)
+        if var is None or not var.isTypeAvailable():
+            return False
+        typE = var.getType()
+        return typE.hasProcedure(self.getVariableName(level))
+    
     def getSubReferenceBeforeFirstProcedure(self):
         var = self.getLevel0Variable()
         for l in range(1, self.getLevel() + 1):
