@@ -522,7 +522,7 @@ class VariableReference(object):
         if level < 0:
             return self.expression
         else:
-            return '%'.join(self.expression.split('%', level + 1)[:level + 1])
+            return '%'.join(self.expression.split('%')[:level + 1])
     
     def getExpressionWithArray(self):
         exp = ''
@@ -1332,12 +1332,13 @@ class Module(SubroutineContainer):
         return SubroutineFullName.fromParts(self.getName(), name)
 
 class SourceFile(object):
-    def __init__(self, path):
-        if not os.path.isfile(path) and os.access(path, os.R_OK):
+    def __init__(self, path, isTestDummy = False):
+        if not isTestDummy and not os.path.isfile(path) and os.access(path, os.R_OK):
             raise IOError("Not a readable file: " + path);
         
         self.__path = path
-        self.__modules = self.__extractModules()
+        if not isTestDummy:
+            self.__modules = self.__extractModules()
         
     def __str__(self):
         return self.__path;
