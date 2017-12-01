@@ -572,20 +572,39 @@ class VariableReference(object):
         return VariableReference(self.getExpression(level), self.__subroutine, self.__lineNumber, self.__level0Variable)
     
     def containsProcedure(self):
+        return self.findFirstProcedure() is not None
+    
+    def findFirstProcedure(self):
         var = self.getLevel0Variable()
         for l in range(1, self.getLevel() + 1):
             if not var.isTypeAvailable():
-                return False
+                return None
             typE = var.getType()
             varName = self.getVariableName(l)
             if typE.hasProcedure(varName):
-                return True
+                return typE.getProcedure(varName)
             elif not typE.hasMember(varName):
-                return False
+                return None
             else: 
                 var = typE.getMember(varName)
         
-        return False
+        return None
+    
+    def getSubReferenceBeforeFirstProcedure(self):
+        var = self.getLevel0Variable()
+        for l in range(1, self.getLevel() + 1):
+            if not var.isTypeAvailable():
+                return self
+            typE = var.getType()
+            varName = self.getVariableName(l)
+            if typE.hasProcedure(varName):
+                return self.getSubReference(l - 1)
+            elif not typE.hasMember(varName):
+                return self
+            else: 
+                var = typE.getMember(varName)
+        
+        return self
     
     def getVariableName(self, level = 0):
         if level < 0 or level > self.getLevel():
