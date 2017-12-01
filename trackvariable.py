@@ -228,9 +228,10 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         ref = regExMatch.group('reference').strip()
         ref = re.sub(r'\([^\)]*\)', '', ref)
         variableReference = VariableReference(ref, self.__callGraph.getRoot(), lineNumber, self.__variable)
-        variable = self.__findLevelNVariable(variableReference)
-        if variable is None or not variable.hasDerivedType():
-            return {variableReference}
+        if not variableReference.containsProcedure():
+            variable = self.__findLevelNVariable(variableReference)
+            if variable is None or not variable.hasDerivedType():
+                return {variableReference}
                     
         return set();       
     

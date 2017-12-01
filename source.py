@@ -571,6 +571,22 @@ class VariableReference(object):
     def getSubReference(self, level = -1):
         return VariableReference(self.getExpression(level), self.__subroutine, self.__lineNumber, self.__level0Variable)
     
+    def containsProcedure(self):
+        var = self.getLevel0Variable()
+        for l in range(1, self.getLevel() + 1):
+            if not var.isTypeAvailable():
+                return False
+            typE = var.getType()
+            varName = self.getVariableName(l)
+            if typE.hasProcedure(varName):
+                return True
+            elif not typE.hasMember(varName):
+                return False
+            else: 
+                var = typE.getMember(varName)
+        
+        return False
+    
     def getVariableName(self, level = 0):
         if level < 0 or level > self.getLevel():
             raise ValueError('Level out of range')
