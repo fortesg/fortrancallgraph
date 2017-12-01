@@ -12,7 +12,7 @@ FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
 from assembler import FromAssemblerCallGraphBuilder
-from source import SourceFiles, SubroutineFullName
+from source import SourceFiles, SubroutineFullName, VariableReference
 from trackvariable import TrackVariableCallGraphAnalysis
 from usetraversal import UseTraversal
 
@@ -37,6 +37,9 @@ class AssignmentTest(unittest.TestCase):
 
         self.member = SubroutineFullName('__assignment_MOD_testMember')
         self.callGraphMember = callGraphBuilder.buildCallGraph(self.member)
+
+        self.operator = SubroutineFullName('__assignment_MOD_testOperator')
+        self.callGraphOperator = callGraphBuilder.buildCallGraph(self.operator)
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -47,20 +50,10 @@ class AssignmentTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        simpleNames = set()
-        for name in self.callGraphDirect.getAllSubroutineNames():
-            simpleNames.add(name.getSimpleName())
-        self.assertEqual({'testdirect'}, simpleNames)
-        
-        simpleNames = set()
-        for name in self.callGraphIndirect.getAllSubroutineNames():
-            simpleNames.add(name.getSimpleName())
-        self.assertEqual({'testindirect'}, simpleNames)
-        
-        simpleNames = set()
-        for name in self.callGraphMember.getAllSubroutineNames():
-            simpleNames.add(name.getSimpleName())
-        self.assertEqual({'testmember'}, simpleNames)
+        self.assertEqual({'testdirect'}, set(map(SubroutineFullName.getSimpleName, self.callGraphDirect.getAllSubroutineNames())))
+        self.assertEqual({'testindirect'}, set(map(SubroutineFullName.getSimpleName, self.callGraphIndirect.getAllSubroutineNames())))
+        self.assertEqual({'testmember'}, set(map(SubroutineFullName.getSimpleName, self.callGraphMember.getAllSubroutineNames())))
+        self.assertEqual({'testoperator', 'ttadd', 'dump'}, set(map(SubroutineFullName.getSimpleName, self.callGraphOperator.getAllSubroutineNames())))
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -77,7 +70,7 @@ class AssignmentTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'testdirect', 'testindirect', 'testmember'}, simpleNames)
+        self.assertEqual({'testdirect', 'testindirect', 'testmember', 'testoperator', 'ttadd', 'dump'}, simpleNames)
                 
     def testDirect(self):
         if not self.filesExist:
@@ -104,6 +97,22 @@ class AssignmentTest(unittest.TestCase):
         for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect):
             members.add(ref.getLevelNVariable().getName())
         self.assertEqual({'first', 'second'}, members)
+                
+    def testOperator(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+         
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.operator)
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+         
+        members = set()
+        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphOperator)))
+        self.assertNotIn('tt1%second', expressions)
+        self.assertNotIn('tt2%second', expressions)
+        self.assertNotIn('tt1%third', expressions)
+        self.assertNotIn('tt2%third', expressions)
+        
                 
 # TODO: Doesn't work yet            
 #     def testMember(self):
