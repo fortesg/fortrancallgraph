@@ -17,7 +17,7 @@ from trackvariable import TrackVariableCallGraphAnalysis
 from usetraversal import UseTraversal
 
 ''' 
-Tests whether assignment are tracked correctly
+Tests whether type-bound procedures are handled correctly
 '''
 class TypeProcedureTest(unittest.TestCase):
     def setUp(self):
@@ -32,16 +32,27 @@ class TypeProcedureTest(unittest.TestCase):
         self.test = SubroutineFullName('__typeprocedure_MOD_test')
         self.callGraph = callGraphBuilder.buildCallGraph(self.test)
         
+        self.useTraversal = UseTraversal(self.sourceFiles)
+        self.useTraversal.parseModules(self.test)
+        
+        self.fileExist = os.path.exists(self.srcFile)
+        
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
         self.assertTrue(os.path.exists(self.assFile), 'Test will fail. Assembler file not found: ' + self.assFile)
 
     def testCallGraphs(self):
-        # TODO Auch mit serialisiertem CallGraph testen
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.assertEqual({'test'}, set(map(SubroutineFullName.getSimpleName, self.callGraph.getAllSubroutineNames())))
+        self.assertEqual({'test', 'dump'}, set(map(SubroutineFullName.getSimpleName, self.callGraph.getAllSubroutineNames())))
+        
+    def testUseTraversal(self):
+        if not self.fileExist:
+            self.skipTest('Files not there')
+        
+        self.assertEqual(0, len(self.useTraversal.getInterfaces()))
+        self.assertEqual(1, len(self.useTraversal.getTypes()))
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -64,14 +75,10 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.test)
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
-        members = set()
-        for ref in tracker.trackDerivedTypeArguments(self.callGraph):
-            members.add(ref.getLevelNVariable().getName())
-        self.assertEqual({'first', 'second'}, members)
+        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraph)))
+        self.assertEqual({'t%first', 't%second'}, expressions)
 
         
 if __name__ == "__main__":

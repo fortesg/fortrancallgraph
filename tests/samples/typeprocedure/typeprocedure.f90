@@ -7,6 +7,7 @@ MODULE typeprocedure
     INTEGER :: second(3)
   CONTAINS
     PROCEDURE :: third => dump
+    PROCEDURE, PASS :: fourth => dump
   END TYPE ttest
 
 CONTAINS
