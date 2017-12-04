@@ -175,7 +175,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 if accessRegExMatch is not None:
                     variableReferences.update(self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber))
                 if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                    variableReferences.update(self.__analyzeTypeBoundFunctionCall(subroutine, statement, lineNumber))
+                    variableReferences.update(self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber))
                 elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
                     variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
             statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
@@ -241,11 +241,11 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             if variable is None or not variable.hasDerivedType():
                 return {variableReference}
         else:
-            return self.__analysizeTypeBoundProcedureCall(variableReference, subroutine, lineNumber)
+            return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber)
                     
         return set();    
     
-    def __analysizeTypeBoundProcedureCall(self, variableReference, subroutine, lineNumber, warnIfNotFound = True):
+    def __analyzeTypeBoundProcedureCallOnThis(self, variableReference, subroutine, lineNumber, warnIfNotFound = True):
         subroutineName = subroutine.getName()
         calledRoutineName = variableReference.findFirstProcedure()
         calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
@@ -301,7 +301,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         return variable
     
-    def __analyzeTypeBoundFunctionCall(self, subroutine, statement, lineNumber):
+    def __analyzeTypeBoundProcedureCallOnOther(self, subroutine, statement, lineNumber):
         #TODO Teste mehrere Function Calls in einem statement
         functionRegEx = re.compile(r'^(?P<procedure>.*\%[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_%])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
         functionRegExMatch = functionRegEx.match(statement)

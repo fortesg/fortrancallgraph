@@ -28,7 +28,7 @@ class TypeFinder(UseTraversalPassenger):
         moduleName = module.getName()
         typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE);
         endTypeRegEx = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE);
-        procedureRegEx = re.compile(r'^PROCEDURE\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*\=\>\s*(?P<procedure>[a-z0-9_]+)$', re.IGNORECASE)
+        procedureRegEx = re.compile(r'^PROCEDURE\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*(\=\>\s*(?P<procedure>[a-z0-9_]+))?$', re.IGNORECASE)
         
         if self.__currentType is None:
             typeRegExMatch = typeRegEx.match(statement)
@@ -44,7 +44,10 @@ class TypeFinder(UseTraversalPassenger):
             procedureRegExMatch = procedureRegEx.match(statement)
             if procedureRegExMatch is not None:
                 alias = procedureRegExMatch.group('alias')
-                procedure = procedureRegExMatch.group('procedure')
+                if procedureRegExMatch.group('procedure') is not None:
+                    procedure = procedureRegExMatch.group('procedure')
+                else:
+                    procedure = alias
                 self.__currentType.addProcedure(alias, procedure)
             else:
                 endTypeRegExMatch = endTypeRegEx.match(statement)
