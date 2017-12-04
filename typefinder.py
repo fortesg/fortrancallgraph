@@ -78,6 +78,9 @@ class TypeCollection(object):
      
     def __len__(self):
         return len(self.__typeSet)
+    
+    def __getitem__(self, key):
+        return self.getType(key)
         
     def addType(self, typE, extendsName = None):
         assertType(typE, 'typE', Type)
