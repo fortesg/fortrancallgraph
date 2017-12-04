@@ -40,9 +40,13 @@ class Type(object):
             self.addMember(member)
         
     def hasMember(self, name):
+        assertType(name, 'name', str)
+        
         return name.lower() in self.__members or ( self.__extends is not None and self.__extends.hasMember(name)) 
         
     def getMember(self, name):
+        assertType(name, 'name', str)
+        
         name = name.lower()
         if not self.hasMember(name):
             return None
@@ -55,12 +59,17 @@ class Type(object):
     def addProcedure(self, alias, procedure):
         assertType(alias, 'alias', str)
         assertType(procedure, 'procedure', str)
+        
         self.__procedures[alias.lower()] = procedure.lower()
         
     def hasProcedure(self, alias):
+        assertType(alias, 'alias', str)
+        
         return alias.lower() in self.__procedures or ( self.__extends is not None and self.__extends.hasProcedure(alias)) 
         
     def getProcedure(self, name):
+        assertType(name, 'name', str)
+        
         name = name.lower()
         if not self.hasProcedure(name):
             return None
