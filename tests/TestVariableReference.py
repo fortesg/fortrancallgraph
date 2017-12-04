@@ -25,6 +25,8 @@ class VariableReferenceTest(unittest.TestCase):
         self.var1 = Variable('first', 'INTEGER')
         ttest.addMember(self.var1)
         ttest.addProcedure('proc2', 'procedure')
+        ttest.addProcedure('proc3', 'gnasl')
+        ttest.addProcedure('generic', ['proc2', 'proc3'])
         self.var0 = Variable('t', 'TYPE(ttest)')
         self.var0.setType(ttest)
         self.var3 = Variable('unbekanntes', 'TYPE(u)')
@@ -33,6 +35,7 @@ class VariableReferenceTest(unittest.TestCase):
         self.ref3 = VariableReference('unbekanntes%pferd(1)%lauf%heim', subroutineName, 42, self.var3)
         self.proc2 = VariableReference('t%proc2(1)%test', subroutineName, 109, self.var0)
         self.proc1 = VariableReference('t%proc2', subroutineName, 109, self.var0)
+        self.generic = VariableReference('t%generic', subroutineName, 109, self.var0)
         
     def testLevel(self):
         self.assertEqual(1, self.ref1.getLevel())
@@ -74,6 +77,12 @@ class VariableReferenceTest(unittest.TestCase):
         self.assertFalse(self.ref3.lastIsProcedure())
         self.assertFalse(self.proc2.lastIsProcedure())
         self.assertTrue(self.proc1.lastIsProcedure())
+        
+    def testGeneric(self):
+        self.assertTrue(self.generic.containsProcedure())
+        self.assertTrue(self.generic.lastIsProcedure())
+        self.assertEqual(['procedure', 'gnasl'], self.generic.findFirstProcedure())
+        self.assertEqual('t', self.generic.getSubReferenceBeforeFirstProcedure().getExpression())
         
 if __name__ == "__main__":
     unittest.main()
