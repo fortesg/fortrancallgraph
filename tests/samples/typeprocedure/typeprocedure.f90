@@ -12,6 +12,11 @@ MODULE typeprocedure
     GENERIC :: sixth => fourth, fifth
   END TYPE ttest
 
+  TYPE, EXTENDS(ttest) :: child
+  CONTAINS
+    PROCEDURE :: third => new_dump
+  END TYPE child
+
 CONTAINS
 
   INTEGER FUNCTION dump(test, var)
@@ -19,6 +24,12 @@ CONTAINS
     INTEGER, INTENT(in) :: var
     dump = var
   END FUNCTION dump
+
+  INTEGER FUNCTION new_dump(test, var)
+    CLASS(child), INTENT(in) :: test
+    INTEGER, INTENT(in) :: var
+    new_dump = var + test%ttest%first(var)
+  END FUNCTION new_dump
 
   INTEGER FUNCTION addInt(test, var)
     CLASS(ttest), INTENT(in) :: test
@@ -79,5 +90,13 @@ CONTAINS
     WRITE (*,*) 'sixth: ',  t1%sixth(t2)
 
   END SUBROUTINE testGeneric
+
+  SUBROUTINE testChild(t)
+
+    TYPE(child), INTENT(in) :: t
+
+    WRITE (*,*) 'third: ',  t%third(3)
+
+  END SUBROUTINE testChild
 
 END MODULE typeprocedure
