@@ -155,11 +155,11 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
     
     def __analyzeStatement(self, statement, subroutine, lineNumber):
         variableName = self.__variable.getName()
-        variableRegEx = re.compile(r'^((.*[^a-z0-9_])?)' + variableName + r'(([^a-z0-9_].*)?)$', re.IGNORECASE);
+        variableRegEx = re.compile(r'^((.*[^a-z0-9_%])?)' + variableName + r'(([^a-z0-9_].*)?)$', re.IGNORECASE);
         assignmentRegEx = re.compile(r'(?P<alias>[a-z0-9_]+)\s*\=\>?\s*(?P<reference>' + variableName + r'(\([a-z0-9_\,\:]+\))?(%[a-z0-9_%]+)?)$', re.IGNORECASE);
-        accessRegEx = re.compile(r'(.*[^a-z0-9_])?(?P<reference>' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)+)', re.IGNORECASE);
-        functionCallRegEx = re.compile(r'^.*[^a-z0-9_]+[a-z0-9_]+\s*\((.*[^a-z0-9_])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
-        typeBoundFunctionCallRegEx = re.compile(r'^.*\%[a-z0-9_]+\s*\((.*[^a-z0-9_])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
+        accessRegEx = re.compile(r'(.*[^a-z0-9_%])?(?P<reference>' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)+)', re.IGNORECASE);
+        functionCallRegEx = re.compile(r'^.*[^a-z0-9_]+[a-z0-9_]+\s*\((.*[^a-z0-9_%])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
+        typeBoundFunctionCallRegEx = re.compile(r'^.*\%[a-z0-9_]+\s*\((.*[^a-z0-9_%])?' + variableName + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*([^a-z0-9_].*)?\).*$', re.IGNORECASE);
         declarationRegEx = re.compile(r'^[A-Z\s]*((SUBROUTINE)|(FUNCTION)).*?$', re.IGNORECASE);
         selectTypeRegEx = re.compile(r'^\s*SELECT\s+TYPE\s*\(\s*' + variableName + r'\s*\)\s*$', re.IGNORECASE);
         innerSubroutineCallRegEx = re.compile(r'^(.*\s+)?CALL\s*(?P<routine>[a-z0-9_]+)\s*\(.*\)$', re.IGNORECASE);
@@ -259,21 +259,21 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 variableNameInCalledSubroutine = calledSubroutine.getArgumentNames()[0]
                 variableInCalledSubroutine = self.__findTypeArgument(variableNameInCalledSubroutine, calledSubroutine)
     
-                if variableInCalledSubroutine is not None and (calledRoutineFullName, variableInCalledSubroutine) not in self.__excludeFromRecursionRoutines:
-                    typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
-                    if typE is not None:
-                        variableInCalledSubroutine.setType(typE)
-                    calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
-                    calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                    variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
-                    for variableReference in variableReferences:
-                        variableReference.setLevel0Variable(self.__variable, subReference.getMembers())
-    
-                    return variableReferences
-                
-                elif warnIfNotFound:
+                if variableInCalledSubroutine is not None:
+                    if (calledRoutineFullName, variableInCalledSubroutine) not in self.__excludeFromRecursionRoutines:
+                        typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
+                        if typE is not None:
+                            variableInCalledSubroutine.setType(typE)
+                        calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                        calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
+                        variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
+                        for variableReference in variableReferences:
+                            variableReference.setLevel0Variable(self.__variable, subReference.getMembers())
+        
+                        return variableReferences
+                else:
                     print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
-            elif warnIfNotFound:
+            else:
                 TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
             TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineName, subroutine.getName(), lineNumber)
@@ -303,7 +303,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
     
     def __analyzeTypeBoundFunctionCall(self, subroutine, statement, lineNumber):
         #TODO Teste mehrere Function Calls in einem statement
-        functionRegEx = re.compile(r'^(?P<procedure>.*\%[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
+        functionRegEx = re.compile(r'^(?P<procedure>.*\%[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_%])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
         functionRegExMatch = functionRegEx.match(statement)
         if functionRegExMatch is None:
             return set()
@@ -340,10 +340,11 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
     
     def __analyzeFunctionCall(self, subroutine, statement, lineNumber):
         #TODO Teste mehrere Function Calls in einem statement
-        functionRegEx = re.compile(r'^.*[^a-z0-9_]+(?P<routine>[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
+        functionRegEx = re.compile(r'^.*[^a-z0-9_]+(?P<routine>[a-z0-9_]+)\s*\((?P<before>(.*[^a-z0-9_%])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?)\).*$', re.IGNORECASE);
         functionRegExMatch = functionRegEx.match(statement)
         if functionRegExMatch is None:
             return set()
+
 
         before = functionRegExMatch.group('before')
         if before.count(')') == before.count('(') + 1:
@@ -381,18 +382,18 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                     variableNameInCalledSubroutine = calledSubroutine.getArgumentNames()[position]
                 variableInCalledSubroutine = self.__findTypeArgument(variableNameInCalledSubroutine, calledSubroutine)
     
-                if variableInCalledSubroutine is not None and (calledRoutineFullName, variableInCalledSubroutine) not in self.__excludeFromRecursionRoutines:
-                    typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
-                    if typE is not None:
-                        variableInCalledSubroutine.setType(typE)
-                    calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
-                    calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                    variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
-                    for variableReference in variableReferences:
-                        variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
-    
-                    return variableReferences
-                
+                if variableInCalledSubroutine is not None:
+                    if (calledRoutineFullName, variableInCalledSubroutine) not in self.__excludeFromRecursionRoutines:
+                        typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
+                        if typE is not None:
+                            variableInCalledSubroutine.setType(typE)
+                        calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                        calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
+                        variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
+                        for variableReference in variableReferences:
+                            variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
+        
+                        return variableReferences
                 else:
                     print  >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
             else:
