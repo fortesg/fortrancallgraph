@@ -17,9 +17,11 @@ class Type(object):
         
         self.__typeName = typeName.lower()
         self.__declaredIn = declaredIn
-        self.__extends = extends
         self.__members = {}
         self.__procedures = {}
+        self.__extends = None
+        if extends is not None:
+            self.setExtends(extends)
         
     def __str__(self, *args, **kwargs):
         string = 'TYPE ' + self.__typeName + '\n'
@@ -94,7 +96,14 @@ class Type(object):
     
     def setExtends(self, extends):
         assertType(extends, 'extends', Type, True)
+        if self.__extends is not None:
+            del self.__members[self.__extends.getName()]
         self.__extends = extends
+        name = extends.getName()
+        parent = Variable(name, 'TYPE(' + name + ')')
+        parent.setDeclaredIn(self)
+        parent.setType(extends)
+        self.addMember(parent)
     
     def getDeclaredIn(self):
         return self.__declaredIn
