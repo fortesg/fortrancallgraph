@@ -81,7 +81,7 @@ class TypeProcedureTest(unittest.TestCase):
         self.assertEqual({'testadd', 'addint'}, set(map(SubroutineFullName.getSimpleName, self.callGraphAddInt.getAllSubroutineNames())))
         self.assertEqual({'testanother', 'addanother'}, set(map(SubroutineFullName.getSimpleName, self.callGraphAnother.getAllSubroutineNames())))
         self.assertEqual({'testgeneric', 'addanother'}, set(map(SubroutineFullName.getSimpleName, self.callGraphGeneric.getAllSubroutineNames())))
-        #self.assertEqual({'testchild', 'new_dump', 'dump'}, set(map(SubroutineFullName.getSimpleName, self.callGraphChild.getAllSubroutineNames())))
+        self.assertEqual({'testchild', 'new_dump', 'addint'}, set(map(SubroutineFullName.getSimpleName, self.callGraphChild.getAllSubroutineNames())))
         
     def testUseTraversal(self):
         if not self.fileExist:
@@ -89,6 +89,16 @@ class TypeProcedureTest(unittest.TestCase):
         
         self.assertEqual(0, len(self.useTraversal.getInterfaces()))
         self.assertEqual(2, len(self.useTraversal.getTypes()))
+        
+    def testChildType(self):
+        if not self.fileExist:
+            self.skipTest('Files not there')
+        
+        types = self.useTraversal.getTypes()
+        child = types['child']
+        self.assertIsNotNone(child)
+        self.assertTrue(child.hasMember('ttest'))
+        self.assertTrue
                 
     def testTypeProcedureReference(self):
         if not self.filesExist:
@@ -142,7 +152,7 @@ class TypeProcedureTest(unittest.TestCase):
         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphChild)))
-        self.assertEqual({'t%first'}, expressions)
+        self.assertEqual({'t%ttest%second'}, expressions)
 
         
 if __name__ == "__main__":

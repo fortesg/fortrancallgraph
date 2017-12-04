@@ -28,7 +28,7 @@ CONTAINS
   INTEGER FUNCTION new_dump(test, var)
     CLASS(child), INTENT(in) :: test
     INTEGER, INTENT(in) :: var
-    new_dump = var + test%ttest%first(var)
+    new_dump = var + test%ttest%fourth(var)
   END FUNCTION new_dump
 
   INTEGER FUNCTION addInt(test, var)
