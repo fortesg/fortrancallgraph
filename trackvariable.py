@@ -365,7 +365,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
 
         calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
         
-        if calledRoutineFullName is not None:
+        if calledRoutineFullName is not None and calledRoutineFullName.getModuleName().lower() not in self.__excludeModules:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
             
             parathesisRegEx = re.compile(r'\([^\(\)]*\)');
@@ -393,9 +393,9 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
     
                     return variableReferences
                 
-                elif warnIfNotFound:
+                else:
                     print  >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
-            elif warnIfNotFound:
+            else:
                 TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
             TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineName, subroutine.getName(), lineNumber)

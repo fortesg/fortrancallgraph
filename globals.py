@@ -85,7 +85,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
         return variableReferences;
 
     def __analyzeSubroutine(self, subroutineName):
-        if self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None:
+        if (self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None) or (subroutineName.getModuleName().lower in self.__excludeModules):
             return set()
         
         moduleName = subroutineName.getModuleName()
@@ -136,7 +136,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
     
     def __getModuleVariables(self, moduleName):
         moduleName = moduleName.lower()
-        if moduleName in self.__ignoredModules:
+        if moduleName in self.__ignoredModules or moduleName.lower() in self.__excludeModules:
             return dict()
 
         module = self.__findModule(moduleName)

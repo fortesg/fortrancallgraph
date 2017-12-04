@@ -1669,7 +1669,7 @@ class SourceFiles(object):
         
         sourceFile = self.findModuleFile(subroutineName.getModuleName())
         if sourceFile is None:
-            print >> sys.stderr, '*** WARNING [SourceFiles]: Module file not found for subroutine: ' + str(subroutineName) + '. ***'
+            print >> sys.stderr, '*** WARNING [SourceFiles]: Module file not found for subroutine: ' + str(subroutineName) + ' ***'
             return None
         else:
             return sourceFile.getSubroutine(subroutineName)
