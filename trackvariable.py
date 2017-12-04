@@ -260,6 +260,9 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 variableInCalledSubroutine = self.__findTypeArgument(variableNameInCalledSubroutine, calledSubroutine)
     
                 if variableInCalledSubroutine is not None and (calledRoutineFullName, variableInCalledSubroutine) not in self.__excludeFromRecursionRoutines:
+                    typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
+                    if typE is not None:
+                        variableInCalledSubroutine.setType(typE)
                     calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                     calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                     variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
@@ -322,13 +325,16 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         variable0Name = procedure[:procedure.find('%')]
         if subroutine.hasVariable(variable0Name):
-            variable0 = subroutine.getVariable(variable0Name) 
+            variable0 = subroutine.getVariable(variable0Name)
+            type0 = self.__types.getTypeOfVariable(variable0)
+            if type0 is not None:
+                variable0.setType(type0) 
             reference = VariableReference(procedure, subroutine.getName(), lineNumber, variable0)
             if reference.lastIsProcedure():
                 calledRoutineName = reference.findFirstProcedure()
                 originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
                 before = functionRegExMatch.group('before').strip()
-                return self.__analysizeCallRegExMatch(calledRoutineName, originalReference, "@@@, " + before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
+                return self.__analyzeCall(calledRoutineName, originalReference, "@@@, " + before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
             
         return set() 
     
@@ -346,9 +352,9 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         calledRoutineName = functionRegExMatch.group('routine').strip().lower()
         originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
         before = functionRegExMatch.group('before').strip()
-        return self.__analysizeCallRegExMatch(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
+        return self.__analyzeCall(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
     
-    def __analysizeCallRegExMatch(self, calledRoutineName, originalReference, before, subroutine, lineNumber, warnIfNotFound = True):
+    def __analyzeCall(self, calledRoutineName, originalReference, before, subroutine, lineNumber, warnIfNotFound = True):
         if self._ignoreRegex is not None and self._ignoreRegex.match(calledRoutineName):
             return set()
         
@@ -358,7 +364,6 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             return set()
 
         calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
-
         
         if calledRoutineFullName is not None:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
@@ -377,7 +382,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                 variableInCalledSubroutine = self.__findTypeArgument(variableNameInCalledSubroutine, calledSubroutine)
     
                 if variableInCalledSubroutine is not None and (calledRoutineFullName, variableInCalledSubroutine) not in self.__excludeFromRecursionRoutines:
-                    typE = self.__types.getTypeOfVariable(variable)
+                    typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
                     if typE is not None:
                         variableInCalledSubroutine.setType(typE)
                     calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
