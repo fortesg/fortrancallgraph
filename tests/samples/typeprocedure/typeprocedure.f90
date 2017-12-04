@@ -9,6 +9,7 @@ MODULE typeprocedure
     PROCEDURE :: third => dump
     PROCEDURE, PASS :: fourth => addInt
     PROCEDURE :: fifth => addAnother
+    GENERIC :: sixth => fourth, fifth
   END TYPE ttest
 
 CONTAINS
@@ -68,5 +69,15 @@ CONTAINS
     WRITE (*,*) 'fifth: ',  t1%fifth(t2)
 
   END SUBROUTINE testAnother
+
+  SUBROUTINE testGeneric(t1, t2)
+
+    TYPE(ttest), INTENT(in) :: t1, t2
+
+    WRITE (*,*) 'firstA: ',  t1%first(1)
+    WRITE (*,*) 'firstB: ',  t2%first(2)
+    WRITE (*,*) 'sixth: ',  t1%sixth(t2)
+
+  END SUBROUTINE testGeneric
 
 END MODULE typeprocedure
