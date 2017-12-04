@@ -1123,9 +1123,9 @@ class Subroutine(SubroutineContainer):
     def getArgumentNames(self):
         declaration = self.getDeclaration()
         name = self.getSimpleName().lower()
-        nameEnd = declaration.lower().find(name) + len(name)
+        nameEnd = declaration.lower().find(' ' + name + '(') + len(name) + 2
         declaration = declaration[nameEnd:]
-        argumentsListing = declaration[(declaration.find('(') + 1):(declaration.find(')'))]
+        argumentsListing = declaration[:(declaration.find(')'))]
         arguments = argumentsListing.lower().split(',')
         arguments = map(str.strip, arguments)
         return arguments
