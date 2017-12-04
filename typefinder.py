@@ -29,6 +29,7 @@ class TypeFinder(UseTraversalPassenger):
         typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE);
         endTypeRegEx = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE);
         procedureRegEx = re.compile(r'^PROCEDURE\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*(\=\>\s*(?P<procedure>[a-z0-9_]+))?$', re.IGNORECASE)
+        genericRegEx = re.compile(r'^GENERIC\s*\:\:\s*(?P<alias>[a-z0-9_]+)\s*\=\>\s*(?P<procedures>[a-z0-9_]+(\,[a-z0-9_]+)*)$', re.IGNORECASE)
         
         if self.__currentType is None:
             typeRegExMatch = typeRegEx.match(statement)
@@ -50,30 +51,17 @@ class TypeFinder(UseTraversalPassenger):
                     procedure = alias
                 self.__currentType.addProcedure(alias, procedure)
             else:
-                endTypeRegExMatch = endTypeRegEx.match(statement)
-                if endTypeRegExMatch is not None:
-                    self.__collection.addType(self.__currentType, self.__currentExtends)
-                    self.__currentType = None
-                    self.__currentExtends = None
-                
-
-    def __extractListedElements(self, spec):
-        spec = spec.strip(' :')
-        elements = []
-        bracketCount = 0
-        element = ''
-        for part in spec.split(','):
-            for c in part:
-                if c == '(': bracketCount += 1
-                if c == ')': bracketCount -= 1
-            element += ',' + part
-            if bracketCount == 0:
-                element = element.strip(' ,')
-                if element != '':
-                    elements.append(element)
-                    element = ''
-            
-        return elements
+                genericRegExMatch = genericRegEx.match(statement)
+                if genericRegExMatch is not None:
+                    alias = genericRegExMatch.group('alias')
+                    procedures = genericRegExMatch.group('procedures').split(',')
+                    self.__currentType.addProcedure(alias, procedures)
+                else:
+                    endTypeRegExMatch = endTypeRegEx.match(statement)
+                    if endTypeRegExMatch is not None:
+                        self.__collection.addType(self.__currentType, self.__currentExtends)
+                        self.__currentType = None
+                        self.__currentExtends = None
 
 class TypeCollection(object):
 

@@ -56,11 +56,18 @@ class Type(object):
         else:
             return self.__extends.getMember(name)
         
-    def addProcedure(self, alias, procedure):
+    def addProcedure(self, alias, procedures):
         assertType(alias, 'alias', str)
-        assertType(procedure, 'procedure', str)
+        assertType(procedures, 'procedures', [str, list])
+
+        if isinstance(procedures, list):
+            assertTypeAll(procedures, 'procedures', str)
+            procedures = map(str.lower, procedures)
+        else:
+            procedures = procedures.lower()
+            
+        self.__procedures[alias.lower()] = procedures
         
-        self.__procedures[alias.lower()] = procedure.lower()
         
     def hasProcedure(self, alias):
         assertType(alias, 'alias', str)
@@ -542,6 +549,12 @@ class VariableReference(object):
         
         return string
     
+    def getSubroutineName(self):
+        return self.__subroutine
+    
+    def getLineNumber(self):
+        return self.__lineNumber
+    
     def getExpression(self, level = -1):
         assertType(level, 'level', int)
         if level > self.getLevel():
@@ -591,7 +604,13 @@ class VariableReference(object):
             typE = var.getType()
             varName = self.getVariableName(l)
             if typE.hasProcedure(varName):
-                return typE.getProcedure(varName)
+                procedures = typE.getProcedure(varName)
+                if isinstance(procedures, list):
+                    generic = procedures
+                    procedures = []
+                    for alias in generic:
+                        procedures.append(typE.getProcedure(alias)) 
+                return procedures
             elif not typE.hasMember(varName):
                 return None
             else: 
