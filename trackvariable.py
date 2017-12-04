@@ -247,8 +247,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
     
     def __analyzeTypeBoundProcedureCallOnThis(self, variableReference, subroutine, lineNumber, warnIfNotFound = True):
         subroutineName = subroutine.getName()
-        calledRoutineName = variableReference.findFirstProcedure()
-        calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
+        calledRoutineFullName = self.__findCalledTypeBoundProcedure(variableReference, subroutine)
         
         subReference = variableReference.getSubReferenceBeforeFirstProcedure()
         if calledRoutineFullName is not None:
@@ -276,7 +275,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             else:
                 TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
-            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineName, subroutine.getName(), lineNumber)
+            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(variableReference.getExpression(), subroutine.getName(), lineNumber)
         
         return set();   
     
@@ -332,6 +331,10 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             reference = VariableReference(procedure, subroutine.getName(), lineNumber, variable0)
             if reference.lastIsProcedure():
                 calledRoutineName = reference.findFirstProcedure()
+                if isinstance(calledRoutineName, list):
+                    calledRoutineName = self.__findCalledTypeBoundProcedure(reference, subroutine)
+                    if calledRoutineName is None:
+                        return set() 
                 originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
                 before = functionRegExMatch.group('before').strip()
                 return self.__analyzeCall(calledRoutineName, originalReference, "@@@, " + before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
@@ -364,8 +367,11 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if variable is None or not variable.hasDerivedType():
             return set()
 
-        calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
-        
+        if isinstance(calledRoutineName, SubroutineFullName):
+            calledRoutineFullName = calledRoutineName
+        else:
+            calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
+            
         if calledRoutineFullName is not None and calledRoutineFullName.getModuleName().lower() not in self.__excludeModules:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
             
@@ -399,9 +405,22 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             else:
                 TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
-            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineName, subroutine.getName(), lineNumber)
+            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(str(calledRoutineName), subroutine.getName(), lineNumber)
         
         return set();
+
+    def __findCalledTypeBoundProcedure(self, variableReference, subroutine):
+        lineNumber = variableReference.getLineNumber()
+        procedures = variableReference.findFirstProcedure()
+        if isinstance(procedures, str):
+            return self.__findCalledSubroutineFullName(procedures, subroutine, lineNumber)
+        else:
+            for candidate in self.__callGraph.findNextCalleesFromLine(subroutine.getName(), lineNumber):
+                if candidate.getSimpleName() in procedures:
+                    return candidate
+        
+        return None
+        
 
     def __findCalledSubroutineFullName(self, calledSubroutineSimpleName, callerSubroutine, lineNumber):
         
