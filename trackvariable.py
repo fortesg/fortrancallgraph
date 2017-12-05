@@ -223,16 +223,22 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
         if subroutine.hasVariable(alias):
             aliasVar = subroutine.getVariable(alias)
+            aliasType = self.__types.getTypeOfVariable(aliasVar)
+            if not aliasVar.isTypeAvailable() and aliasType is not None:
+                aliasVar.setType(aliasType)
             originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
-            variable = self.__findLevelNVariable(originalReference)
-            if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
-                newSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
-                newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines);
-                for variableReference in variableReferences:
-                    variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
-                    
-                return variableReferences
+            if not originalReference.isRecursive():
+                variable = self.__findLevelNVariable(originalReference)
+                if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
+                    newSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                    newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
+                    variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines);
+                    for variableReference in variableReferences:
+                        variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
+                        
+                    return variableReferences
+            else:
+                print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
                 
         return set();
                 
@@ -240,13 +246,16 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         ref = regExMatch.group('reference').strip()
         ref = re.sub(r'\([^\)]*\)', '', ref)
         variableReference = VariableReference(ref, subroutine.getName(), lineNumber, self.__variable)
-        if not variableReference.containsProcedure():
-            variable = self.__findLevelNVariable(variableReference)
-            if variable is None or not variable.hasDerivedType():
-                return {variableReference}
+        if not variableReference.isRecursive(): 
+            if not variableReference.containsProcedure():
+                variable = self.__findLevelNVariable(variableReference)
+                if variable is None or not variable.hasDerivedType():
+                    return {variableReference}
+            else:
+                return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber)
         else:
-            return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber)
-                    
+            print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: Ignored access to recursive data structure: ' + str(variableReference) + ') ***';
+        
         return set();    
     
     def __analyzeTypeBoundProcedureCallOnThis(self, variableReference, subroutine, lineNumber, warnIfNotFound = True):
@@ -369,6 +378,10 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         subroutineName = subroutine.getName()
         variable = self.__findLevelNVariable(originalReference)
         if variable is None or not variable.hasDerivedType():
+            return set()
+        
+        if originalReference.isRecursive():
+            print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis]: Ignored argument with recursive data structure: ' + str(originalReference) + ') ***';
             return set()
 
         if isinstance(calledRoutineName, SubroutineFullName):

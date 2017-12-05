@@ -573,7 +573,7 @@ class VariableReference(object):
             return self.expression
         else:
             return '%'.join(self.expression.split('%')[:level + 1])
-    
+        
     def getExpressionWithArray(self):
         exp = ''
         for level in self.getLevels():
@@ -702,6 +702,17 @@ class VariableReference(object):
     
     def getLevelNVariable(self):
         return self.getVariable(self.getLevel())
+
+    def isRecursive(self):
+        typeNames = set()
+        for level in self.getLevels():
+            var = self.getVariable(level)
+            if var is not None and var.hasDerivedType() and var.isTypeAvailable():
+                typeName = var.getDerivedTypeName().lower()
+                if typeName in typeNames:
+                    return True
+                typeNames.add(typeName)
+        return False
 
     def isPointer(self, level = 0):
         var = self.getVariable(level)
