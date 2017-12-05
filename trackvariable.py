@@ -171,14 +171,18 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
                 variableReferences.update(self.__analyzeAssignment(assignmentRegExMatch, subroutine, lineNumber))
             else:
-                accessRegExMatch = accessRegEx.match(statement) 
+                accessRegExMatch = accessRegEx.match(statement)
+                foundReferences = {} 
                 if accessRegExMatch is not None:
-                    variableReferences.update(self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber))
-                if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                    variableReferences.update(self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber))
-                elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                    variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
+                    foundReferences = self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber)
+                    variableReferences.update(foundReferences)
+                if not foundReferences:
+                    if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
+                        variableReferences.update(self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber))
+                    elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
+                        variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber))
             statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
+                 
             
         innerSubroutineCallRegExMatch = innerSubroutineCallRegEx.match(statement)
         if innerSubroutineCallRegExMatch is not None:
@@ -320,7 +324,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                     procedure += c
                 else:
                     break
-        procedure = procedure[::-1]        
+        procedure = procedure[::-1]
         
         variable0Name = procedure[:procedure.find('%')]
         if subroutine.hasVariable(variable0Name):
@@ -348,13 +352,13 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if functionRegExMatch is None:
             return set()
 
-
         before = functionRegExMatch.group('before')
         if before.count(')') == before.count('(') + 1:
             return set()
         
         calledRoutineName = functionRegExMatch.group('routine').strip().lower()
         originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
+        
         before = functionRegExMatch.group('before').strip()
         return self.__analyzeCall(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
     
