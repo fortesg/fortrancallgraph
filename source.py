@@ -591,13 +591,13 @@ class VariableReference(object):
     def getLevel(self):
         return self.level
     
-    def getLevels(self, decrementing = False):
+    def getLevels(self, decrementing = False, start = 0):
         assertType(decrementing, 'decrementing', bool)
         
         if decrementing:
-            return range(self.getLevel(), -1, -1)
+            return range(self.getLevel(), start - 1, -1)
         else:
-            return range(self.getLevel() + 1) 
+            return range(start, self.getLevel() + 1) 
         
     def getSubReference(self, level = -1):
         return VariableReference(self.getExpression(level), self.__subroutine, self.__lineNumber, self.__level0Variable)
@@ -607,7 +607,7 @@ class VariableReference(object):
     
     def findFirstProcedure(self):
         var = self.getLevel0Variable()
-        for l in range(1, self.getLevel() + 1):
+        for l in self.getLevels(start = 1):
             if not var.isTypeAvailable():
                 return None
             typE = var.getType()
@@ -639,7 +639,7 @@ class VariableReference(object):
     
     def getSubReferenceBeforeFirstProcedure(self):
         var = self.getLevel0Variable()
-        for l in range(1, self.getLevel() + 1):
+        for l in self.getLevels(start = 1):
             if not var.isTypeAvailable():
                 return self
             typE = var.getType()
@@ -740,6 +740,22 @@ class VariableReference(object):
                 return -1
             dim += dimL
         return dim
+    
+    def getNumberOfPointerAndAllocatableLevels(self):
+        count = 0
+        var = self.getLevel0Variable()
+        count += (var.isPointer() or var.isAllocatable())
+        for level in self.getLevels(start = 1):
+            if not var.isTypeAvailable():
+                return count
+            typE = var.getType()
+            varName = self.getVariableName(level)
+            if not typE.hasMember(varName):
+                return count
+            var = typE.getMember(varName)
+            count += (var.isPointer() or var.isAllocatable())
+        
+        return count
     
     def isOneVariableArray(self):
         for level in self.getLevels():
