@@ -9,6 +9,7 @@ Created on 10.07.2014
 
 import sys;
 import argparse;
+import re
 
 from source import SubroutineFullName;
 from tree import TreeLikeCallGraphPrinter;
@@ -20,47 +21,75 @@ from allvariables import AllVariablesCallGraphAnalysis
 from dumper import SourceLineDumper, SourceStatementDumper
 from linenumbers import DeclarationLineNumberFinder, EndStatementLineNumberFinder, FirstDocumentationLineFinder, LastSpecificationLineFinder, AllLineFinder,\
     LastUseLineFinder, ContainsLineFinder
-
-from config_fortrancallgraph import GRAPH_BUILDER, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES
-import re
 from useprinter import UsedModuleNamePrinter, UsedFileNamePrinter
 
-GRAPH_PRINTERS = {'tree': TreeLikeCallGraphPrinter(), 
-                  'dot': DotFormatCallGraphPrinter(),
-                  'list-subroutines': SubroutineListingCallGraphPrinter(),
-                  'list-modules': ModuleListingCallGraphPrinter() } 
-graphPrintersHelp = 'tree: in a tree-like form; dot: in DOT format for Graphviz; list-subroutines: only list subroutines; list-modules: only list modules containing subroutines from the call graph'
+GRAPH_PRINTERS = {'tree': 'in a tree-like form',
+                  'dot': 'in DOT format for Graphviz',
+                  'list-subroutines': 'only list subroutines',
+                  'list-modules': 'only list modules containing subroutines from the call graph'}
+def graphPrinter(key):
+    if key not in GRAPH_PRINTERS: raise KeyError('No such CallGraphPrinter: ' + str(key))
+    elif key == 'tree': return TreeLikeCallGraphPrinter()
+    elif key == 'dot':  return DotFormatCallGraphPrinter()
+    elif key == 'list-subroutines': return SubroutineListingCallGraphPrinter()
+    elif key == 'list-modules': return ModuleListingCallGraphPrinter()
+    else: raise NotImplementedError('CallGraphPrinter not yet implemented: ' + str(key))
 
-GRAPH_ANALYSIS = {'globals': GlobalVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES),
-                  'arguments': TrackVariableCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_DERIVED_TYPES),
-                  'all': AllVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)}
-graphAnalysisHelp = 'arguments: only subroutine arguments; globals: only module variables; all: both arguments and globals'
+GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
+                 'globals': 'only module variables',
+                 'all': 'both arguments and globals'}
+def graphAnalysis(key, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES):
+    if key not in GRAPH_ANALYSIS: raise KeyError('No such CallGraphAnalyzer: ' + str(key))
+    elif key == 'globals': return GlobalVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
+    elif key == 'arguments': return TrackVariableCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_DERIVED_TYPES)
+    elif key == 'all': return AllVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
+    else: raise NotImplementedError('CallGraphAnalyzer not yet implemented: ' + str(key))
 
-SUBROUTINE_DUMPER = {'lines': SourceLineDumper(SOURCE_FILES),
-                     'statements': SourceStatementDumper(SOURCE_FILES)}
-subroutineDumperHelp = 'lines: original source lines; statements: normalized source lines' 
+SUBROUTINE_DUMPER = {'lines': 'original source lines',
+                    'statements': 'normalized source lines'} 
+def subroutineDumper(key, SOURCE_FILES):
+    if key not in GRAPH_ANALYSIS: raise KeyError('No such SourceDumper: ' + str(key))
+    elif key == 'lines': return SourceLineDumper(SOURCE_FILES)
+    elif key == 'statements': return SourceStatementDumper(SOURCE_FILES)
+    else: raise NotImplementedError('SourceDumper not yet implemented: ' + str(key))
 
-LINE_NUMBER_FINDER = {'first': DeclarationLineNumberFinder(SOURCE_FILES),
-                     'last': EndStatementLineNumberFinder(SOURCE_FILES),
-                     'doc': FirstDocumentationLineFinder(SOURCE_FILES),
-                     'specs': LastSpecificationLineFinder(SOURCE_FILES),
-                     'use': LastUseLineFinder(SOURCE_FILES),
-                     'contains': ContainsLineFinder(SOURCE_FILES),
-                     'all': AllLineFinder(SOURCE_FILES)} 
-lineNumberFinderHelp = 'first: the first line, containing the SUBROUTINE/FUNCTION keyword; last: the last line, containing the END keyword; doc: the first line of the leading comment - the same as "first" when no comment exists; specs: the last variable specification; use - the last USE statement; contains: the CONTAINS statement - -1 when there is no such statement; all: all of the others' 
+LINE_NUMBER_FINDER = {'first': 'the first line, containing the SUBROUTINE/FUNCTION keyword',
+                    'last': 'the last line, containing the END keyword',
+                    'doc': 'the first line of the leading comment - the same as "first" when no comment exists',
+                    'specs': 'the last variable specification',
+                    'use': 'the last USE statement',
+                    'contains': 'the CONTAINS statement - -1 when there is no such statement',
+                    'all': 'all of the others'}
+def lineNumberFinder(key, SOURCE_FILES):
+    if key not in GRAPH_ANALYSIS: raise KeyError('No such LineNumberFinder: ' + str(key))
+    elif key == 'first': return DeclarationLineNumberFinder(SOURCE_FILES),
+    elif key == 'last': return EndStatementLineNumberFinder(SOURCE_FILES),
+    elif key == 'doc': return FirstDocumentationLineFinder(SOURCE_FILES),
+    elif key == 'specs': return LastSpecificationLineFinder(SOURCE_FILES),
+    elif key == 'use': return LastUseLineFinder(SOURCE_FILES),
+    elif key == 'contains': return ContainsLineFinder(SOURCE_FILES),
+    elif key == 'all': return AllLineFinder(SOURCE_FILES)
+    else: raise NotImplementedError('LineNumberFinder not yet implemented: ' + str(key))
 
-USE_PRINTERS = {'modules': UsedModuleNamePrinter(SOURCE_FILES),
-                'files': UsedFileNamePrinter(SOURCE_FILES)}
-usePrinterHelp = 'modules: module names; files: file pathes'
+USE_PRINTERS = {'modules': 'module names',
+                'files': 'file pathes'} 
+def usePrinter(key, SOURCE_FILES):
+    if key not in USE_PRINTERS: raise KeyError('No such UsePrinter: ' + str(key))
+    elif key == 'modules': return UsedModuleNamePrinter(SOURCE_FILES),
+    elif key == 'files': return UsedFileNamePrinter(SOURCE_FILES)
+    else: raise NotImplementedError('UsePrinter not yet implemented: ' + str(key))
+
+def optionHelp(helps):
+    return ", ".join('%s: %s' % (key, string) for key, string in helps.iteritems())
 
 def parseArguments():
     argParser = argparse.ArgumentParser(description="Print or analyse a subroutine's call graph.");
     actionArg = argParser.add_mutually_exclusive_group(required=True)
-    actionArg.add_argument('-p', '--printer', choices=GRAPH_PRINTERS.keys(), help='Print the callgraph (' + graphPrintersHelp + ').');
-    actionArg.add_argument('-a', '--analysis', choices=GRAPH_ANALYSIS.keys(), help='Analyze variable usage (' + graphAnalysisHelp + ').');
-    actionArg.add_argument('-d', '--dump', choices=SUBROUTINE_DUMPER.keys(), help='Dump subroutine or module source code (' + subroutineDumperHelp + '). When no subroutine is given, the whole module is dumped.');
-    actionArg.add_argument('-l', '--line', choices=LINE_NUMBER_FINDER.keys(), help='Show some interesting source lines of the subroutine (' + lineNumberFinderHelp + ').');
-    actionArg.add_argument('-u', '--use', choices=USE_PRINTERS.keys(), help='Prints use dependencies of a subroutine (' + usePrinterHelp + ').');
+    actionArg.add_argument('-p', '--printer', choices=GRAPH_PRINTERS.keys(), help='Print the callgraph (' + optionHelp(GRAPH_PRINTERS) + ').');
+    actionArg.add_argument('-a', '--analysis', choices=GRAPH_ANALYSIS.keys(), help='Analyze variable usage (' + optionHelp(GRAPH_ANALYSIS) + ').');
+    actionArg.add_argument('-d', '--dump', choices=SUBROUTINE_DUMPER.keys(), help='Dump subroutine or module source code (' + optionHelp(SUBROUTINE_DUMPER) + '). When no subroutine is given, the whole module is dumped.');
+    actionArg.add_argument('-l', '--line', choices=LINE_NUMBER_FINDER.keys(), help='Show some interesting source lines of the subroutine (' + optionHelp(LINE_NUMBER_FINDER) + ').');
+    actionArg.add_argument('-u', '--use', choices=USE_PRINTERS.keys(), help='Prints use dependencies of a subroutine (' + optionHelp(USE_PRINTERS) + ').');
     argParser.add_argument('-v', '--variable', type=str, help='Restrict the analysis to the given variable which has to be a subroutine argument and of a derived type. Applicable with -a arguments.');
     argParser.add_argument('-ml', '--maxLevel', type=int, help='Limits depth of callgraph output. Applicable with -p.');
     argParser.add_argument('-po', '--pointersOnly', action="store_true", help='Limit result output to pointer variables. Applicable with -a.');
@@ -68,12 +97,24 @@ def parseArguments():
     argParser.add_argument('-cc', '--clearCache', action="store_true", help='Create a new call graph instead of using a cached one. Applicable with -p or -a.');
     argParser.add_argument('-q', '--quiet', action="store_true", help='Reduce the output. Applicable with -a and -l.');
     argParser.add_argument('-i', '--ignore', type=str, help='Leave out subroutines matching a given regular expression. Applicable with -p and -a.');
+    argParser.add_argument('-cf', '--configModule', type=str, help='Import configuration from this module.');
     argParser.add_argument('module');
     argParser.add_argument('subroutine', nargs='?', default=None);
     return argParser.parse_args();
 
 def main():
     args = parseArguments()
+    
+    configModule = 'config_fortrancallgraph'
+    if args.configModule is not None:
+        configModule = args.configModule
+    try: 
+        __import__(configModule, fromlist=['GRAPH_BUILDER', 'SOURCE_FILES', 'EXCLUDE_MODULES', 'IGNORE_GLOBALS_FROM_MODULES', 'IGNORE_DERIVED_TYPES'])
+    except ImportError as ie:
+        print >> sys.stderr, 'Not a valid config module: ' + configModule;
+        print >> sys.stderr, '  ' + ie.strerror;
+        exit(3);
+    
     moduleName = args.module
     subroutineName = args.subroutine
     subroutineFullName = None
@@ -101,13 +142,13 @@ def main():
         print >> sys.stderr, 'Invalid Module and/or Subroutine name!';
         exit(1);
         
-    if subroutineFullName is not None and not SOURCE_FILES.existsSubroutine(subroutineFullName):
+    if subroutineFullName is not None and not SOURCE_FILES.existsSubroutine(subroutineFullName):  # @UndefinedVariable
         print >> sys.stderr, 'ERROR: Subroutine ' + str(subroutineFullName) + ' not found!';
         exit(2);
-    elif sourceFileName is not None and SOURCE_FILES.existsSourceFile(sourceFileName):
+    elif sourceFileName is not None and SOURCE_FILES.existsSourceFile(sourceFileName):  # @UndefinedVariable
         print >> sys.stderr, 'ERROR: Source file ' + sourceFileName + ' not found!';
         exit(2);
-    elif subroutineFullName is None and sourceFileName is None and not SOURCE_FILES.existsModule(moduleName):
+    elif subroutineFullName is None and sourceFileName is None and not SOURCE_FILES.existsModule(moduleName):  # @UndefinedVariable
         print >> sys.stderr, 'ERROR: Module ' + moduleName + ' not found!';
         exit(2);
         
@@ -124,14 +165,14 @@ def main():
         maxLevel = args.maxLevel
     
     if args.printer is not None:
-        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
-        printer = GRAPH_PRINTERS[args.printer]
+        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)  # @UndefinedVariable
+        printer = graphPrinter(args.printer)
         printer.setIgnoreRegex(ignoreRegex)
         printer.setMaxLevel(maxLevel)
         printer.printCallGraph(callGraph)
     elif args.analysis is not None:
-        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
-        analysis = GRAPH_ANALYSIS[args.analysis]
+        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)  # @UndefinedVariable
+        analysis = graphAnalysis(args.analysis, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)  # @UndefinedVariable
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
         if args.pointersOnly:
@@ -141,7 +182,7 @@ def main():
         analysis.setIgnoreRegex(ignoreRegex)
         analysis.analyzeCallgraph(callGraph)
     elif args.dump is not None:
-        dumper = SUBROUTINE_DUMPER[args.dump]
+        dumper = subroutineDumper(args.dump, SOURCE_FILES)  # @UndefinedVariable
         if (args.lineNumbers):
             dumper.setPrintLineNumbers(True)
         if subroutineFullName is not None:
@@ -151,7 +192,7 @@ def main():
         else:
             dumper.dumpModule(moduleName)
     elif args.line is not None:
-        lineNumberFinder = LINE_NUMBER_FINDER[args.line]
+        lineNumberFinder = lineNumberFinder(args.line, SOURCE_FILES)  # @UndefinedVariable
         if args.quiet:
             lineNumberFinder.setMinimalOutput(True)
         if subroutineFullName is not None:
@@ -159,7 +200,7 @@ def main():
         else:
             lineNumberFinder.printLineNumber(moduleName)
     elif args.use is not None:
-        usePrinter = USE_PRINTERS[args.use]
+        usePrinter = usePrinter(args.use, SOURCE_FILES)  # @UndefinedVariable
         usePrinter.printUses(subroutineFullName)
 
 if __name__ == "__main__":
