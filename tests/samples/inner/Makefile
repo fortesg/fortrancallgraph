@@ -1,7 +1,7 @@
 FF = gfortran
 FFLAGS = 
 
-all: modules assembler
+all: modules
 
 modules: innerprog
 
