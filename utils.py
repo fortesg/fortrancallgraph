@@ -32,3 +32,4 @@ def assertTypeAll(variables, varName, expectedType, noneAccepted = False):
     
     for i, var in enumerate(variables):
         assertType(var, varName + '[' + str(i) + ']', expectedType)  
+        
