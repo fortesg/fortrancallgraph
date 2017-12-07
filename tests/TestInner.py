@@ -16,7 +16,7 @@ from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, InnerSubroutineName
 from globals import GlobalVariablesCallGraphAnalysis
 
-class SampleTest(unittest.TestCase):
+class TestInner(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
@@ -38,12 +38,12 @@ class SampleTest(unittest.TestCase):
         self.i1 = SubroutineFullName('__inner_MOD_i1')
         self.i1CallGraph = callGraphBuilder.buildCallGraph(self.i1)
         
-        self.i1a = InnerSubroutineName('i1.3460', self.sa)
-        self.i1b = InnerSubroutineName('i1.3450', self.sb)
-        self.i2a = InnerSubroutineName('i2.3458', self.sa)
-        self.i2b = InnerSubroutineName('i2.3448', self.sb)
-        self.ia = InnerSubroutineName('ia.3456', self.sa)
-        self.ib = InnerSubroutineName('ib.3446', self.sb)
+        self.i1a = InnerSubroutineName('i1.3528', self.sa)
+        self.i1b = InnerSubroutineName('i1.3518', self.sb)
+        self.i2a = InnerSubroutineName('i2.3526', self.sa)
+        self.i2b = InnerSubroutineName('i2.3516', self.sb)
+        self.ia = InnerSubroutineName('ia.3526', self.sa)
+        self.ib = InnerSubroutineName('ib.3514', self.sb)
         
         self.printer = TreeLikeCallGraphPrinter()
         self.globalsTracker = GlobalVariablesCallGraphAnalysis(self.sourceFiles)
