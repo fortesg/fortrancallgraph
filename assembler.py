@@ -29,10 +29,10 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         
         self.__specialModuleFiles = dict()
-        for module, file in specialModuleFiles.iteritems():
-            self.__specialModuleFiles[module.lower()] = file;
+        for module, filE in specialModuleFiles.iteritems():
+            self.__specialModuleFiles[module.lower()] = filE;
         
-    def buildCallGraph(self, rootSubroutine, clear = False):
+    def buildCallGraph(self, rootSubroutine, clear = False):  # @UnusedVariable
         assertType(rootSubroutine, 'rootSubroutine', SubroutineFullName)     
         ### clear only for compatibility ### 
         
