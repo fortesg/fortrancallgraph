@@ -23,7 +23,7 @@ class TestBrackets(unittest.TestCase):
         self.assFile = ASSEMBLER_DIR + '/brackets.s'
         self.filesExist = os.path.exists(self.srcFile) and os.path.exists(self.assFile)
         self.root = SubroutineFullName('__brackets_MOD_dummy')
-        self.usetraversal = UseTraversal(self.sourceFiles)
+        self.usetraversal = UseTraversal(self.sourceFiles, excludeModules=['iso_c_binding'])
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
