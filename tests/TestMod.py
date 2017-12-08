@@ -34,6 +34,9 @@ class SampleTest(unittest.TestCase):
         
         self.printer = TreeLikeCallGraphPrinter()
         self.globalsTracker = GlobalVariablesCallGraphAnalysis(self.sourceFiles)
+
+    def testModuleName(self):
+        self.assertEqual('RHS_mod', self.func.getModuleName())
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
