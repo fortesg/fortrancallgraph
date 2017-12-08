@@ -82,15 +82,17 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
         assertType(moduleName, 'moduleName', str)
             
         if moduleName in self.__specialModuleFiles:
-            path = self.__specialModuleFiles[moduleName]
-            path = path[:path.rfind('.')] + FromAssemblerCallGraphBuilder.FILE_SUFFIX
+            fileName = self.__specialModuleFiles[moduleName]
+            fileName = fileName[:fileName.rfind('.')] + FromAssemblerCallGraphBuilder.FILE_SUFFIX
         else:
-            path = moduleName + FromAssemblerCallGraphBuilder.FILE_SUFFIX;
+            fileName = moduleName + FromAssemblerCallGraphBuilder.FILE_SUFFIX;
         
+        fileName = fileName.lower()
         for baseDir in self.__baseDirs:
-            fullPath = os.path.join(baseDir, path);
-            if os.path.isfile(fullPath):
-                return fullPath
+            for root, _, files in os.walk(baseDir):
+                for name in files:
+                    if name.lower() == fileName:
+                        return os.path.join(root, name)
             
         return None
     
