@@ -21,32 +21,34 @@ def loadFortranCallGraphConfiguration(configFile):
     config = {}
     execfile(configFile, globals(), config)
     
+    #TODO Constants for keys
+    
     configError = False
-    if not config['SOURCE_DIR']:
+    if 'SOURCE_DIR' not in config or not config['SOURCE_DIR']:
         print >> sys.stderr, 'Missing config variable: SOURCE_DIR'
         configError = True
     elif isinstance(config['SOURCE_DIR'], str):
         config['SOURCE_DIR'] = [config['SOURCE_DIR']]
 
-    if not config['ASSEMBLER_DIR']:
+    if 'ASSEMBLER_DIR' not in config or not config['ASSEMBLER_DIR']:
         print >> sys.stderr, 'Missing config variable: ASSEMBLER_DIR'
         configError = True
     elif isinstance(config['ASSEMBLER_DIR'], str):
         config['ASSEMBLER_DIR'] = [config['ASSEMBLER_DIR']]
         
-    if not config['SPECIAL_MODULE_FILES']:
+    if 'SPECIAL_MODULE_FILES' not in config or not config['SPECIAL_MODULE_FILES']:
         config['SPECIAL_MODULE_FILES'] = {}
 
-    if not config['CACHE_DIR']:
-        config['CACHE_DIR'] = None
+    if 'EXCLUDE_MODULES' not in config or not config['CACHE_DIR']:
+        config['EXCLUDE_MODULES'] = None
 
-    if not config['EXCLUDE_MODULES']:
+    if 'EXCLUDE_MODULES' not in config or not config['EXCLUDE_MODULES']:
         config['EXCLUDE_MODULES'] = []
 
-    if not config['IGNORE_GLOBALS_FROM_MODULES']:
+    if 'IGNORE_GLOBALS_FROM_MODULES' not in config or not config['IGNORE_GLOBALS_FROM_MODULES']:
         config['IGNORE_GLOBALS_FROM_MODULES'] = []
 
-    if not config['IGNORE_DERIVED_TYPES']:
+    if 'IGNORE_DERIVED_TYPES' not in config or not config['IGNORE_DERIVED_TYPES']:
         config['IGNORE_DERIVED_TYPES'] = []
     
     if configError:
