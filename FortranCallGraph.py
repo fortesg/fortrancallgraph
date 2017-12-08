@@ -21,7 +21,7 @@ from linenumbers import DeclarationLineNumberFinder, EndStatementLineNumberFinde
 from useprinter import UsedModuleNamePrinter, UsedFileNamePrinter
 from assembler import FromAssemblerCallGraphBuilder
 from treecache import CachedAssemblerCallGraphBuilder
-from configurator import loadConfiguration
+from fcgconfigurator import loadFortranCallGraphConfiguration
 
 GRAPH_PRINTERS = {'tree': 'in a tree-like form',
                   'dot': 'in DOT format for Graphviz',
@@ -104,7 +104,7 @@ def parseArguments():
 
 def main():
     args = parseArguments()
-    config = loadConfiguration(args.configFile)
+    config = loadFortranCallGraphConfiguration(args.configFile)
     if config is None:
         exit(3)
 
