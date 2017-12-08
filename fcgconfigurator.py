@@ -5,7 +5,7 @@ from utils import assertType
 def loadFortranCallGraphConfiguration(configFile):
     assertType(configFile, 'configFile', str, True)
 
-    if configFile is not None:
+    if configFile:
         configFile = configFile.strip('"\'')
     else:
         configFile = 'config_fortrancallgraph.py'
