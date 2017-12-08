@@ -36,7 +36,8 @@ class SampleTest(unittest.TestCase):
         self.globalsTracker = GlobalVariablesCallGraphAnalysis(self.sourceFiles)
 
     def testModuleName(self):
-        self.assertEqual('RHS_mod', self.func.getModuleName())
+        self.assertEqual('rhs_mod', self.func.getModuleName())
+        self.assertEqual('func', self.func.getSimpleName())
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)

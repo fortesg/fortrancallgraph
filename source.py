@@ -1797,10 +1797,11 @@ class SourceFiles(object):
             return moduleName + '.f90'
         
     def __findFile(self, fileName):
+        fileName = fileName.lower()
         for baseDir in self.__baseDirs:
             for root, _, files in os.walk(baseDir):
                 for name in files:
-                    if name.replace('.F90', '.f90') == fileName.replace('.F90', '.f90'):
+                    if name.lower() == fileName:
                         return os.path.join(root, name)
         return None
     
