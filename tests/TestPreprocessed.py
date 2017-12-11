@@ -69,7 +69,11 @@ class TypeProcedureTest(unittest.TestCase):
         
         self.assertEqual(1, len(self.useTraversal.getInterfaces()))
         self.assertEqual(1, len(self.useTraversal.getTypes()))
-        
+    
+    def testOffset(self):
+        sourceFile = self.sourceFiles.findSourceFile('preprocessed.f90')
+        self.assertEqual(11, sourceFile.findPreprocessorOffset(47))
+    
     def testTracker(self):
         if not self.filesExist:
             self.skipTest('Files not there')
