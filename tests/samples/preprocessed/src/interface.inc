@@ -1,0 +1,5 @@
+  INTERFACE test
+    MODULE PROCEDURE test_0d
+    MODULE PROCEDURE test_1d
+    MODULE PROCEDURE test_2d
+  END INTERFACE test
