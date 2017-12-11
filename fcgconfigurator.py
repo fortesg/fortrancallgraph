@@ -50,6 +50,9 @@ def loadFortranCallGraphConfiguration(configFile):
 
     if 'IGNORE_DERIVED_TYPES' not in config or not config['IGNORE_DERIVED_TYPES']:
         config['IGNORE_DERIVED_TYPES'] = []
+        
+    if 'SOURCE_FILES_PREPROCESSED' not in config or not config['SOURCE_FILES_PREPROCESSED']:
+        config['SOURCE_FILES_PREPROCESSED'] = False
     
     if configError:
         return None

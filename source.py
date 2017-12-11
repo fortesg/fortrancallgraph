@@ -1620,6 +1620,15 @@ class SourceFile(object):
             return self.__getAnyModule().getUseAliases()
         return dict()
 
+    def findPreprocessorOffset(self, lineNumber):
+        regEx = re.compile('^\#\s+(?P<line>\d+)\s.*')
+        
+        for i, line in self.getLines()[:lineNumber-1][::-1]:
+            regExMatch = regEx.match(line)
+            if regExMatch is not None:
+                return i + 1 - int(regExMatch.group('line'))
+        
+        return 0
     
     @staticmethod
     def linesToStatements(lines):

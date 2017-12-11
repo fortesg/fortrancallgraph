@@ -13,7 +13,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
 
     __routineWarnings = set()
 
-    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None):
+    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None, sourceFilePreprocessed = False):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
@@ -32,6 +32,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         self.__ignoredTypes = map(str.lower, ignoredTypes)
         self.__excludeFromRecursionVariables = set()
         self.__excludeFromRecursionRoutines = set()
+        self.__sourceFilePreprocessed = bool(sourceFilePreprocessed)
     
     def setVariable(self, variable):
         assertType(variable, 'variable', Variable)
@@ -186,7 +187,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             
         innerSubroutineCallRegExMatch = innerSubroutineCallRegEx.match(statement)
         if innerSubroutineCallRegExMatch is not None:
-            self.__analyzeInnerSubroutineCall(innerSubroutineCallRegExMatch, subroutine, statement, lineNumber)
+            self.__analyzeInnerSubroutineCall(innerSubroutineCallRegExMatch, subroutine, lineNumber)
             
         return variableReferences
     
@@ -432,7 +433,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if isinstance(procedures, str):
             return self.__findCalledSubroutineFullName(procedures, subroutine, lineNumber)
         else:
-            for candidate in self.__callGraph.findNextCalleesFromLine(subroutine.getName(), lineNumber):
+            for candidate in self.__findNextCalleesFromLine(subroutine, lineNumber):
                 if candidate.getSimpleName() in procedures:
                     return candidate
         
@@ -456,13 +457,27 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
              
             if calledSubroutineSimpleName in self.__interfaces:
                 interface = self.__interfaces[calledSubroutineSimpleName]
-                for candidate in self.__callGraph.findNextCalleesFromLine(callerSubroutineName, lineNumber):
+                for candidate in self.__findNextCalleesFromLine(callerSubroutine, lineNumber):
                     if candidate.getSimpleName() in interface:
                         return candidate
         
         return None
     
-    def __analyzeInnerSubroutineCall(self, regExMatch, subroutine, statement, lineNumber):
+    
+    def __findNextCalleesFromLine(self, callerSubroutine, lineNumber):
+        if self.__sourceFilePreprocessed:
+            lineNumber -= self.__findLineNumberOffset(callerSubroutine, lineNumber)
+        
+        return self.__callGraph.findNextCalleesFromLine(callerSubroutine.getName(), lineNumber)
+    
+    def __findLineNumberOffset(self, subroutine, lineNumber):
+        sourceFile = subroutine.getSourceFile()
+        if sourceFile is not None:
+            return sourceFile.findPreprocessorOffset(lineNumber)
+        
+        return 0
+    
+    def __analyzeInnerSubroutineCall(self, regExMatch, subroutine, lineNumber):
         calledSubroutineSimpleName = regExMatch.group('routine').strip().lower()
         if self._ignoreRegex is not None and self._ignoreRegex.match(calledSubroutineSimpleName):
             return set()
