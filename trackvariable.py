@@ -13,7 +13,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
 
     __routineWarnings = set()
 
-    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None, sourceFilePreprocessed = False):
+    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
@@ -32,7 +32,6 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         self.__ignoredTypes = map(str.lower, ignoredTypes)
         self.__excludeFromRecursionVariables = set()
         self.__excludeFromRecursionRoutines = set()
-        self.__sourceFilePreprocessed = bool(sourceFilePreprocessed)
     
     def setVariable(self, variable):
         assertType(variable, 'variable', Variable)
@@ -370,7 +369,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
         
         before = functionRegExMatch.group('before').strip()
-        return self.__analyzeCall(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
+        return self.__analyzeCall(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum steht hier False? Weil es sonst zu viele Fehlermeldungen gaebe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
     
     def __analyzeCall(self, calledRoutineName, originalReference, before, subroutine, lineNumber, warnIfNotFound = True):
         if self._ignoreRegex is not None and self._ignoreRegex.match(calledRoutineName):
@@ -465,16 +464,13 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
     
     
     def __findNextCalleesFromLine(self, callerSubroutine, lineNumber):
-        if self.__sourceFilePreprocessed:
-            lineNumber -= self.__findLineNumberOffset(callerSubroutine, lineNumber)
-        
+        lineNumber -= self.__findLineNumberOffset(callerSubroutine, lineNumber)
         return self.__callGraph.findNextCalleesFromLine(callerSubroutine.getName(), lineNumber)
     
     def __findLineNumberOffset(self, subroutine, lineNumber):
         sourceFile = subroutine.getSourceFile()
         if sourceFile is not None:
             return sourceFile.findPreprocessorOffset(lineNumber)
-        
         return 0
     
     def __analyzeInnerSubroutineCall(self, regExMatch, subroutine, lineNumber):
