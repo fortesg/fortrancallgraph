@@ -72,7 +72,7 @@ class TypeProcedureTest(unittest.TestCase):
     
     def testOffset(self):
         sourceFile = self.sourceFiles.findSourceFile('preprocessed.f90')
-        self.assertEqual(11, sourceFile.findPreprocessorOffset(47))
+        self.assertEqual(11, sourceFile.getPreprocessorOffset(47))
     
     def testTracker(self):
         if not self.filesExist:

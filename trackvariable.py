@@ -470,7 +470,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
     def __findLineNumberOffset(self, subroutine, lineNumber):
         sourceFile = subroutine.getSourceFile()
         if sourceFile is not None:
-            return sourceFile.findPreprocessorOffset(lineNumber)
+            return sourceFile.getPreprocessorOffset(lineNumber)
         return 0
     
     def __analyzeInnerSubroutineCall(self, regExMatch, subroutine, lineNumber):
