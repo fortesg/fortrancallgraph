@@ -10,7 +10,7 @@ from trackvariable import VariableTracker, VariableReference
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
 
-class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
+class GlobalVariableTracker(CallGraphAnalyzer):
 
     __routineWarnings = set()
     __moduleWarnings = set()
@@ -23,7 +23,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
         assertType(interfaces, 'interfaces', dict, True)
         assertType(types, 'types', TypeCollection, True)
         
-        super(GlobalVariablesCallGraphAnalysis, self).__init__()
+        super(GlobalVariableTracker, self).__init__()
         
         self.__sourceFiles = sourceFiles;
         self.__callGraph = None
@@ -34,7 +34,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
         self.__types = types;
         self.__variableTracker = None
         self.__usedVariableLists = dict()
-        GlobalVariablesCallGraphAnalysis.__routineWarnings = set()
+        GlobalVariableTracker.__routineWarnings = set()
     
     def analyzeCallgraph(self, callGraph):
         'Analyzes the given Callgraph. Finds all references to global variables.'
@@ -207,17 +207,17 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
 
     def __findSubroutine(self, subroutineName):
         subroutine = self.__sourceFiles.findSubroutine(subroutineName);
-        if subroutine is None and subroutineName not in GlobalVariablesCallGraphAnalysis.__routineWarnings:
-            GlobalVariablesCallGraphAnalysis.__routineWarnings.add(subroutineName)
-            print >> sys.stderr, '*** WARNING [GlobalVariablesCallGraphAnalysis] Routine not found: ' + str(subroutineName) + ' ***';
+        if subroutine is None and subroutineName not in GlobalVariableTracker.__routineWarnings:
+            GlobalVariableTracker.__routineWarnings.add(subroutineName)
+            print >> sys.stderr, '*** WARNING [GlobalVariableTracker] Routine not found: ' + str(subroutineName) + ' ***';
             
         return subroutine
 
     def __findModule(self, moduleName):
         module = self.__sourceFiles.findModule(moduleName);
-        if module is None and moduleName not in GlobalVariablesCallGraphAnalysis.__moduleWarnings:
-            GlobalVariablesCallGraphAnalysis.__moduleWarnings.add(moduleName)
-            print >> sys.stderr, '*** WARNING [GlobalVariablesCallGraphAnalysis] Module not found: ' + str(moduleName) + ' ***'
+        if module is None and moduleName not in GlobalVariableTracker.__moduleWarnings:
+            GlobalVariableTracker.__moduleWarnings.add(moduleName)
+            print >> sys.stderr, '*** WARNING [GlobalVariableTracker] Module not found: ' + str(moduleName) + ' ***'
             
         return module
                 

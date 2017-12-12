@@ -5,7 +5,7 @@ from source import SourceFiles
 from callgraph import CallGraph
 from supertypes import CallGraphAnalyzer
 from trackvariable import VariableTracker
-from globals import GlobalVariablesCallGraphAnalysis
+from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 
 class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
@@ -38,7 +38,7 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
         argumentTracker.setPointersOnly(self._pointersOnly)
         argumentTracker.analyzeCallgraph(callGraph)
         
-        globalTracker = GlobalVariablesCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
+        globalTracker = GlobalVariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
         globalTracker.setIgnoreRegex(self._ignoreRegex)
         globalTracker.setMinimalOutput(self._minimalOutput)
         globalTracker.setPointersOnly(self._pointersOnly)

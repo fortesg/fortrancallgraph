@@ -13,7 +13,7 @@ sys.path.append(FCG_DIR)
 from tree import TreeLikeCallGraphPrinter
 from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
-from globals import GlobalVariablesCallGraphAnalysis
+from globals import GlobalVariableTracker
 from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 
@@ -32,7 +32,7 @@ class TestNested(unittest.TestCase):
         self.callGraph = callGraphBuilder.buildCallGraph(self.root)
         
         self.printer = TreeLikeCallGraphPrinter()
-        self.globalsTracker = GlobalVariablesCallGraphAnalysis(self.sourceFiles)
+        self.globalsTracker = GlobalVariableTracker(self.sourceFiles)
         
         self.usetraversal = UseTraversal(self.sourceFiles)
         
