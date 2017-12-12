@@ -21,7 +21,8 @@ from linenumbers import DeclarationLineNumberFinder, EndStatementLineNumberFinde
 from useprinter import UsedModuleNamePrinter, UsedFileNamePrinter
 from assembler import FromAssemblerCallGraphBuilder
 from treecache import CachedAssemblerCallGraphBuilder
-from fcgconfigurator import loadFortranCallGraphConfiguration
+from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_SOURCE_DIRS, CFG_ASSEMBLER_DIRS, CFG_SPECIAL_MODULE_FILES,\
+    CFG_CACHE_DIR, CFG_SOURCE_FILES_PREPROCESSED, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES
 
 GRAPH_PRINTERS = {'tree': 'in a tree-like form',
                   'dot': 'in DOT format for Graphviz',
@@ -108,13 +109,13 @@ def main():
     if config is None:
         exit(3)
 
-    GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config['ASSEMBLER_DIR'], config['SPECIAL_MODULE_FILES'])
-    if config['CACHE_DIR']:
-        GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config['CACHE_DIR'], GRAPH_BUILDER)
-    SOURCE_FILES = SourceFiles(config['SOURCE_DIR'], config['SPECIAL_MODULE_FILES'], config['SOURCE_FILES_PREPROCESSED'])
-    EXCLUDE_MODULES = config['EXCLUDE_MODULES']
-    IGNORE_GLOBALS_FROM_MODULES = config['IGNORE_GLOBALS_FROM_MODULES']
-    IGNORE_DERIVED_TYPES = config['IGNORE_DERIVED_TYPES']
+    graphBuilder = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
+    if config[CFG_CACHE_DIR]:
+        graphBuilder = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], graphBuilder)
+    sourceFiles = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
+    excludeModules = config[CFG_EXCLUDE_MODULES]
+    ignoreGlobalsFromModules = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
+    ignoreDerivedTypes = config[CFG_IGNORE_DERIVED_TYPES]
     
     moduleName = args.module
     subroutineName = args.subroutine
@@ -143,13 +144,13 @@ def main():
         print >> sys.stderr, 'Invalid Module and/or Subroutine name!';
         exit(1);
         
-    if subroutineFullName is not None and not SOURCE_FILES.existsSubroutine(subroutineFullName):
+    if subroutineFullName is not None and not sourceFiles.existsSubroutine(subroutineFullName):
         print >> sys.stderr, 'ERROR: Subroutine ' + str(subroutineFullName) + ' not found!';
         exit(2);
-    elif sourceFileName is not None and SOURCE_FILES.existsSourceFile(sourceFileName):
+    elif sourceFileName is not None and sourceFiles.existsSourceFile(sourceFileName):
         print >> sys.stderr, 'ERROR: Source file ' + sourceFileName + ' not found!';
         exit(2);
-    elif subroutineFullName is None and sourceFileName is None and not SOURCE_FILES.existsModule(moduleName):
+    elif subroutineFullName is None and sourceFileName is None and not sourceFiles.existsModule(moduleName):
         print >> sys.stderr, 'ERROR: Module ' + moduleName + ' not found!';
         exit(2);
         
@@ -166,14 +167,14 @@ def main():
         maxLevel = args.maxLevel
     
     if args.printer is not None:
-        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
+        callGraph = graphBuilder.buildCallGraph(subroutineFullName, args.clearCache)
         printer = graphPrinter(args.printer)
         printer.setIgnoreRegex(ignoreRegex)
         printer.setMaxLevel(maxLevel)
         printer.printCallGraph(callGraph)
     elif args.analysis is not None:
-        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
-        analysis = graphAnalysis(args.analysis, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
+        callGraph = graphBuilder.buildCallGraph(subroutineFullName, args.clearCache)
+        analysis = graphAnalysis(args.analysis, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
         if args.pointersOnly:
@@ -183,7 +184,7 @@ def main():
         analysis.setIgnoreRegex(ignoreRegex)
         analysis.analyzeCallgraph(callGraph)
     elif args.dump is not None:
-        dumper = subroutineDumper(args.dump, SOURCE_FILES)
+        dumper = subroutineDumper(args.dump, sourceFiles)
         if (args.lineNumbers):
             dumper.setPrintLineNumbers(True)
         if subroutineFullName is not None:
@@ -193,7 +194,7 @@ def main():
         else:
             dumper.dumpModule(moduleName)
     elif args.line is not None:
-        lineNumberFinder = lineNumberFinder(args.line, SOURCE_FILES)
+        lineNumberFinder = lineNumberFinder(args.line, sourceFiles)
         if args.quiet:
             lineNumberFinder.setMinimalOutput(True)
         if subroutineFullName is not None:
@@ -201,7 +202,7 @@ def main():
         else:
             lineNumberFinder.printLineNumber(moduleName)
     elif args.use is not None:
-        usePrinter = usePrinter(args.use, SOURCE_FILES)
+        usePrinter = usePrinter(args.use, sourceFiles)
         usePrinter.printUses(subroutineFullName)
 
 if __name__ == "__main__":
