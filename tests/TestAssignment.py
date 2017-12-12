@@ -13,7 +13,7 @@ sys.path.append(FCG_DIR)
 
 from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, VariableReference
-from trackvariable import TrackVariableCallGraphAnalysis
+from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 
 ''' 
@@ -78,7 +78,7 @@ class AssignmentTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.direct)
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
         members = set()
         for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect):
@@ -91,7 +91,7 @@ class AssignmentTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.indirect)
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
         members = set()
         for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect):
@@ -104,7 +104,7 @@ class AssignmentTest(unittest.TestCase):
          
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.operator)
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
          
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphOperator)))
         self.assertNotIn('tt1%second', expressions)
@@ -120,7 +120,7 @@ class AssignmentTest(unittest.TestCase):
 #         
 #         useTraversal = UseTraversal(self.sourceFiles, [])
 #         useTraversal.parseModules(self.member)
-#         tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+#         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
 #         
 #         members = set()
 #         for ref in tracker.trackDerivedTypeArguments(self.callGraphMember):

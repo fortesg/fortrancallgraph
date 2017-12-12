@@ -13,7 +13,7 @@ from tree import TreeLikeCallGraphPrinter;
 from dot import DotFormatCallGraphPrinter;
 from lister import SubroutineListingCallGraphPrinter, ModuleListingCallGraphPrinter;
 from globals import GlobalVariablesCallGraphAnalysis
-from trackvariable import TrackVariableCallGraphAnalysis
+from trackvariable import VariableTracker
 from allvariables import AllVariablesCallGraphAnalysis
 from dumper import SourceLineDumper, SourceStatementDumper
 from linenumbers import DeclarationLineNumberFinder, EndStatementLineNumberFinder, FirstDocumentationLineFinder, LastSpecificationLineFinder, AllLineFinder,\
@@ -42,7 +42,7 @@ GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
 def graphAnalysis(key, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES):
     if key not in GRAPH_ANALYSIS: raise KeyError('No such CallGraphAnalyzer: ' + str(key))
     elif key == 'globals': return GlobalVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
-    elif key == 'arguments': return TrackVariableCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_DERIVED_TYPES)
+    elif key == 'arguments': return VariableTracker(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_DERIVED_TYPES)
     elif key == 'all': return AllVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
     else: raise NotImplementedError('CallGraphAnalyzer not yet implemented: ' + str(key))
 

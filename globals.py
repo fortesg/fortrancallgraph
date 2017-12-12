@@ -6,7 +6,7 @@ from utils import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer
 from source import SourceFiles
 from callgraph import CallGraph
-from trackvariable import TrackVariableCallGraphAnalysis, VariableReference
+from trackvariable import VariableTracker, VariableReference
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
 
@@ -68,7 +68,7 @@ class GlobalVariablesCallGraphAnalysis(CallGraphAnalyzer):
             self.__interfaces = useTraversal.getInterfaces()
             self.__types = useTraversal.getTypes()
         
-        self.__variableTracker = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+        self.__variableTracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
         self.__variableTracker.setIgnoreRegex(self._ignoreRegex)
         variableReferences = self.__analyzeSubroutines(callGraph.getAllSubroutineNames());
         variableReferences = VariableReference.sort(variableReferences)

@@ -9,7 +9,7 @@ from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
 
-class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
+class VariableTracker(CallGraphAnalyzer):
 
     __routineWarnings = set()
 
@@ -20,7 +20,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         assertType(interfaces, 'interfaces', dict, True)
         assertType(types, 'types', TypeCollection, True)
 
-        super(TrackVariableCallGraphAnalysis, self).__init__()
+        super(VariableTracker, self).__init__()
 
         self.__sourceFiles = sourceFiles;
         self.__variable = None;
@@ -50,7 +50,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         rootSubroutineName = callGraph.getRoot()
         rootSubroutine = self.__sourceFiles.findSubroutine(rootSubroutineName)
         if rootSubroutine is None:
-            print  >> sys.stderr, '*** ERROR [TrackVariableCallGraphAnalysis] Subroutine ' + str(rootSubroutineName) + ' not found. ***';
+            print  >> sys.stderr, '*** ERROR [VariableTracker] Subroutine ' + str(rootSubroutineName) + ' not found. ***';
             return None;
         
         if self.__variable is not None:
@@ -59,7 +59,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             if self.__variableName is not None:
                 self.__variable = self.__findTypeArgument(self.__variableName, rootSubroutine)
                 if self.__variable is None:
-                    print  >> sys.stderr, '*** ERROR [TrackVariableCallGraphAnalysis] No type argument with name: ' + self.__variableName + '. ***';
+                    print  >> sys.stderr, '*** ERROR [VariableTracker] No type argument with name: ' + self.__variableName + '. ***';
                     return None;
                 variables = {self.__variable}
             else:
@@ -96,7 +96,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         subroutineName = callGraph.getRoot()
         subroutine = self.__sourceFiles.findSubroutine(subroutineName)
         if subroutine is None:
-            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(subroutineName)
+            VariableTracker.__routineNotFoundWarning(subroutineName)
             return []
         
         variables = subroutine.getDerivedTypeArguments()
@@ -149,7 +149,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             for lineNumber, statement, _ in subroutine.getStatements():
                 variableReferences |= self.__analyzeStatement(statement, subroutine, lineNumber)
         else:
-            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(subroutineName)
+            VariableTracker.__routineNotFoundWarning(subroutineName)
                 
         return variableReferences;
     
@@ -230,7 +230,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             if not originalReference.isRecursive():
                 variable = self.__findLevelNVariable(originalReference)
                 if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
-                    newSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                    newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                     newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                     variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines);
                     for variableReference in variableReferences:
@@ -238,7 +238,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                         
                     return variableReferences
             else:
-                print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
+                print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
                 
         return set();
                 
@@ -254,7 +254,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             else:
                 return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber)
         else:
-            print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis] Ignored access to recursive data structure: ' + str(variableReference) + ') ***';
+            print >> sys.stderr, '*** WARNING [VariableTracker] Ignored access to recursive data structure: ' + str(variableReference) + ') ***';
         
         return set();    
     
@@ -276,7 +276,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                         typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
                         if typE is not None:
                             variableInCalledSubroutine.setType(typE)
-                        calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                        calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                         calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                         variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
                         for variableReference in variableReferences:
@@ -284,11 +284,11 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
                         return variableReferences
                 else:
-                    print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
+                    print >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
             else:
-                TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
+                VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
-            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(variableReference.getExpression(), subroutine.getName(), lineNumber)
+            VariableTracker.__routineNotFoundWarning(variableReference.getExpression(), subroutine.getName(), lineNumber)
         
         return set();   
     
@@ -381,7 +381,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
             return set()
         
         if originalReference.isRecursive():
-            print >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis] Ignored argument with recursive data structure: ' + str(originalReference) + ') ***';
+            print >> sys.stderr, '*** WARNING [VariableTracker] Ignored argument with recursive data structure: ' + str(originalReference) + ') ***';
             return set()
 
         if isinstance(calledRoutineName, SubroutineFullName):
@@ -410,7 +410,7 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
                         typE = self.__types.getTypeOfVariable(variableInCalledSubroutine)
                         if typE is not None:
                             variableInCalledSubroutine.setType(typE)
-                        calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                        calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                         calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                         variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
                         for variableReference in variableReferences:
@@ -418,11 +418,11 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         
                         return variableReferences
                 else:
-                    print  >> sys.stderr, '*** WARNING [TrackVariableCallGraphAnalysis] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
+                    print  >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
             else:
-                TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
+                VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
-            TrackVariableCallGraphAnalysis.__routineNotFoundWarning(str(calledRoutineName), subroutine.getName(), lineNumber)
+            VariableTracker.__routineNotFoundWarning(str(calledRoutineName), subroutine.getName(), lineNumber)
         
         return set();
 
@@ -482,22 +482,22 @@ class TrackVariableCallGraphAnalysis(CallGraphAnalyzer):
         if isinstance(calledInnerSubroutineName, InnerSubroutineName):
             if calledInnerSubroutineName in subroutine and (calledInnerSubroutineName, self.__variable) not in self.__excludeFromRecursionRoutines:
                 subGraph = self.__callGraph.extractSubgraph(calledInnerSubroutineName);
-                calledSubroutineAnalyzer = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+                calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
                 calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
             
                 return calledSubroutineAnalyzer.__trackVariable(self.__variable, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines)
             else:
-                TrackVariableCallGraphAnalysis.__routineNotFoundWarning(calledInnerSubroutineName, subroutine.getName(), lineNumber, text = 'Inner Subroutine not found')
+                VariableTracker.__routineNotFoundWarning(calledInnerSubroutineName, subroutine.getName(), lineNumber, text = 'Inner Subroutine not found')
                 
         return set();    
         
     @staticmethod
     def __routineNotFoundWarning(subroutineName, callerName = None, lineNumber = 0, text = ''):
-        if subroutineName not in TrackVariableCallGraphAnalysis.__routineWarnings:
+        if subroutineName not in VariableTracker.__routineWarnings:
         
-            TrackVariableCallGraphAnalysis.__routineWarnings.add(subroutineName)
+            VariableTracker.__routineWarnings.add(subroutineName)
             
-            warning = '*** WARNING [TrackVariableCallGraphAnalysis] '
+            warning = '*** WARNING [VariableTracker] '
             if text:
                 warning += text
             else:

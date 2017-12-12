@@ -4,7 +4,7 @@ from utils import assertType, assertTypeAll
 from source import SourceFiles
 from callgraph import CallGraph
 from supertypes import CallGraphAnalyzer
-from trackvariable import TrackVariableCallGraphAnalysis
+from trackvariable import VariableTracker
 from globals import GlobalVariablesCallGraphAnalysis
 from usetraversal import UseTraversal
 
@@ -32,7 +32,7 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
         interfaces = useTraversal.getInterfaces()
         types = useTraversal.getTypes()        
         
-        argumentTracker = TrackVariableCallGraphAnalysis(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types)
+        argumentTracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, interfaces, types)
         argumentTracker.setIgnoreRegex(self._ignoreRegex)
         argumentTracker.setMinimalOutput(self._minimalOutput)
         argumentTracker.setPointersOnly(self._pointersOnly)

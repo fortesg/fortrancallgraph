@@ -14,7 +14,7 @@ from tree import TreeLikeCallGraphPrinter
 from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from globals import GlobalVariablesCallGraphAnalysis
-from trackvariable import TrackVariableCallGraphAnalysis
+from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 
 
@@ -36,7 +36,7 @@ class TestNested(unittest.TestCase):
         
         self.usetraversal = UseTraversal(self.sourceFiles)
         
-        #self.tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], interfaces, types)
+        #self.tracker = VariableTracker(self.sourceFiles, [], [], interfaces, types)
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -85,7 +85,7 @@ class TestNested(unittest.TestCase):
             
         self.usetraversal.parseModules(self.root)
         
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.usetraversal.getInterfaces(), self.usetraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.usetraversal.getInterfaces(), self.usetraversal.getTypes())
         expressions = set()
         for varRef in tracker.trackDerivedTypeArguments(self.callGraph):
             expressions.add(varRef.getExpression())

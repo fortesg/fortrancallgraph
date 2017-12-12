@@ -13,7 +13,7 @@ sys.path.append(FCG_DIR)
 
 from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, VariableReference
-from trackvariable import TrackVariableCallGraphAnalysis
+from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 
 ''' 
@@ -104,7 +104,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphTest)))
         self.assertEqual({'t%first', 't%second'}, expressions)
@@ -113,7 +113,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphIndirect)))
         self.assertEqual({'t%first', 't%second'}, expressions)
@@ -122,7 +122,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphAddInt)))
         self.assertEqual({'t%first', 't%second'}, expressions)
@@ -131,7 +131,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
          
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphAnother)))
         self.assertEqual({'t1%first', 't2%first', 't1%second', 't2%second'}, expressions)
@@ -140,7 +140,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
          
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphGeneric)))
         self.assertEqual({'t1%first', 't2%first', 't1%second', 't2%second'}, expressions)
@@ -149,7 +149,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
          
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphChild)))
         self.assertEqual({'t%ttest%second'}, expressions)

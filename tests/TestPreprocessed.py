@@ -13,7 +13,7 @@ sys.path.append(FCG_DIR)
 
 from assembler import FromAssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, VariableReference
-from trackvariable import TrackVariableCallGraphAnalysis
+from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 
 ''' 
@@ -78,7 +78,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraph)))
         self.assertEqual({'t0%i0', 't1%i1', 't2%i2'}, expressions)
