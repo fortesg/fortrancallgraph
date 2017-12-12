@@ -1466,8 +1466,11 @@ class SourceFile(object):
         
         self.__path = path
         self.__preprocessed = preprocessed
+        self.__preprocessorLineDirectives = None
         if not isTestDummy:
             self.__modules = self.__extractModules()
+        else:
+            self.__modules = dict()
         
     def __str__(self):
         return self.__path;
@@ -1621,16 +1624,28 @@ class SourceFile(object):
             return self.__getAnyModule().getUseAliases()
         return dict()
 
-    def findPreprocessorOffset(self, lineNumber):
+    def getPreprocessorOffset(self, lineNumber):
         if self.__preprocessed:
-            regEx = re.compile('^\#\s+(?P<line>\d+)\s.*')
-            
-            for i, line in self.getLines()[:lineNumber-1][::-1]:
-                regExMatch = regEx.match(line)
-                if regExMatch is not None:
-                    return i + 1 - int(regExMatch.group('line'))
+            if self.__preprocessorLineDirectives is None:
+                self.__preprocessorLineDirectives = self.__findPreprocessorLineDirectives()
+        
+            for i, line in self.__preprocessorLineDirectives:
+                if i < lineNumber:
+                    return i + 1 - line
         
         return 0
+    
+    def __findPreprocessorLineDirectives(self):
+        """Reversed order!!!"""        
+        regEx = re.compile('^\#\s+(?P<line>\d+)\s.*')
+            
+        directives = []
+        if self.__preprocessed:
+            for i, line in self.getLines()[::-1]:
+                regExMatch = regEx.match(line)
+                if regExMatch is not None:
+                    directives.append((i, int(regExMatch.group('line'))))
+        return directives
     
     @staticmethod
     def linesToStatements(lines):
