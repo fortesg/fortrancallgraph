@@ -1,5 +1,5 @@
 # coding=utf8
-from supertypes import UsePrinters, UseTraversalPassenger
+from supertypes import UsePrinter, UseTraversalPassenger
 from utils import assertTypeAll, assertType
 from source import SourceFiles, SubroutineFullName, Module
 from usetraversal import UseTraversal
@@ -21,7 +21,7 @@ class UseCollector(UseTraversalPassenger):
         self.__moduleNames.add(module.getName())
         
 
-class UsedModuleNamePrinter(UsePrinters):
+class UsedModuleNamePrinter(UsePrinter):
     
     def __init__(self, sourceFiles, excludeModules = []):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)

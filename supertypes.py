@@ -171,7 +171,7 @@ class UseTraversalPassenger(object):
         raise NotImplementedError() 
  
  
-class UsePrinters(object):
+class UsePrinter(object):
          
     def __init__(self, sourceFiles, excludeModules = []):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
