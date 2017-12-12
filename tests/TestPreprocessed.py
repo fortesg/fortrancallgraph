@@ -23,7 +23,7 @@ class TypeProcedureTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
+        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles, True);
         
         self.srcFile = SOURCE_DIR + '/preprocessed.f90'
         self.assFile = ASSEMBLER_DIR + '/preprocessed.s'
@@ -78,7 +78,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes(), True)
+        tracker = TrackVariableCallGraphAnalysis(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
         expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraph)))
         self.assertEqual({'t0%i0', 't1%i1', 't2%i2'}, expressions)

@@ -1460,11 +1460,12 @@ class Module(SubroutineContainer):
         return SubroutineFullName.fromParts(self.getName(), name)
 
 class SourceFile(object):
-    def __init__(self, path, isTestDummy = False):
+    def __init__(self, path, preprocessed = False, isTestDummy = False):
         if not isTestDummy and not os.path.isfile(path) and os.access(path, os.R_OK):
             raise IOError("Not a readable file: " + path);
         
         self.__path = path
+        self.__preprocessed = preprocessed
         if not isTestDummy:
             self.__modules = self.__extractModules()
         
@@ -1621,12 +1622,13 @@ class SourceFile(object):
         return dict()
 
     def findPreprocessorOffset(self, lineNumber):
-        regEx = re.compile('^\#\s+(?P<line>\d+)\s.*')
-        
-        for i, line in self.getLines()[:lineNumber-1][::-1]:
-            regExMatch = regEx.match(line)
-            if regExMatch is not None:
-                return i + 1 - int(regExMatch.group('line'))
+        if self.__preprocessed:
+            regEx = re.compile('^\#\s+(?P<line>\d+)\s.*')
+            
+            for i, line in self.getLines()[:lineNumber-1][::-1]:
+                regExMatch = regEx.match(line)
+                if regExMatch is not None:
+                    return i + 1 - int(regExMatch.group('line'))
         
         return 0
     
@@ -1704,7 +1706,7 @@ class SourceFile(object):
         return cleanStatement
 
 class SourceFiles(object):
-    def __init__(self, baseDirs, specialModuleFiles={}):
+    def __init__(self, baseDirs, specialModuleFiles = {}, preprocessed = False):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         
         if isinstance(baseDirs, str):
@@ -1717,8 +1719,12 @@ class SourceFiles(object):
         self.__baseDirs = baseDirs
         self.__filesByPath = dict()
         self.__filesByModules = dict()
+        self.__preprocessed = preprocessed
         self.setSpecialModuleFiles(specialModuleFiles)
-        
+    
+    def isPreprocessed(self):
+        return self.__preprocessed
+    
     def getSpecialModuleFiles(self):
         return self.__specialModuleFiles
     
@@ -1785,7 +1791,7 @@ class SourceFiles(object):
         elif path in self.__filesByPath:
             sourceFile = self.__filesByPath[path]
         else:
-            sourceFile = SourceFile(path) 
+            sourceFile = SourceFile(path, self.__preprocessed) 
             self.__filesByPath[path] = sourceFile
         
         return sourceFile

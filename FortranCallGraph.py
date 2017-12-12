@@ -111,8 +111,7 @@ def main():
     GRAPH_BUILDER = FromAssemblerCallGraphBuilder(config['ASSEMBLER_DIR'], config['SPECIAL_MODULE_FILES'])
     if config['CACHE_DIR']:
         GRAPH_BUILDER = CachedAssemblerCallGraphBuilder(config['CACHE_DIR'], GRAPH_BUILDER)
-    SOURCE_FILES = SourceFiles(config['SOURCE_DIR'], config['SPECIAL_MODULE_FILES'])
-    SOURCE_FILES_PREPROCESSED = config['SOURCE_FILES_PREPROCESSED']
+    SOURCE_FILES = SourceFiles(config['SOURCE_DIR'], config['SPECIAL_MODULE_FILES'], config['SOURCE_FILES_PREPROCESSED'])
     EXCLUDE_MODULES = config['EXCLUDE_MODULES']
     IGNORE_GLOBALS_FROM_MODULES = config['IGNORE_GLOBALS_FROM_MODULES']
     IGNORE_DERIVED_TYPES = config['IGNORE_DERIVED_TYPES']
@@ -144,13 +143,13 @@ def main():
         print >> sys.stderr, 'Invalid Module and/or Subroutine name!';
         exit(1);
         
-    if subroutineFullName is not None and not SOURCE_FILES.existsSubroutine(subroutineFullName):  # @UndefinedVariable
+    if subroutineFullName is not None and not SOURCE_FILES.existsSubroutine(subroutineFullName):
         print >> sys.stderr, 'ERROR: Subroutine ' + str(subroutineFullName) + ' not found!';
         exit(2);
-    elif sourceFileName is not None and SOURCE_FILES.existsSourceFile(sourceFileName):  # @UndefinedVariable
+    elif sourceFileName is not None and SOURCE_FILES.existsSourceFile(sourceFileName):
         print >> sys.stderr, 'ERROR: Source file ' + sourceFileName + ' not found!';
         exit(2);
-    elif subroutineFullName is None and sourceFileName is None and not SOURCE_FILES.existsModule(moduleName):  # @UndefinedVariable
+    elif subroutineFullName is None and sourceFileName is None and not SOURCE_FILES.existsModule(moduleName):
         print >> sys.stderr, 'ERROR: Module ' + moduleName + ' not found!';
         exit(2);
         
@@ -167,14 +166,14 @@ def main():
         maxLevel = args.maxLevel
     
     if args.printer is not None:
-        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)  # @UndefinedVariable
+        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
         printer = graphPrinter(args.printer)
         printer.setIgnoreRegex(ignoreRegex)
         printer.setMaxLevel(maxLevel)
         printer.printCallGraph(callGraph)
     elif args.analysis is not None:
-        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)  # @UndefinedVariable
-        analysis = graphAnalysis(args.analysis, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)  # @UndefinedVariable
+        callGraph = GRAPH_BUILDER.buildCallGraph(subroutineFullName, args.clearCache)
+        analysis = graphAnalysis(args.analysis, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
         if args.pointersOnly:
@@ -184,7 +183,7 @@ def main():
         analysis.setIgnoreRegex(ignoreRegex)
         analysis.analyzeCallgraph(callGraph)
     elif args.dump is not None:
-        dumper = subroutineDumper(args.dump, SOURCE_FILES)  # @UndefinedVariable
+        dumper = subroutineDumper(args.dump, SOURCE_FILES)
         if (args.lineNumbers):
             dumper.setPrintLineNumbers(True)
         if subroutineFullName is not None:
@@ -194,7 +193,7 @@ def main():
         else:
             dumper.dumpModule(moduleName)
     elif args.line is not None:
-        lineNumberFinder = lineNumberFinder(args.line, SOURCE_FILES)  # @UndefinedVariable
+        lineNumberFinder = lineNumberFinder(args.line, SOURCE_FILES)
         if args.quiet:
             lineNumberFinder.setMinimalOutput(True)
         if subroutineFullName is not None:
@@ -202,7 +201,7 @@ def main():
         else:
             lineNumberFinder.printLineNumber(moduleName)
     elif args.use is not None:
-        usePrinter = usePrinter(args.use, SOURCE_FILES)  # @UndefinedVariable
+        usePrinter = usePrinter(args.use, SOURCE_FILES)
         usePrinter.printUses(subroutineFullName)
 
 if __name__ == "__main__":
