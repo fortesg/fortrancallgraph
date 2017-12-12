@@ -2,7 +2,7 @@
 
 import re
 import sys
-from utils import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer
 from source import SourceFiles, Variable, VariableReference, SubroutineFullName, InnerSubroutineName
 from callgraph import CallGraph

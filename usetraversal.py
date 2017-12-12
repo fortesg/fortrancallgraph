@@ -2,7 +2,7 @@
 
 import sys
 import re
-from utils import assertType
+from assertions import assertType
 from source import SubroutineFullName, SourceFiles
 from interfaces import InterfaceFinder
 from typefinder import TypeFinder

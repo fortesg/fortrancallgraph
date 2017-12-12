@@ -1,6 +1,6 @@
 # coding=utf8
 from supertypes import UsePrinter, UseTraversalPassenger
-from utils import assertTypeAll, assertType
+from assertions import assertTypeAll, assertType
 from source import SourceFiles, SubroutineFullName, Module
 from usetraversal import UseTraversal
 

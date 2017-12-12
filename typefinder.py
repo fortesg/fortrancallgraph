@@ -1,7 +1,7 @@
 # coding=utf8
 
 import re
-from utils import assertType
+from assertions import assertType
 from source import Type, Variable, Module
 from supertypes import UseTraversalPassenger
 

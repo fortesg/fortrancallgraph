@@ -1,6 +1,6 @@
 import os
 import sys
-from utils import assertType
+from assertions import assertType
 
 CFG_SOURCE_DIRS = 'SOURCE_DIRS'
 CFG_SOURCE_DIRS_LEGACY = 'SOURCE_DIR'

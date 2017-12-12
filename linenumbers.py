@@ -1,6 +1,6 @@
 #coding=utf8
 
-from utils import assertType
+from assertions import assertType
 from supertypes import LineNumberFinder
 from source import SourceFiles, Subroutine, Module
 

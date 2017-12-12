@@ -1,6 +1,6 @@
 #coding=utf8
 
-from utils import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll
 from source import SourceFiles
 from callgraph import CallGraph
 from supertypes import CallGraphAnalyzer

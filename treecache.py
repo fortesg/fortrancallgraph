@@ -1,4 +1,4 @@
-from utils import assertType
+from assertions import assertType
 import os
 from supertypes import CallGraphBuilder
 from source import SubroutineFullName

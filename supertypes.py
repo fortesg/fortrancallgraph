@@ -1,4 +1,4 @@
-from utils import assertType, REGEX_TYPE, assertTypeAll
+from assertions import assertType, REGEX_TYPE, assertTypeAll
 from source import SubroutineFullName, Subroutine, SourceFiles, Module
 from callgraph import CallGraph
 import re

@@ -5,7 +5,7 @@ import os.path;
 import re
 from source import SubroutineFullName, InnerSubroutineName
 from callgraph import CallGraph
-from utils import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll
 from supertypes import CallGraphBuilder
 
 class FromAssemblerCallGraphBuilder(CallGraphBuilder):

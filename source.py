@@ -3,7 +3,7 @@
 import os.path;
 import re
 import sys
-from utils import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll
 from operator import attrgetter
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)

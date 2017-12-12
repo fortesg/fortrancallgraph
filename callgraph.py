@@ -1,4 +1,4 @@
-from utils import assertType
+from assertions import assertType
 from source import SubroutineFullName, SubroutineName, InnerSubroutineName
 import sys
 

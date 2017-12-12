@@ -1,4 +1,4 @@
-from utils import assertType
+from assertions import assertType
 from callgraph import CallGraph
 from supertypes import CallGraphPrinter
 

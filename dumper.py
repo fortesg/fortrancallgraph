@@ -1,4 +1,4 @@
-from utils import assertType
+from assertions import assertType
 from supertypes import SourceDumper
 from source import SubroutineFullName
 
