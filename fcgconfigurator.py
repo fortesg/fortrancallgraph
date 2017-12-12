@@ -1,6 +1,17 @@
 import os
 import sys
 from utils import assertType
+
+CFG_SOURCE_DIRS = 'SOURCE_DIRS'
+CFG_SOURCE_DIRS_LEGACY = 'SOURCE_DIR'
+CFG_ASSEMBLER_DIRS = 'ASSEMBLER_DIRS'
+CFG_ASSEMBLER_DIRS_LEGACY = 'ASSEMBLER_DIR'
+CFG_SPECIAL_MODULE_FILES = 'SPECIAL_MODULE_FILES'
+CFG_SOURCE_FILES_PREPROCESSED = 'SOURCE_FILES_PREPROCESSED'
+CFG_CACHE_DIR = 'CACHE_DIR'
+CFG_EXCLUDE_MODULES = 'EXCLUDE_MODULES'
+CFG_IGNORE_GLOBALS_FROM_MODULES = 'IGNORE_GLOBALS_FROM_MODULES'
+CFG_IGNORE_DERIVED_TYPES = 'IGNORE_DERIVED_TYPES'
         
 def loadFortranCallGraphConfiguration(configFile):
     assertType(configFile, 'configFile', str, True)
@@ -21,38 +32,40 @@ def loadFortranCallGraphConfiguration(configFile):
     config = {}
     execfile(configFile, globals(), config)
     
-    #TODO Constants for keys
-    
     configError = False
-    if 'SOURCE_DIR' not in config or not config['SOURCE_DIR']:
-        print >> sys.stderr, 'Missing config variable: SOURCE_DIR'
+    if CFG_SOURCE_DIRS not in config and CFG_SOURCE_DIRS_LEGACY in config:
+        config[CFG_SOURCE_DIRS] = config[CFG_SOURCE_DIRS_LEGACY]
+    if CFG_SOURCE_DIRS not in config or not config[CFG_SOURCE_DIRS]:
+        print >> sys.stderr, 'Missing config variable: ' + CFG_SOURCE_DIRS
         configError = True
-    elif isinstance(config['SOURCE_DIR'], str):
-        config['SOURCE_DIR'] = [config['SOURCE_DIR']]
+    elif isinstance(config[CFG_SOURCE_DIRS], str):
+        config[CFG_SOURCE_DIRS] = [config[CFG_SOURCE_DIRS]]
 
-    if 'ASSEMBLER_DIR' not in config or not config['ASSEMBLER_DIR']:
-        print >> sys.stderr, 'Missing config variable: ASSEMBLER_DIR'
+    if CFG_ASSEMBLER_DIRS not in config and CFG_ASSEMBLER_DIRS_LEGACY in config:
+        config[CFG_ASSEMBLER_DIRS] = config[CFG_ASSEMBLER_DIRS_LEGACY]
+    if CFG_ASSEMBLER_DIRS not in config or not config[CFG_ASSEMBLER_DIRS]:
+        print >> sys.stderr, 'Missing config variable: ' + CFG_ASSEMBLER_DIRS
         configError = True
-    elif isinstance(config['ASSEMBLER_DIR'], str):
-        config['ASSEMBLER_DIR'] = [config['ASSEMBLER_DIR']]
+    elif isinstance(config[CFG_ASSEMBLER_DIRS], str):
+        config[CFG_ASSEMBLER_DIRS] = [config[CFG_ASSEMBLER_DIRS]]
         
-    if 'SPECIAL_MODULE_FILES' not in config or not config['SPECIAL_MODULE_FILES']:
-        config['SPECIAL_MODULE_FILES'] = {}
-
-    if 'EXCLUDE_MODULES' not in config or not config['CACHE_DIR']:
-        config['EXCLUDE_MODULES'] = None
-
-    if 'EXCLUDE_MODULES' not in config or not config['EXCLUDE_MODULES']:
-        config['EXCLUDE_MODULES'] = []
-
-    if 'IGNORE_GLOBALS_FROM_MODULES' not in config or not config['IGNORE_GLOBALS_FROM_MODULES']:
-        config['IGNORE_GLOBALS_FROM_MODULES'] = []
-
-    if 'IGNORE_DERIVED_TYPES' not in config or not config['IGNORE_DERIVED_TYPES']:
-        config['IGNORE_DERIVED_TYPES'] = []
+    if CFG_SPECIAL_MODULE_FILES not in config or not config[CFG_SPECIAL_MODULE_FILES]:
+        config[CFG_SPECIAL_MODULE_FILES] = {}
         
-    if 'SOURCE_FILES_PREPROCESSED' not in config or not config['SOURCE_FILES_PREPROCESSED']:
-        config['SOURCE_FILES_PREPROCESSED'] = False
+    if CFG_SOURCE_FILES_PREPROCESSED not in config or not config[CFG_SOURCE_FILES_PREPROCESSED]:
+        config[CFG_SOURCE_FILES_PREPROCESSED] = False
+
+    if CFG_CACHE_DIR not in config or not config[CFG_CACHE_DIR]:
+        config[CFG_CACHE_DIR] = None
+
+    if CFG_EXCLUDE_MODULES not in config or not config[CFG_EXCLUDE_MODULES]:
+        config[CFG_EXCLUDE_MODULES] = []
+
+    if CFG_IGNORE_GLOBALS_FROM_MODULES not in config or not config[CFG_IGNORE_GLOBALS_FROM_MODULES]:
+        config[CFG_IGNORE_GLOBALS_FROM_MODULES] = []
+
+    if CFG_IGNORE_DERIVED_TYPES not in config or not config[CFG_IGNORE_DERIVED_TYPES]:
+        config[CFG_IGNORE_DERIVED_TYPES] = []
     
     if configError:
         return None
