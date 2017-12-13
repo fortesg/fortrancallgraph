@@ -9,6 +9,7 @@ CACHE_DIR = FCG_DIR + '/cache'
 ASSEMBLER_DIRS = [] 
 
 # Locations of the original source files
+# same as above
 SOURCE_DIRS = [] 
 
 # Are the files in SOURCE_DIRS already preprocessed?
