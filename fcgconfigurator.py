@@ -22,9 +22,9 @@ def loadFortranCallGraphConfiguration(configFile, incomplete = False, baseConfig
         configFile = 'config_fortrancallgraph.py'
     originalConfigFile = configFile
     if not os.path.isfile(configFile):
-        configFile = os.path.dirname(os.path.realpath(__file__)) + '/' + originalConfigFile
+        configFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), originalConfigFile)
     if not os.path.isfile(configFile):
-        configFile = os.path.dirname(os.path.realpath(__file__)) + '/config/' + originalConfigFile
+        configFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config', originalConfigFile)
     if not os.path.isfile(configFile):
         print >> sys.stderr, 'Config file not found: ' + originalConfigFile
         return None
