@@ -49,7 +49,7 @@ def graphAnalysis(key, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULE
 SUBROUTINE_DUMPER = {'lines': 'original source lines',
                     'statements': 'normalized source lines'} 
 def subroutineDumper(key, SOURCE_FILES):
-    if key not in GRAPH_ANALYSIS: raise KeyError('No such SourceDumper: ' + str(key))
+    if key not in SUBROUTINE_DUMPER: raise KeyError('No such SourceDumper: ' + str(key))
     elif key == 'lines': return SourceLineDumper(SOURCE_FILES)
     elif key == 'statements': return SourceStatementDumper(SOURCE_FILES)
     else: raise NotImplementedError('SourceDumper not yet implemented: ' + str(key))
@@ -62,7 +62,7 @@ LINE_NUMBER_FINDER = {'first': 'the first line, containing the SUBROUTINE/FUNCTI
                     'contains': 'the CONTAINS statement - -1 when there is no such statement',
                     'all': 'all of the others'}
 def lineNumberFinder(key, SOURCE_FILES):
-    if key not in GRAPH_ANALYSIS: raise KeyError('No such LineNumberFinder: ' + str(key))
+    if key not in LINE_NUMBER_FINDER: raise KeyError('No such LineNumberFinder: ' + str(key))
     elif key == 'first': return DeclarationLineNumberFinder(SOURCE_FILES),
     elif key == 'last': return EndStatementLineNumberFinder(SOURCE_FILES),
     elif key == 'doc': return FirstDocumentationLineFinder(SOURCE_FILES),
