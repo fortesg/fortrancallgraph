@@ -1,6 +1,8 @@
 import os
 
 FCG_DIR = os.path.dirname(os.path.realpath(__file__))
+
+# Directory where serialized call trees are stored for quicker analysis
 CACHE_DIR = FCG_DIR + '/cache'
 
 # Locations of the assembler files 
