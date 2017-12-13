@@ -131,7 +131,29 @@ Everything else you have to find out on your own, so far.
 
 ## Notes for ICON developers
 
-*coming soon*
+#### 1. Create assembler files
+
+I have done it like this:
+
+* In my `mh-linux` file I have added `$FFLAGS` itself to `FFLAGS` under the `gcc` section:
+  ```
+  FFLAGS      = $FFLAGS $FCPP $FLANG $FWARN $INCLUDES
+  ```
+* Then, when I want to create the assembler files, I just run:
+  ```
+  $> make clean
+  $> export FFLAGS='-save-temps -g -O0' && ./configure && make
+  $> rm build/x86_64-unknown-linux-gnu/support/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/yac/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/tixi/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/mtime/src/*.f90
+  $> rm build/x86_64-unknown-linux-gnu/externals/self/src/*.f90 
+  $> export FFLAGS='' && ./configure && make
+  ```
+#### 2. Configuration
+
+[My configuration file for ICON](https://github.com/fortesg/config-examples/blob/master/icon/config_fortrancallgraph.py)
 
 ## License
 
