@@ -143,12 +143,7 @@ I have done it like this:
   ```
   $> make clean
   $> export FFLAGS='-save-temps -g -O0' && ./configure && make
-  $> rm build/x86_64-unknown-linux-gnu/support/*.f90
-  $> rm build/x86_64-unknown-linux-gnu/src/*.f90
-  $> rm build/x86_64-unknown-linux-gnu/externals/yac/src/*.f90
-  $> rm build/x86_64-unknown-linux-gnu/externals/tixi/src/*.f90
-  $> rm build/x86_64-unknown-linux-gnu/externals/mtime/src/*.f90
-  $> rm build/x86_64-unknown-linux-gnu/externals/self/src/*.f90 
+  $> find build/x86_64-unknown-linux-gnu -name *.f90 -delete 
   $> export FFLAGS='' && ./configure && make
   ```
 #### 2. Configuration
