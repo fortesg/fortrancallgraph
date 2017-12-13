@@ -12,6 +12,8 @@ Arguments of basic types will not be tracked but also listed in the results.
 So far, the documentation is very poor. If your interested in using `FortranCallGraph`, please feel free to contact me:   
 Christian Hovy <<hovy@informatik.uni-hamburg.de>>
 
+**Contents:** [Quick Start Guide](#quick-start-guide) | [Notes for ICON developers](#notes-for-icon-developers) | [License](#license)
+
 ## Quick Start Guide
 
 ### 1. Clone this repo
@@ -126,6 +128,10 @@ $> ./FortranCallGraph.py -a all my_module my_subroutine
 ```
 
 Everything else you have to find out on your own, so far.
+
+## Notes for ICON developers
+
+*coming soon*
 
 ## License
 
