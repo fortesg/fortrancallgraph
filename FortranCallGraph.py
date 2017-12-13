@@ -55,20 +55,20 @@ def subroutineDumper(key, SOURCE_FILES):
     else: raise NotImplementedError('SourceDumper not yet implemented: ' + str(key))
 
 LINE_NUMBER_FINDER = {'first': 'the first line, containing the SUBROUTINE/FUNCTION keyword',
-                    'last': 'the last line, containing the END keyword',
-                    'doc': 'the first line of the leading comment - the same as "first" when no comment exists',
-                    'specs': 'the last variable specification',
-                    'use': 'the last USE statement',
-                    'contains': 'the CONTAINS statement - -1 when there is no such statement',
-                    'all': 'all of the others'}
+                      'last': 'the last line, containing the END keyword',
+                      'doc': 'the first line of the leading comment - the same as "first" when no comment exists',
+                      'specs': 'the last variable specification',
+                      'use': 'the last USE statement',
+                      'contains': 'the CONTAINS statement - -1 when there is no such statement',
+                      'all': 'all of the others'}
 def lineNumberFinder(key, SOURCE_FILES):
     if key not in LINE_NUMBER_FINDER: raise KeyError('No such LineNumberFinder: ' + str(key))
-    elif key == 'first': return DeclarationLineNumberFinder(SOURCE_FILES),
-    elif key == 'last': return EndStatementLineNumberFinder(SOURCE_FILES),
-    elif key == 'doc': return FirstDocumentationLineFinder(SOURCE_FILES),
-    elif key == 'specs': return LastSpecificationLineFinder(SOURCE_FILES),
-    elif key == 'use': return LastUseLineFinder(SOURCE_FILES),
-    elif key == 'contains': return ContainsLineFinder(SOURCE_FILES),
+    elif key == 'first': return DeclarationLineNumberFinder(SOURCE_FILES)
+    elif key == 'last': return EndStatementLineNumberFinder(SOURCE_FILES)
+    elif key == 'doc': return FirstDocumentationLineFinder(SOURCE_FILES)
+    elif key == 'specs': return LastSpecificationLineFinder(SOURCE_FILES)
+    elif key == 'use': return LastUseLineFinder(SOURCE_FILES)
+    elif key == 'contains': return ContainsLineFinder(SOURCE_FILES)
     elif key == 'all': return AllLineFinder(SOURCE_FILES)
     else: raise NotImplementedError('LineNumberFinder not yet implemented: ' + str(key))
 
@@ -76,7 +76,7 @@ USE_PRINTERS = {'modules': 'module names',
                 'files': 'file pathes'} 
 def usePrinter(key, SOURCE_FILES):
     if key not in USE_PRINTERS: raise KeyError('No such UsePrinter: ' + str(key))
-    elif key == 'modules': return UsedModuleNamePrinter(SOURCE_FILES),
+    elif key == 'modules': return UsedModuleNamePrinter(SOURCE_FILES)
     elif key == 'files': return UsedFileNamePrinter(SOURCE_FILES)
     else: raise NotImplementedError('UsePrinter not yet implemented: ' + str(key))
 
@@ -194,13 +194,14 @@ def main():
         else:
             dumper.dumpModule(moduleName)
     elif args.line is not None:
-        lineNumberFinder = lineNumberFinder(args.line, sourceFiles)
+        finder = lineNumberFinder(args.line, sourceFiles)
+        print '*** DEBUG *** ' + str(finder)
         if args.quiet:
-            lineNumberFinder.setMinimalOutput(True)
+            finder.setMinimalOutput(True)
         if subroutineFullName is not None:
-            lineNumberFinder.printLineNumber(subroutineFullName)
+            finder.printLineNumber(subroutineFullName)
         else:
-            lineNumberFinder.printLineNumber(moduleName)
+            finder.printLineNumber(moduleName)
     elif args.use is not None:
         usePrinter = usePrinter(args.use, sourceFiles)
         usePrinter.printUses(subroutineFullName)
