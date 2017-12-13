@@ -29,7 +29,7 @@ The meaning of the variables is documented in the [sample configuration file](co
 
 ### 3. Create assembler files
 
-Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `--save-temps -g -O0` to generate assembler files.
+Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `-save-temps -g -O0` to generate assembler files.
 
 ### 4. Run `./FortranCallGraph.py`
 
