@@ -1075,6 +1075,7 @@ class SubroutineContainer(object):
     def __findContainsStatementIndex(self):
         lastUseIndex = self.__getLastUseStatementIndex()
         for i, (_, statement, _) in enumerate(self.getStatements()[lastUseIndex + 1:]):
+            # FIXME Ignore CONTAINS within types
             if statement.upper() == 'CONTAINS':
                 return i + lastUseIndex + 1
         
