@@ -13,7 +13,7 @@ CFG_EXCLUDE_MODULES = 'EXCLUDE_MODULES'
 CFG_IGNORE_GLOBALS_FROM_MODULES = 'IGNORE_GLOBALS_FROM_MODULES'
 CFG_IGNORE_DERIVED_TYPES = 'IGNORE_DERIVED_TYPES'
         
-def loadFortranCallGraphConfiguration(configFile):
+def loadFortranCallGraphConfiguration(configFile, incomplete = False, baseConfig = {}):
     assertType(configFile, 'configFile', str, True)
 
     if configFile:
@@ -29,23 +29,25 @@ def loadFortranCallGraphConfiguration(configFile):
         print >> sys.stderr, 'Config file not found: ' + originalConfigFile
         return None
         
-    config = {}
+    config = baseConfig
     execfile(configFile, globals(), config)
     
     configError = False
     if CFG_SOURCE_DIRS not in config and CFG_SOURCE_DIRS_LEGACY in config:
         config[CFG_SOURCE_DIRS] = config[CFG_SOURCE_DIRS_LEGACY]
     if CFG_SOURCE_DIRS not in config or not config[CFG_SOURCE_DIRS]:
-        print >> sys.stderr, 'Missing config variable: ' + CFG_SOURCE_DIRS
-        configError = True
+        if not incomplete:
+            print >> sys.stderr, 'Missing config variable: ' + CFG_SOURCE_DIRS
+            configError = True
     elif isinstance(config[CFG_SOURCE_DIRS], str):
         config[CFG_SOURCE_DIRS] = [config[CFG_SOURCE_DIRS]]
 
     if CFG_ASSEMBLER_DIRS not in config and CFG_ASSEMBLER_DIRS_LEGACY in config:
         config[CFG_ASSEMBLER_DIRS] = config[CFG_ASSEMBLER_DIRS_LEGACY]
     if CFG_ASSEMBLER_DIRS not in config or not config[CFG_ASSEMBLER_DIRS]:
-        print >> sys.stderr, 'Missing config variable: ' + CFG_ASSEMBLER_DIRS
-        configError = True
+        if not incomplete:
+            print >> sys.stderr, 'Missing config variable: ' + CFG_ASSEMBLER_DIRS
+            configError = True
     elif isinstance(config[CFG_ASSEMBLER_DIRS], str):
         config[CFG_ASSEMBLER_DIRS] = [config[CFG_ASSEMBLER_DIRS]]
         
