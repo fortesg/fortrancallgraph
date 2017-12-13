@@ -23,35 +23,19 @@ $> cd fortrancallgraph
 
 ### 2. Fill out the configuration file [config_fortrancallgraph.py](config_fortrancallgraph.py):
 
-`FCG_DIR` : The location of `FortranCallGraph` (usually `os.path.dirname(os.path.realpath(__file__))`)
-
-`CACHE_DIR` : FCG is able to cache call graphs. This is folder for the cache files (usually `FCG_DIR + '/cache'`).
-
-`ASSEMBLER_DIR` : The location of the GCC assembler files you have created from your application's sources.
-
-`SOURCE_DIR` : The location of the source files of your application. Can be organized in subfolders.
-
-`SPECIAL_MODULE_FILES` : FCG assumes that your code is organized in modules and that every module is in a file with the name `<modulename>.f90`. In this constant you can declare a dict with exceptions from this rule.
-Example:  
-```python
-SPECIAL_MODULE_FILES = { 'mod_foo': 'bar.f90' }
-```
-`EXCLUDE_MODULES` : A list of modules that shall not be analyzed
-
-`IGNORE_GLOBALS_FROM_MODULES` : A list of modules which module variables shall not appear in the result
-
-`IGNORE_DERIVED_TYPES` : A list of derived type which members shall not appear in the result
+The meaning of the variables is documented in the [sample configuration file](config_fortrancallgraph.py).
 
 ### 3. Create assembler files
 
-Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` to generate assembler files.
+Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `--save-temps -g -O0` to generate assembler files.
 
 ### 4. Run `./FortranCallGraph.py`
 
 ```
 usage: FortranCallGraph.py [-h]
                            (-p {list-modules,list-subroutines,tree,dot} | -a {all,globals,arguments} | -d {statements,lines} | -l {use,last,doc,contains,all,specs,first} | -u {files,modules})
-                           [-v VARIABLE] [-po] [-ln] [-cc] [-q] [-i IGNORE]
+                           [-v VARIABLE] [-ml MAXLEVEL] [-po] [-ln] [-cc] [-q]
+                           [-i IGNORE] [-cf CONFIGFILE]
                            module [subroutine]
 
 Print or analyse a subroutine's call graph.
@@ -63,36 +47,38 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -p {list-modules,list-subroutines,tree,dot}, --printer {list-modules,list-subroutines,tree,dot}
-                        Print the callgraph (tree: in a tree-like form; dot:
-                        in DOT format for Graphviz; list-subroutines: only
-                        list subroutines; list-modules: only list modules
-                        containing subroutines from the call graph).
+                        Print the callgraph (list-modules: only list modules
+                        containing subroutines from the call graph, list-
+                        subroutines: only list subroutines, tree: in a tree-
+                        like form, dot: in DOT format for Graphviz).
   -a {all,globals,arguments}, --analysis {all,globals,arguments}
-                        Analyze variable usage (arguments: only subroutine
-                        arguments; globals: only module variables; all: both
-                        arguments and globals).
+                        Analyze variable usage (all: both arguments and
+                        globals, globals: only module variables, arguments:
+                        only subroutine arguments).
   -d {statements,lines}, --dump {statements,lines}
-                        Dump subroutine or module source code (lines: original
-                        source lines; statements: normalized source lines).
-                        When no subroutine is given, the whole module is
-                        dumped.
+                        Dump subroutine or module source code (statements:
+                        normalized source lines, lines: original source
+                        lines). When no subroutine is given, the whole module
+                        is dumped.
   -l {use,last,doc,contains,all,specs,first}, --line {use,last,doc,contains,all,specs,first}
                         Show some interesting source lines of the subroutine
-                        (first: the first line, containing the
-                        SUBROUTINE/FUNCTION keyword; last: the last line,
-                        containing the END keyword; doc: the first line of the
+                        (use: the last USE statement, last: the last line,
+                        containing the END keyword, doc: the first line of the
                         leading comment - the same as "first" when no comment
-                        exists; specs: the last variable specification; use -
-                        the last USE statement; contains: the CONTAINS
-                        statement - -1 when there is no such statement; all:
-                        all of the others).
+                        exists, contains: the CONTAINS statement - -1 when
+                        there is no such statement, all: all of the others,
+                        specs: the last variable specification, first: the
+                        first line, containing the SUBROUTINE/FUNCTION
+                        keyword).
   -u {files,modules}, --use {files,modules}
-                        Prints use dependencies of a subroutine (modules:
-                        module names; files: file pathes).
+                        Prints use dependencies of a subroutine (files: file
+                        pathes, modules: module names).
   -v VARIABLE, --variable VARIABLE
                         Restrict the analysis to the given variable which has
                         to be a subroutine argument and of a derived type.
                         Applicable with -a arguments.
+  -ml MAXLEVEL, --maxLevel MAXLEVEL
+                        Limits depth of callgraph output. Applicable with -p.
   -po, --pointersOnly   Limit result output to pointer variables. Applicable
                         with -a.
   -ln, --lineNumbers    Add line numbers to the output. Applicable with -d.
@@ -102,6 +88,8 @@ optional arguments:
   -i IGNORE, --ignore IGNORE
                         Leave out subroutines matching a given regular
                         expression. Applicable with -p and -a.
+  -cf CONFIGFILE, --configFile CONFIGFILE
+                        Import configuration from this file.
 ```
 #### Examples:
 
