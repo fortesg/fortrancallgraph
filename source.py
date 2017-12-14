@@ -1082,7 +1082,6 @@ class SubroutineContainer(object):
         lastUseIndex = self.__getLastUseStatementIndex()
         inType = False
         for i, (_, statement, _) in enumerate(self.getStatements()[lastUseIndex + 1:]):
-            # FIXME Ignore CONTAINS within types
             if typeRegEx.match(statement) is not None:
                 inType = True
             elif endTypeRegEx.match(statement) is not None:
