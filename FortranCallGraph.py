@@ -74,10 +74,10 @@ def lineNumberFinder(key, SOURCE_FILES):
 
 USE_PRINTERS = {'modules': 'module names',
                 'files': 'file pathes'} 
-def usePrinter(key, SOURCE_FILES):
+def usePrinter(key, SOURCE_FILES, EXCLUDE_MODULES):
     if key not in USE_PRINTERS: raise KeyError('No such UsePrinter: ' + str(key))
-    elif key == 'modules': return UsedModuleNamePrinter(SOURCE_FILES)
-    elif key == 'files': return UsedFileNamePrinter(SOURCE_FILES)
+    elif key == 'modules': return UsedModuleNamePrinter(SOURCE_FILES, EXCLUDE_MODULES)
+    elif key == 'files': return UsedFileNamePrinter(SOURCE_FILES, EXCLUDE_MODULES)
     else: raise NotImplementedError('UsePrinter not yet implemented: ' + str(key))
 
 def optionHelp(helps):
@@ -203,7 +203,7 @@ def main():
         else:
             finder.printLineNumber(moduleName)
     elif args.use is not None:
-        printer = usePrinter(args.use, sourceFiles)
+        printer = usePrinter(args.use, sourceFiles, excludeModules)
         printer.printUses(subroutineFullName)
 
 if __name__ == "__main__":
