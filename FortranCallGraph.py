@@ -203,8 +203,8 @@ def main():
         else:
             finder.printLineNumber(moduleName)
     elif args.use is not None:
-        usePrinter = usePrinter(args.use, sourceFiles)
-        usePrinter.printUses(subroutineFullName)
+        printer = usePrinter(args.use, sourceFiles)
+        printer.printUses(subroutineFullName)
 
 if __name__ == "__main__":
     main()
