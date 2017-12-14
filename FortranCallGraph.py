@@ -39,19 +39,19 @@ def graphPrinter(key):
 GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
                  'globals': 'only module variables',
                  'all': 'both arguments and globals'}
-def graphAnalysis(key, SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES):
+def graphAnalysis(key, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes):
     if key not in GRAPH_ANALYSIS: raise KeyError('No such CallGraphAnalyzer: ' + str(key))
-    elif key == 'globals': return GlobalVariableTracker(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
-    elif key == 'arguments': return VariableTracker(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_DERIVED_TYPES)
-    elif key == 'all': return AllVariablesCallGraphAnalysis(SOURCE_FILES, EXCLUDE_MODULES, IGNORE_GLOBALS_FROM_MODULES, IGNORE_DERIVED_TYPES)
+    elif key == 'globals': return GlobalVariableTracker(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
+    elif key == 'arguments': return VariableTracker(sourceFiles, excludeModules, ignoreDerivedTypes)
+    elif key == 'all': return AllVariablesCallGraphAnalysis(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
     else: raise NotImplementedError('CallGraphAnalyzer not yet implemented: ' + str(key))
 
 SUBROUTINE_DUMPER = {'lines': 'original source lines',
                     'statements': 'normalized source lines'} 
-def subroutineDumper(key, SOURCE_FILES):
+def subroutineDumper(key, sourceFiles):
     if key not in SUBROUTINE_DUMPER: raise KeyError('No such SourceDumper: ' + str(key))
-    elif key == 'lines': return SourceLineDumper(SOURCE_FILES)
-    elif key == 'statements': return SourceStatementDumper(SOURCE_FILES)
+    elif key == 'lines': return SourceLineDumper(sourceFiles)
+    elif key == 'statements': return SourceStatementDumper(sourceFiles)
     else: raise NotImplementedError('SourceDumper not yet implemented: ' + str(key))
 
 LINE_NUMBER_FINDER = {'first': 'the first line, containing the SUBROUTINE/FUNCTION keyword',
@@ -61,23 +61,23 @@ LINE_NUMBER_FINDER = {'first': 'the first line, containing the SUBROUTINE/FUNCTI
                       'use': 'the last USE statement',
                       'contains': 'the CONTAINS statement - -1 when there is no such statement',
                       'all': 'all of the others'}
-def lineNumberFinder(key, SOURCE_FILES):
+def lineNumberFinder(key, sourceFiles):
     if key not in LINE_NUMBER_FINDER: raise KeyError('No such LineNumberFinder: ' + str(key))
-    elif key == 'first': return DeclarationLineNumberFinder(SOURCE_FILES)
-    elif key == 'last': return EndStatementLineNumberFinder(SOURCE_FILES)
-    elif key == 'doc': return FirstDocumentationLineFinder(SOURCE_FILES)
-    elif key == 'specs': return LastSpecificationLineFinder(SOURCE_FILES)
-    elif key == 'use': return LastUseLineFinder(SOURCE_FILES)
-    elif key == 'contains': return ContainsLineFinder(SOURCE_FILES)
-    elif key == 'all': return AllLineFinder(SOURCE_FILES)
+    elif key == 'first': return DeclarationLineNumberFinder(sourceFiles)
+    elif key == 'last': return EndStatementLineNumberFinder(sourceFiles)
+    elif key == 'doc': return FirstDocumentationLineFinder(sourceFiles)
+    elif key == 'specs': return LastSpecificationLineFinder(sourceFiles)
+    elif key == 'use': return LastUseLineFinder(sourceFiles)
+    elif key == 'contains': return ContainsLineFinder(sourceFiles)
+    elif key == 'all': return AllLineFinder(sourceFiles)
     else: raise NotImplementedError('LineNumberFinder not yet implemented: ' + str(key))
 
 USE_PRINTERS = {'modules': 'module names',
                 'files': 'file pathes'} 
-def usePrinter(key, SOURCE_FILES, EXCLUDE_MODULES):
+def usePrinter(key, sourceFiles, excludeModules):
     if key not in USE_PRINTERS: raise KeyError('No such UsePrinter: ' + str(key))
-    elif key == 'modules': return UsedModuleNamePrinter(SOURCE_FILES, EXCLUDE_MODULES)
-    elif key == 'files': return UsedFileNamePrinter(SOURCE_FILES, EXCLUDE_MODULES)
+    elif key == 'modules': return UsedModuleNamePrinter(sourceFiles, excludeModules)
+    elif key == 'files': return UsedFileNamePrinter(sourceFiles, excludeModules)
     else: raise NotImplementedError('UsePrinter not yet implemented: ' + str(key))
 
 def optionHelp(helps):
