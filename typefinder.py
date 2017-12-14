@@ -26,8 +26,8 @@ class TypeFinder(UseTraversalPassenger):
         assertType(module, 'module', Module)
         
         moduleName = module.getName()
-        typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE);
-        endTypeRegEx = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        typeRegEx = Type.DECLARATION_REGEX
+        endTypeRegEx = Type.END_REGEX
         procedureRegEx = re.compile(r'^PROCEDURE\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*(\=\>\s*(?P<procedure>[a-z0-9_]+))?$', re.IGNORECASE)
         genericRegEx = re.compile(r'^GENERIC\s*\:\:\s*(?P<alias>[a-z0-9_]+)\s*\=\>\s*(?P<procedures>[a-z0-9_]+(\,[a-z0-9_]+)*)$', re.IGNORECASE)
         

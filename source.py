@@ -5,10 +5,14 @@ import re
 import sys
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
+from os.path import stat
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
 class Type(object):
+    
+    DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
+    END_REGEX = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE)
     
     def __init__(self, typeName, declaredIn, extends = None):
         assertType(typeName, 'typeName', str)
@@ -1073,10 +1077,17 @@ class SubroutineContainer(object):
         return self.__containsStatementIndex
     
     def __findContainsStatementIndex(self):
+        typeRegEx = Type.DECLARATION_REGEX
+        endTypeRegEx = Type.END_REGEX
         lastUseIndex = self.__getLastUseStatementIndex()
+        inType = False
         for i, (_, statement, _) in enumerate(self.getStatements()[lastUseIndex + 1:]):
             # FIXME Ignore CONTAINS within types
-            if statement.upper() == 'CONTAINS':
+            if typeRegEx.match(statement) is not None:
+                inType = True
+            elif endTypeRegEx.match(statement) is not None:
+                inType = False
+            elif not inType and statement.upper() == 'CONTAINS':
                 return i + lastUseIndex + 1
         
         return -1
@@ -1372,8 +1383,8 @@ class Module(SubroutineContainer):
         return self.__variableList
      
     def __findVariables(self):
-        typeRegEx = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*[A-Z]+(\([a-z0-9_]+\))?\s*)*((\:\:)|\s)\s*([a-z0-9_]+)$', re.IGNORECASE);
-        endTypeRegEx = re.compile(r'^END\s*TYPE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        typeRegEx = Type.DECLARATION_REGEX
+        endTypeRegEx = Type.END_REGEX
         interfaceRegEx = re.compile(r'^(ABSTRACT\s+)?INTERFACE(\s+([a-z0-9_]+))?$', re.IGNORECASE);
         endInterfaceRegEx = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
          
