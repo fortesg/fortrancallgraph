@@ -1510,6 +1510,9 @@ class SourceFile(object):
     def __hash__(self):
         return hash(self.__path)  
     
+    def isPreprocessed(self):
+        return self.__preprocessed
+    
     def getPath(self):
         return self.__path
     
@@ -1747,9 +1750,6 @@ class SourceFiles(object):
         self.__filesByModules = dict()
         self.__preprocessed = preprocessed
         self.setSpecialModuleFiles(specialModuleFiles)
-    
-    def isPreprocessed(self):
-        return self.__preprocessed
     
     def getSpecialModuleFiles(self):
         return self.__specialModuleFiles
