@@ -7,6 +7,7 @@ from assertions import assertType, assertTypeAll
 from operator import attrgetter
 from os.path import stat
 from gtk.keysyms import at
+from mercurial.templater import sub
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -192,6 +193,7 @@ class Variable(object):
         self.__dimension = dimension
         self.__intent = intent
         self.__optional = optional
+        self.__functionResult = False
         self.__public = public
         self.__private = private
         self.__declaredIn = None
@@ -330,6 +332,13 @@ class Variable(object):
     
     def isOptionalArgument(self):
         return self.isArgument() and self.__optional
+    
+    def setIsFunctionResult(self, isFunctionResult):
+        assertType(isFunctionResult, 'isFunctionResult', bool)
+        self.__functionResult = isFunctionResult
+        
+    def isFunctionResult(self):
+        return self.__functionResult
     
     def isPublic(self):
         return self.__public
@@ -1002,7 +1011,7 @@ class SubroutineContainer(object):
     
     def __findSubroutines(self):
         subroutineRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE))\s+)*SUBROUTINE\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
-        functionRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE)|(INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))\s*(\(.*\))?\s+)*FUNCTION\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
+        functionRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE)|(INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))\s*(\(.*\))?\s+)*FUNCTION\s+(?P<name>[a-z0-9_]{1,63})\s*\([a-z0-9_,]*\)\s*(RESULT\s*\((?P<result>[a-z0-9_]{1,63})\))?', re.IGNORECASE);
         endRegEx = re.compile(r'\s*END\s*((SUBROUTINE)|(FUNCTION))', re.IGNORECASE);
         
         lines = self.getLines()
@@ -1046,7 +1055,7 @@ class SubroutineContainer(object):
                 if subroutineStack == 0:
                     fullName = self._createSubroutineName(name)
                     subroutineLines = lines[(firstLine - offset - 1):(sn - offset)]
-                    subroutines[name.lower()] = Subroutine(fullName, function, subroutineLines, self);
+                    subroutines[name.lower()] = Subroutine(fullName, function, subroutineLines, self)
 
         return subroutines;
     
@@ -1138,8 +1147,7 @@ class Subroutine(SubroutineContainer):
         
         self.__name = name
         self.__function = isFunction
-        if self.__function:
-            self.__resultVar = self.__name.getSimpleName().lower()
+        self.__resultVar = None
         self.__container = container
         self.__variables = None
         
@@ -1243,19 +1251,39 @@ class Subroutine(SubroutineContainer):
     def getOutArguments(self):
         return [a for a in self.getArguments() if a.isOutArgument()]
     
-    def setResultVariableName(self, name):
-        assertType(name, 'name', str)
-        if not self.isFunction():
-            raise Exception("This is not a function, cannot have a result variable!.")
-        
-        self.__resultVar = name.lower()
-    
     def getResultVariable(self):
         if self.isFunction():
+            if self.__resultVar is None:
+                self.__resultVar = self.__findResultVar()
+                self.__resultVar.setIsFunctionResult(True)
+            return self.__resultVar
+                
+        return None
+    
+    def __findResultVar(self):
+        if self.isFunction():
+            name = self.__findResultVariableName()
             for variable in self.getVariables():
-                if variable.getName().lower() == self.__resultVar:
+                if variable.getName().lower() == name:
                     return variable
                 
+                resultTypeRegEx = re.compile(r'.*(?P<type>((INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))(\s*\(.*\))?).*\s+FUNCTION\s+.*', re.IGNORECASE);
+                resultTypeRegExMatch = resultTypeRegEx.match(self.getDeclaration())
+                if resultTypeRegExMatch is not None:
+                    typeName = resultTypeRegExMatch.group('type').strip()
+                    return Variable(name, typeName)
+        
+        return None
+    
+    def __findResultVariableName(self):
+        if self.isFunction():
+            resultRegEx = re.compile(r'.*\s+RESULT\s*\((?P<result>[a-z0-9_]{1,63})\)', re.IGNORECASE)
+            resultRegExMatch = resultRegEx.match(self.getDeclaration())
+            if resultRegExMatch is not None:
+                return resultRegExMatch.group('result').strip().lower()
+            else:
+                return self.getSimpleName()
+            
         return None
     
     def getDerivedTypeArguments(self):

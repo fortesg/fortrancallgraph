@@ -2,6 +2,10 @@ MODULE functions
 
   IMPLICIT NONE
 
+  TYPE :: type0
+    INTEGER :: member
+  END TYPE type0
+
 CONTAINS
 
   INTEGER FUNCTION func1(var)
@@ -31,5 +35,9 @@ CONTAINS
     INTEGER, INTENT(out) :: r5
     r5 = var
   END SUBROUTINE subr5
+
+  TYPE(type0) FUNCTION func6()
+    func6%member = 42
+  END FUNCTION func6
 
 END MODULE functions

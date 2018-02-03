@@ -33,6 +33,7 @@ class FunctionsTest(unittest.TestCase):
         self.func3 = SubroutineFullName('__functions_MOD_func3')
         self.func4 = SubroutineFullName('__functions_MOD_func4')
         self.subr5 = SubroutineFullName('__functions_MOD_subr5')
+        self.func6 = SubroutineFullName('__functions_MOD_func6')
         
         self.fileExist = os.path.exists(self.srcFile) and os.path.exists(self.assFile) 
         
@@ -57,7 +58,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'func1', 'func2', 'func3', 'func4', 'subr5'}, simpleNames)
+        self.assertEqual({'func1', 'func2', 'func3', 'func4', 'subr5', 'func6'}, simpleNames)
 
 
     def testFindFunctions(self):
@@ -66,6 +67,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertIsNotNone(self.sourceFiles.findSubroutine(self.func3))
         self.assertIsNotNone(self.sourceFiles.findSubroutine(self.func4))
         self.assertIsNotNone(self.sourceFiles.findSubroutine(self.subr5))
+        self.assertIsNotNone(self.sourceFiles.findSubroutine(self.func6))
 
 
     def testIsFunction(self):
@@ -74,6 +76,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertTrue(self.sourceFiles.findSubroutine(self.func3).isFunction())
         self.assertTrue(self.sourceFiles.findSubroutine(self.func4).isFunction())
         self.assertFalse(self.sourceFiles.findSubroutine(self.subr5).isFunction())
+        self.assertTrue(self.sourceFiles.findSubroutine(self.func6).isFunction())
 
 
     def testGetResultVar(self):
@@ -100,6 +103,7 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual('r2', func2.getResultVariable().getName())
         self.assertEqual('INTEGER', func2.getResultVariable().getTypeName())
 
+        #TODO func6
         
 if __name__ == "__main__":
     unittest.main()
