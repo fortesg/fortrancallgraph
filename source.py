@@ -1255,7 +1255,6 @@ class Subroutine(SubroutineContainer):
         if self.isFunction():
             if self.__resultVar is None:
                 self.__resultVar = self.__findResultVar()
-                self.__resultVar.setIsFunctionResult(True)
             return self.__resultVar
                 
         return None
@@ -1265,13 +1264,16 @@ class Subroutine(SubroutineContainer):
             name = self.__findResultVariableName()
             for variable in self.getVariables():
                 if variable.getName().lower() == name:
+                    variable.setIsFunctionResult(True)
                     return variable
                 
                 resultTypeRegEx = re.compile(r'.*(?P<type>((INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))(\s*\(.*\))?).*\s+FUNCTION\s+.*', re.IGNORECASE);
                 resultTypeRegExMatch = resultTypeRegEx.match(self.getDeclaration())
                 if resultTypeRegExMatch is not None:
                     typeName = resultTypeRegExMatch.group('type').strip()
-                    return Variable(name, typeName)
+                    variable = Variable(name, typeName) 
+                    variable.setIsFunctionResult(True)
+                    return variable
         
         return None
     
