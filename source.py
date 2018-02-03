@@ -6,6 +6,7 @@ import sys
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
 from os.path import stat
+from gtk.keysyms import at
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -1013,12 +1014,17 @@ class SubroutineContainer(object):
         subroutineLines = None;
         firstLine = -1
         statements = self.getStatementsAfterContains()
-        
+        function = False
         
         for i, (sn, line, _) in enumerate(statements):
-            regExMatch = subroutineRegEx.match(line);
-            if regExMatch is None:
-                regExMatch = functionRegEx.match(line);
+            regExMatch = subroutineRegEx.match(line)
+            if regExMatch is not None:
+                function = False
+            else:
+                regExMatch = functionRegEx.match(line)
+                if regExMatch is not None:
+                    function = True
+                    
             if regExMatch is not None:
                 subroutineStack += 1;
                 if subroutineStack == 1:
@@ -1040,7 +1046,7 @@ class SubroutineContainer(object):
                 if subroutineStack == 0:
                     fullName = self._createSubroutineName(name)
                     subroutineLines = lines[(firstLine - offset - 1):(sn - offset)]
-                    subroutines[name.lower()] = Subroutine(fullName, subroutineLines, self);
+                    subroutines[name.lower()] = Subroutine(fullName, function, subroutineLines, self);
 
         return subroutines;
     
@@ -1120,8 +1126,9 @@ class SubroutineContainer(object):
         return index   
     
 class Subroutine(SubroutineContainer):
-    def __init__(self, name, lines, container):
+    def __init__(self, name, isFunction, lines, container):
         assertType(name, 'name', SubroutineName)
+        assertType(isFunction, 'isFunction', bool)
         if isinstance(name, InnerSubroutineName):
             assertType(container, 'container', Subroutine)
         else:
@@ -1130,6 +1137,9 @@ class Subroutine(SubroutineContainer):
         super(Subroutine, self).__init__(lines)
         
         self.__name = name
+        self.__function = isFunction
+        if self.__function:
+            self.__resultVar = self.__name.getSimpleName().lower()
         self.__container = container
         self.__variables = None
         
@@ -1147,6 +1157,9 @@ class Subroutine(SubroutineContainer):
     
     def getName(self):
         return self.__name;
+    
+    def isFunction(self):
+        return self.__function
     
     def hasContainer(self):
         return self.getContainer() is not None
@@ -1229,6 +1242,21 @@ class Subroutine(SubroutineContainer):
     
     def getOutArguments(self):
         return [a for a in self.getArguments() if a.isOutArgument()]
+    
+    def setResultVariableName(self, name):
+        assertType(name, 'name', str)
+        if not self.isFunction():
+            raise Exception("This is not a function, cannot have a result variable!.")
+        
+        self.__resultVar = name.lower()
+    
+    def getResultVariable(self):
+        if self.isFunction():
+            for variable in self.getVariables():
+                if variable.getName().lower() == self.__resultVar:
+                    return variable
+                
+        return None
     
     def getDerivedTypeArguments(self):
         return [a for a in self.getArguments() if a.hasDerivedType()]
