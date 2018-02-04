@@ -103,7 +103,13 @@ class FunctionsTest(unittest.TestCase):
         self.assertEqual('r2', func2.getResultVariable().getName())
         self.assertEqual('INTEGER', func2.getResultVariable().getTypeName())
 
-        #TODO func6
-        
+        func6 = self.sourceFiles.findSubroutine(self.func6)
+        result6 = func6.getResultVariable()
+        self.assertIsNotNone(result6)
+        self.assertEqual('func6', result6.getName())
+        self.assertEqual('TYPE(type0)', result6.getTypeName())
+        self.assertTrue(result6.isFunctionResult())
+
+
 if __name__ == "__main__":
     unittest.main()
