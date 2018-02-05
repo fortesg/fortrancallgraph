@@ -121,7 +121,7 @@ class VariableTracker(CallGraphAnalyzer):
         
         return variableReferences;
     
-    def __trackVariable(self, variable, callGraph, excludeFromRecursionVariables = set(), excludeFromRecursionRoutines = set()):
+    def __trackVariable(self, variable, callGraph, excludeFromRecursionVariables = set(), excludeFromRecursionRoutines = set(), startAtLine = 0):
         self.__variable = variable;
         if self.__variable.hasDerivedType and self.__variable.getDerivedTypeName() in self.__ignoredTypes:
             return set()
@@ -134,12 +134,12 @@ class VariableTracker(CallGraphAnalyzer):
         self.__excludeFromRecursionRoutines = set(excludeFromRecursionRoutines) 
         self.__excludeFromRecursionRoutines.add((subroutineFullName, variable))
         
-        variableReferences = self.__analyzeSubroutine(subroutineFullName)
+        variableReferences = self.__analyzeSubroutine(subroutineFullName, startAtLine)
         variableReferences = VariableReference.sort(variableReferences)
         
         return variableReferences;    
                 
-    def __analyzeSubroutine(self, subroutineName):
+    def __analyzeSubroutine(self, subroutineName, startAtLine = 0):
         if (self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None) or (subroutineName.getModuleName().lower() in self.__excludeModules):
             return set()
         
@@ -147,7 +147,8 @@ class VariableTracker(CallGraphAnalyzer):
         subroutine = self.__sourceFiles.findSubroutine(subroutineName)
         if subroutine is not None:
             for lineNumber, statement, _ in subroutine.getStatements():
-                variableReferences |= self.__analyzeStatement(statement, subroutine, lineNumber)
+                if startAtLine <= 0 or lineNumber >= startAtLine:
+                    variableReferences |= self.__analyzeStatement(statement, subroutine, lineNumber)
         else:
             VariableTracker.__routineNotFoundWarning(subroutineName)
                 
@@ -232,7 +233,7 @@ class VariableTracker(CallGraphAnalyzer):
                 if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
                     newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                     newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                    variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines);
+                    variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                         
