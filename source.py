@@ -13,7 +13,7 @@ IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
 class Type(object):
     
-    DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
+    DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(ABSTRACT)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
     END_REGEX = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE)
     
     def __init__(self, typeName, declaredIn, extends = None):
@@ -64,22 +64,21 @@ class Type(object):
         else:
             return self.__extends.getMember(name)
         
-    def addProcedure(self, alias, procedures):
+    def addProcedure(self, alias, procedure):
         assertType(alias, 'alias', str)
-        assertType(procedures, 'procedures', [str, list])
+        assertType(procedure, 'procedure', [str, list])
 
-        if isinstance(procedures, list):
-            assertTypeAll(procedures, 'procedures', str)
-            procedures = map(str.lower, procedures)
+        if isinstance(procedure, list):
+            assertTypeAll(procedure, 'procedure', str)
+            procedure = map(str.lower, procedure)
         else:
-            procedures = procedures.lower()
+            procedure = procedure.lower()
             
-        self.__procedures[alias.lower()] = procedures
+        self.__procedures[alias.lower()] = procedure
         
         
     def hasProcedure(self, alias):
         assertType(alias, 'alias', str)
-        
         return alias.lower() in self.__procedures or ( self.__extends is not None and self.__extends.hasProcedure(alias)) 
         
     def getProcedure(self, name):
@@ -1816,8 +1815,8 @@ class SourceFiles(object):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         
         self.__specialModuleFiles = dict()
-        for module, file in specialModuleFiles.iteritems():
-            self.__specialModuleFiles[module.lower()] = file
+        for module, filE in specialModuleFiles.iteritems():
+            self.__specialModuleFiles[module.lower()] = filE
 
         self.__filesByModules = dict() # Clear Module Cache
         
@@ -1829,7 +1828,6 @@ class SourceFiles(object):
         
     def findSubroutine(self, subroutineName):    
         assertType(subroutineName, 'subroutineName', SubroutineName)
-        
         sourceFile = self.findModuleFile(subroutineName.getModuleName())
         if sourceFile is None:
             print >> sys.stderr, '*** WARNING [SourceFiles]: Module file not found for subroutine: ' + str(subroutineName) + ' ***'
