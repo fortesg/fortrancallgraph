@@ -260,7 +260,6 @@ class VariableTracker(CallGraphAnalyzer):
         return set();    
     
     def __analyzeTypeBoundProcedureCallOnThis(self, variableReference, subroutine, lineNumber, warnIfNotFound = True):
-        subroutineName = subroutine.getName()
         calledRoutineFullName = self.__findCalledTypeBoundProcedure(variableReference, subroutine)
         
         subReference = variableReference.getSubReferenceBeforeFirstProcedure()
@@ -285,7 +284,7 @@ class VariableTracker(CallGraphAnalyzer):
         
                         return variableReferences
                 else:
-                    print >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
+                    print >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutine.getName().getModuleName() + ':' + str(lineNumber) + ') ***';
             else:
                 VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
