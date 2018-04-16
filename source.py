@@ -329,6 +329,9 @@ class Variable(object):
     def isOptionalArgument(self):
         return self.isArgument() and self.__optional
     
+    def isRequiredArgument(self):
+        return self.isArgument() and not self.__optional
+    
     def setIsFunctionResult(self, isFunctionResult):
         assertType(isFunctionResult, 'isFunctionResult', bool)
         self.__functionResult = isFunctionResult
@@ -684,7 +687,7 @@ class VariableReference(object):
         return self.__level0Variable
     
     def getDeclaredIn(self):
-        if self.__level0Variable is None:
+        if self.__level0Variable is None: #TODO: Kann gar nicht vorkommen, oder?
             return None
         return self.__level0Variable.getDeclaredIn()
     
