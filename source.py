@@ -388,7 +388,10 @@ class Variable(object):
     def getOriginalName(self):
         return self.__originalName
     
-    def getAlias(self, name):
+    def getAlias(self, name = None):
+        if name is None:
+            name = self.__name
+        
         alias = Variable(name, self.__typeName, self.__parameter, self.__allocatable, self.__pointer, self.__target, self.__dimension, self.__intent, self.__optional)
         alias.setDeclaredIn(self.__declaredIn)
         alias.setOriginalName(self.__name)
