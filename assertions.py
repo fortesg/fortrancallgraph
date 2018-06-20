@@ -22,7 +22,7 @@ def assertType(var, varName, expectedType, noneAccepted = False):
             raise TypeError('Variable ' + varName + ' has type ' + str(type(var)) + ', expected: ' + str(expectedType))
         
 def assertTypeAll(variables, varName, expectedType, noneAccepted = False):
-    assertType(variables, 'vars', [list, set, dict], True)
+    assertType(variables, 'vars', [list, set, dict, tuple], True)
     assert isinstance(varName, str)
     assert isinstance(expectedType, type) or ( isinstance(expectedType, list) and all(isinstance(t, type) for t in expectedType)) 
     assert isinstance(noneAccepted, bool)
