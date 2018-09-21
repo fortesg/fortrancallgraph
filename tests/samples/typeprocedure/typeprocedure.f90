@@ -2,7 +2,12 @@ MODULE typeprocedure
 
   IMPLICIT NONE
 
-  TYPE :: ttest
+  TYPE, ABSTRACT :: atest
+  CONTAINS
+    PROCEDURE(third_interface), DEFERRED :: third
+  END TYPE atest
+
+  TYPE, EXTENDS(atest) :: ttest
     INTEGER :: first(3)
     INTEGER :: second(3)
   CONTAINS
@@ -18,6 +23,11 @@ MODULE typeprocedure
   END TYPE child
 
 CONTAINS
+
+  INTEGER FUNCTION third_interface(test, var)
+    CLASS(atest), INTENT(in) :: test
+    INTEGER, INTENT(in) :: var
+  END FUNCTION third_interface
 
   INTEGER FUNCTION dump(test, var)
     CLASS(ttest), INTENT(in) :: test
@@ -98,5 +108,13 @@ CONTAINS
     WRITE (*,*) 'third: ',  t%third(3)
 
   END SUBROUTINE testChild
+
+  SUBROUTINE testDeferred(a)
+
+    CLASS(atest), INTENT(in) :: a
+
+    WRITE (*,*) 'third: ',  a%third(3)
+
+  END SUBROUTINE testDeferred
 
 END MODULE typeprocedure
