@@ -9,14 +9,14 @@ class InterfaceFinder(UseTraversalPassenger):
 
     def __init__(self):
         self.__types = dict()
-        self.__currentType = None
+        self.__currentInterface = None
         
     def getResult(self):
         return self.__types
         
     def reset(self):      
         self.__types = dict()
-        self.__currentType = None
+        self.__currentInterface = None
     
     def parseStatement(self, i, statement, j, module):
         assertType(i, 'i', int) 
@@ -27,17 +27,17 @@ class InterfaceFinder(UseTraversalPassenger):
         endInterfaceRegEx = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
         procedureRegEx = re.compile(r'^MODULE\s+PROCEDURE\s+(?P<procedurelist>[a-z0-9_\s\,]+)$', re.IGNORECASE);
         
-        if self.__currentType is None:
+        if self.__currentInterface is None:
             interfaceRegExMatch = interfaceRegEx.match(statement)
             if interfaceRegExMatch is not None:
-                self.__currentType = Interface(interfaceRegExMatch.group('interfacename'))
+                self.__currentInterface = Interface(interfaceRegExMatch.group('interfacename'))
         else:
             procedureRegExMatch = procedureRegEx.match(statement)
             if procedureRegExMatch is not None:
                 for procedure in procedureRegExMatch.group('procedurelist').split(','):
-                    self.__currentType.addProcedure(procedure.strip())
+                    self.__currentInterface.addProcedure(procedure.strip())
             else:
                 endInterfaceRegExMatch = endInterfaceRegEx.match(statement)
                 if endInterfaceRegExMatch is not None:
-                    self.__types[self.__currentType.getName().lower()] = self.__currentType
-                    self.__currentType = None
+                    self.__types[self.__currentInterface.getName().lower()] = self.__currentInterface
+                    self.__currentInterface = None
