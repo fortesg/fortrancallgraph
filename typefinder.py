@@ -28,7 +28,7 @@ class TypeFinder(UseTraversalPassenger):
         moduleName = module.getName()
         typeRegEx = Type.DECLARATION_REGEX
         endTypeRegEx = Type.END_REGEX
-        procedureRegEx = re.compile(r'^PROCEDURE\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*(\=\>\s*(?P<procedure>[a-z0-9_]+))?$', re.IGNORECASE)
+        procedureRegEx = re.compile(r'^PROCEDURE\s*(\(.*\))?\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*(\=\>\s*(?P<procedure>[a-z0-9_]+))?$', re.IGNORECASE)
         genericRegEx = re.compile(r'^GENERIC\s*\:\:\s*(?P<alias>[a-z0-9_]+)\s*\=\>\s*(?P<procedures>[a-z0-9_]+(\,[a-z0-9_]+)*)$', re.IGNORECASE)
         
         if self.__currentType is None:
