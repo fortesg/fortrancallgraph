@@ -32,6 +32,7 @@ class VariableTracker(CallGraphAnalyzer):
         self.__ignoredTypes = map(str.lower, ignoredTypes)
         self.__excludeFromRecursionVariables = set()
         self.__excludeFromRecursionRoutines = set()
+        self.outAssignments = set()
     
     def setVariable(self, variable):
         assertType(variable, 'variable', Variable)
@@ -224,9 +225,10 @@ class VariableTracker(CallGraphAnalyzer):
         
         if subroutine.hasVariable(alias):
             aliasVar = subroutine.getVariable(alias)
-            aliasType = self.__types.getTypeOfVariable(aliasVar)
-            if not aliasVar.isTypeAvailable() and aliasType is not None:
-                aliasVar.setType(aliasType)
+            if not aliasVar.isTypeAvailable():
+                aliasType = self.__types.getTypeOfVariable(aliasVar)
+                if aliasType is not None:
+                    aliasVar.setType(aliasType)
             originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
             if not originalReference.isRecursive():
                 variable = self.__findLevelNVariable(originalReference)
@@ -236,6 +238,8 @@ class VariableTracker(CallGraphAnalyzer):
                     variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
+                    if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
+                        self.outAssignments.add((aliasVar, originalReference))                    
                         
                     return variableReferences
             else:

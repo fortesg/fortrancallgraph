@@ -1254,12 +1254,10 @@ class Subroutine(SubroutineContainer):
         return [a for a in self.getArguments() if a.isOutArgument()]
     
     def getResultVariable(self):
-        if self.isFunction():
-            if self.__resultVar is None:
-                self.__resultVar = self.__findResultVar()
-            return self.__resultVar
-                
-        return None
+        if self.isFunction() and self.__resultVar is None:
+            self.__resultVar = self.__findResultVar()
+        
+        return self.__resultVar
     
     def __findResultVar(self):
         if self.isFunction():
@@ -1315,6 +1313,7 @@ class Subroutine(SubroutineContainer):
     def getVariables(self):
         if self.__variables is None:
             self.__variables = self.__findVariables()
+            self.__findResultVar()
             
         return self.__variables
         
