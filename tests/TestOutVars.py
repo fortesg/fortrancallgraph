@@ -87,19 +87,19 @@ class OutVarsTest(unittest.TestCase):
         self.assertFalse(refs)
         self.assertEqual(1, len(tracker.outAssignments))
                  
-    def testArgumentAsFunc2tionResult(self):
+    def testArgumentAsFunctionResult(self):
         if not self.filesExist:
             self.skipTest('Files not there')
          
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.testFunc2)
-        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
          
-        refs = tracker.trackGlobalVariables(self.callGraphTestFunc2)
+        refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc2)
         globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'mother%second'}, globalVars)
+        self.assertEqual({'mother%child%second'}, globalVars)
                  
-    def testGlobalAsFunc1tionResult(self):
+    def testGlobalAsFunctionResult(self):
         if not self.filesExist:
             self.skipTest('Files not there')
          

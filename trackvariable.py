@@ -8,6 +8,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
+from os.path import stat
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -167,6 +168,7 @@ class VariableTracker(CallGraphAnalyzer):
         innerSubroutineCallRegEx = re.compile(r'^(.*\s+)?CALL\s*(?P<routine>[a-z0-9_]+)\s*\(.*\)$', re.IGNORECASE);
         
         variableReferences = set()
+        functionResultReference = None
         while variableRegEx.match(statement) is not None:
             statement = self.__removeUnimportantParentheses(statement, variableRegEx)
             assignmentRegExMatch = assignmentRegEx.match(statement)
@@ -182,15 +184,49 @@ class VariableTracker(CallGraphAnalyzer):
                     if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
                         variableReferences.update(self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber)[0])
                     elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                        variableReferences.update(self.__analyzeFunctionCall(subroutine, statement, lineNumber)[0])
-            statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
-                 
+                        (functionCallVariableReferences, outAssignments) = self.__analyzeFunctionCall(subroutine, statement, lineNumber)
+                        variableReferences.update(functionCallVariableReferences)
+                        for aliasVar, originalReference in outAssignments:
+                            if aliasVar.isFunctionResult():
+                                functionResultReference = originalReference
+                                break
+            if functionResultReference is not None:
+                statement = self.__replaceFunctionNameByResultVar(statement, functionResultReference)
+                functionResultReference = None      
+            else:
+                statement = re.sub(variableRegEx, r'\1@@@@@\3', statement, 1)
             
         innerSubroutineCallRegExMatch = innerSubroutineCallRegEx.match(statement)
         if innerSubroutineCallRegExMatch is not None:
             self.__analyzeInnerSubroutineCall(innerSubroutineCallRegExMatch, subroutine, lineNumber)
             
         return variableReferences
+    
+    def __replaceFunctionNameByResultVar(self, statement, variableReference):
+        #TODO Teste mehrere Function Calls in einem statement
+        functionRegEx = re.compile(r'^.*[^a-z0-9_]+(?P<routine>[a-z0-9_]+)(?P<before>\s*\((.*[^a-z0-9_%])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?\)).*$', re.IGNORECASE);
+        functionRegExMatch = functionRegEx.match(statement)
+        if functionRegExMatch is None:
+            return statement
+
+        functionExpression = functionRegExMatch.group('routine')
+        before = functionRegExMatch.group('before')
+        paranthCount = before.count('(') - before.count(')')
+        if paranthCount <= 0:
+            return statement
+        functionExpression += before
+        functionExpression += functionRegExMatch.group('reference')
+        for c in functionRegExMatch.group('after'):
+            if paranthCount > 0:
+                functionExpression += c
+                if c == '(':
+                    paranthCount += 1
+                elif c == ')':
+                    paranthCount -= 1
+            else:
+                break
+        
+        return re.sub(re.escape(functionExpression), variableReference.getExpression(), statement, 1)
     
     def __removeUnimportantParentheses(self, statement, regEx):
         clean = ''
@@ -423,7 +459,7 @@ class VariableTracker(CallGraphAnalyzer):
                         for variableReference in variableReferences:
                             variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                         for assignment in outAssignments:
-                            assignment(1).setLevel0Variable(self.__variable, originalReference.getMembers())
+                            assignment[1].setLevel0Variable(self.__variable, originalReference.getMembers())
         
                         return (variableReferences, outAssignments)
                 else:
