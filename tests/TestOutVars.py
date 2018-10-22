@@ -33,8 +33,11 @@ class OutVarsTest(unittest.TestCase):
         self.get = SubroutineFullName('__outvars_MOD_get')
         self.callGraphGet = callGraphBuilder.buildCallGraph(self.get)
         
-        self.testfunc = SubroutineFullName('__outvars_MOD_testFunc')
-        self.callGraphTestFunc = callGraphBuilder.buildCallGraph(self.testfunc)
+        self.testFunc1 = SubroutineFullName('__outvars_MOD_testFunc1')
+        self.callGraphTestFunc1 = callGraphBuilder.buildCallGraph(self.testFunc1)
+        
+        self.testFunc2 = SubroutineFullName('__outvars_MOD_testFunc2')
+        self.callGraphTestFunc2 = callGraphBuilder.buildCallGraph(self.testFunc2)
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -45,7 +48,8 @@ class OutVarsTest(unittest.TestCase):
             self.skipTest('Files not there')
         
         self.assertEqual({'get'}, set(map(SubroutineFullName.getSimpleName, self.callGraphGet.getAllSubroutineNames())))
-        self.assertEqual({'testfunc', 'get'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc.getAllSubroutineNames())))
+        self.assertEqual({'testfunc1', 'get'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc1.getAllSubroutineNames())))
+        self.assertEqual({'testfunc2', 'part'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc2.getAllSubroutineNames())))
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -62,7 +66,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'get', 'testfunc'}, simpleNames)
+        self.assertEqual({'get', 'part', 'testfunc1', 'testfunc2'}, simpleNames)
         
         
     def testOutArguments(self):
@@ -75,7 +79,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertIsNotNone(t1)
 
         useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testfunc)
+        useTraversal.parseModules(self.testFunc1)
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         self.assertEqual(0, len(tracker.outAssignments))
         
@@ -83,15 +87,27 @@ class OutVarsTest(unittest.TestCase):
         self.assertFalse(refs)
         self.assertEqual(1, len(tracker.outAssignments))
                  
-    def testDirect(self):
+    def testArgumentAsFunc2tionResult(self):
         if not self.filesExist:
             self.skipTest('Files not there')
          
         useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testfunc)
+        useTraversal.parseModules(self.testFunc2)
         tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
          
-        refs = tracker.trackGlobalVariables(self.callGraphTestFunc)
+        refs = tracker.trackGlobalVariables(self.callGraphTestFunc2)
+        globalVars = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'mother%second'}, globalVars)
+                 
+    def testGlobalAsFunc1tionResult(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+         
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.testFunc1)
+        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+         
+        refs = tracker.trackGlobalVariables(self.callGraphTestFunc1)
         globalVars = set([ref.getExpression() for ref in refs])
         self.assertEqual({'t1%first'}, globalVars)
         
