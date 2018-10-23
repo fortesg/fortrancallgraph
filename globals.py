@@ -6,10 +6,9 @@ from assertions import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer
 from source import SourceFiles, VariableReference
 from callgraph import CallGraph
-from trackvariable import VariableTracker, VariableReference
+from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from multiprocessing import dummy
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
