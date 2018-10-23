@@ -111,6 +111,7 @@ class VariableTracker(CallGraphAnalyzer):
         return self.trackVariables(variables, callGraph)
     
     def trackVariables(self, variables, callGraph):
+        assertTypeAll(variables, 'variables', Variable) 
         assertType(callGraph, 'callGraph', CallGraph) 
         
         if self.__interfaces is None or self.__types is None:
