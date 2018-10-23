@@ -16,13 +16,19 @@ MODULE outvars
     TYPE(parent) :: child
   END TYPE grand
 
-  TYPE(ttest) :: t1
+  TYPE(ttest) :: t1, t2
 
 CONTAINS
 
-  FUNCTION get()
+  FUNCTION get(i)
+   INTEGER, INTENT(in) :: i
    TYPE(ttest) :: get
-   get = t1
+
+   IF (i == 1) THEN
+     get = t1
+   ELSE
+     get = t2
+   END IF
   END FUNCTION get
 
   FUNCTION part(p)
@@ -33,7 +39,7 @@ CONTAINS
 
   SUBROUTINE testFunc1()
     TYPE(ttest) :: var
-    var = get()
+    var = get(1)
     WRITE (*,*) 'first: ', var%first
   END SUBROUTINE testFunc1
 

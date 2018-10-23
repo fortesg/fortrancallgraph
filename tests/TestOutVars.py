@@ -83,19 +83,19 @@ class OutVarsTest(unittest.TestCase):
         self.assertIsNotNone(module)
         t1 = module.getVariable('t1')
         self.assertIsNotNone(t1)
+        t2 = module.getVariable('t2')
+        self.assertIsNotNone(t2)
 
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.testFunc1)
         
         trackerGet = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         self.assertEqual(0, len(trackerGet.getOutAssignments()))
-        refs = trackerGet.trackVariables([t1], self.callGraphGet)
-        self.assertFalse(refs)
-        self.assertEqual(1, len(trackerGet.getOutAssignments()))
+        trackerGet.trackVariables([t1, t2], self.callGraphGet)
+        self.assertEqual(2, len(trackerGet.getOutAssignments()))
         
         trackerTestFunc1 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
-        refs = trackerTestFunc1.trackVariables([t1], self.callGraphTestFunc1)
-        self.assertFalse(refs)
+        trackerTestFunc1.trackVariables([t1, t2], self.callGraphTestFunc1)
         self.assertEqual(0, len(trackerTestFunc1.getOutAssignments()))
                  
     def testArgumentAsFunctionResult(self):
@@ -124,7 +124,7 @@ class OutVarsTest(unittest.TestCase):
          
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc1)
         globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'t1%first'}, globalVars)
+        self.assertEqual({'t1%first', 't2%first'}, globalVars)
         
 if __name__ == "__main__":
     unittest.main()
