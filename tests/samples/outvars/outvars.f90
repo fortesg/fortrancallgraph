@@ -12,6 +12,10 @@ MODULE outvars
     TYPE(ttest) :: child
   END TYPE parent
 
+  TYPE :: grand
+    TYPE(parent) :: child
+  END TYPE grand
+
   TYPE(ttest) :: t1
 
 CONTAINS
@@ -39,5 +43,12 @@ CONTAINS
     temp = part(mother)
     WRITE (*,*) 'second: ', temp%second
   END SUBROUTINE testFunc2
+
+  SUBROUTINE testFunc3(grandpa)
+    TYPE(grand), INTENT(in) :: grandpa
+    TYPE(ttest) :: temp
+    temp = part(grandpa%child)
+    WRITE (*,*) 'third: ', temp%third
+  END SUBROUTINE testFunc3
 
 END MODULE outvars

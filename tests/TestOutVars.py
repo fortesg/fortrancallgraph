@@ -39,6 +39,9 @@ class OutVarsTest(unittest.TestCase):
         self.testFunc2 = SubroutineFullName('__outvars_MOD_testFunc2')
         self.callGraphTestFunc2 = callGraphBuilder.buildCallGraph(self.testFunc2)
         
+        self.testFunc3 = SubroutineFullName('__outvars_MOD_testFunc3')
+        self.callGraphTestFunc3 = callGraphBuilder.buildCallGraph(self.testFunc3)
+        
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
         self.assertTrue(os.path.exists(self.assFile), 'Test will fail. Assembler file not found: ' + self.assFile)
@@ -50,6 +53,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertEqual({'get'}, set(map(SubroutineFullName.getSimpleName, self.callGraphGet.getAllSubroutineNames())))
         self.assertEqual({'testfunc1', 'get'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc1.getAllSubroutineNames())))
         self.assertEqual({'testfunc2', 'part'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc2.getAllSubroutineNames())))
+        self.assertEqual({'testfunc3', 'part'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc3.getAllSubroutineNames())))
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -66,7 +70,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'get', 'part', 'testfunc1', 'testfunc2'}, simpleNames)
+        self.assertEqual({'get', 'part', 'testfunc1', 'testfunc2', 'testfunc3'}, simpleNames)
         
         
     def testOutArguments(self):
@@ -98,6 +102,10 @@ class OutVarsTest(unittest.TestCase):
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc2)
         globalVars = set([ref.getExpression() for ref in refs])
         self.assertEqual({'mother%child%second'}, globalVars)
+         
+        refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc3)
+        globalVars = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'grandpa%child%child%third'}, globalVars)
                  
     def testGlobalAsFunctionResult(self):
         if not self.filesExist:
