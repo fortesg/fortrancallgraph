@@ -88,15 +88,15 @@ class OutVarsTest(unittest.TestCase):
         useTraversal.parseModules(self.testFunc1)
         
         trackerGet = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
-        self.assertEqual(0, len(trackerGet.outAssignments))
+        self.assertEqual(0, len(trackerGet.getOutAssignments()))
         refs = trackerGet.trackVariables([t1], self.callGraphGet)
         self.assertFalse(refs)
-        self.assertEqual(1, len(trackerGet.outAssignments))
+        self.assertEqual(1, len(trackerGet.getOutAssignments()))
         
         trackerTestFunc1 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         refs = trackerTestFunc1.trackVariables([t1], self.callGraphTestFunc1)
         self.assertFalse(refs)
-        self.assertEqual(0, len(trackerTestFunc1.outAssignments))
+        self.assertEqual(0, len(trackerTestFunc1.getOutAssignments()))
                  
     def testArgumentAsFunctionResult(self):
         if not self.filesExist:

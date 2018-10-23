@@ -33,7 +33,13 @@ class VariableTracker(CallGraphAnalyzer):
         self.__ignoredTypes = map(str.lower, ignoredTypes)
         self.__excludeFromRecursionVariables = set()
         self.__excludeFromRecursionRoutines = set()
-        self.outAssignments = set()
+        self.__outAssignments = set()
+        
+    def getOutAssignments(self):
+        return self.__outAssignments
+        
+    def clearOutAssignments(self):
+        self.__outAssignments = set()
     
     def setVariable(self, variable):
         assertType(variable, 'variable', Variable)
@@ -274,10 +280,10 @@ class VariableTracker(CallGraphAnalyzer):
                     variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
-                    for asgmtAlias, asgmtReference in newSubroutineAnalyzer.outAssignments:
-                        self.outAssignments.add((asgmtAlias, asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())))
+                    for asgmtAlias, asgmtReference in newSubroutineAnalyzer.__outAssignments:
+                        self.__outAssignments.add((asgmtAlias, asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())))
                     if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
-                        self.outAssignments.add((aliasVar, originalReference))                    
+                        self.__outAssignments.add((aliasVar, originalReference))                    
                         
                     return variableReferences
             else:
@@ -455,7 +461,7 @@ class VariableTracker(CallGraphAnalyzer):
                         calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                         calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                         variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
-                        outAssignments = calledSubroutineAnalyzer.outAssignments
+                        outAssignments = calledSubroutineAnalyzer.__outAssignments
                         for variableReference in variableReferences:
                             variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                         for assignment in outAssignments:
