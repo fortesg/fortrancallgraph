@@ -9,6 +9,7 @@ from callgraph import CallGraph
 from trackvariable import VariableTracker, VariableReference
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
+from multiprocessing import dummy
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
@@ -101,7 +102,12 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                     typeVariables.add(variable)
                 else:
                     normalVariables.add(variable)
+        self.__variableTracker.clearOutAssignments()
         typeVariableReferences = set(self.__variableTracker.trackVariables(typeVariables, callGraph))
+        for aliasVar, originalReference in self.__variableTracker.getOutAssignments():
+            if aliasVar.isFunctionResult():
+                typeVariableReferences.update(self.__trackFunctionResult(subroutineName, originalReference))
+        
         normalVariableReferences = set(self.__trackVariables(normalVariables, subroutineName))
         
         references = set()
@@ -112,6 +118,18 @@ class GlobalVariableTracker(CallGraphAnalyzer):
             references.add(reference)
 
         return references
+    
+    def __trackFunctionResult(self, functionName, originalReference):
+        dummyVar = originalReference.getLevelNVariable().getAlias(functionName.getSimpleName()) # TODO interfaces!!! type-bound-procedures???
+        tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+        functionReferences = set()
+        for callerName in self.__callGraph.getCallers(functionName):
+            callGraph = self.__callGraph.extractSubgraph(callerName) 
+            functionReferences.update(tracker.trackVariables([dummyVar], callGraph))
+        for variableReference in functionReferences:
+            variableReference.setLevel0Variable(originalReference.getLevel0Variable(), originalReference.getMembers())
+            
+        return functionReferences
     
     def __trackVariables(self, variables, subroutineName):
 
