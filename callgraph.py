@@ -248,6 +248,17 @@ class CallGraph(object):
         for subroutine in self.__subroutines.values():
             calls.update(subroutine.getCalls())
         return calls
+    
+    def getCallers(self, calleeName):
+        assertType(calleeName, 'calleeName', SubroutineName)      
+        if not calleeName in self:
+            raise ValueError("Caller subroutine not found in CallGraph: " + str(calleeName))
+        callers = set()
+        for subroutineName, subroutine in self.__subroutines.iteritems():
+            if calleeName in subroutine.getCallees():
+                callers.add(subroutineName)
+                
+        return callers
  
     def extractSubgraph(self, subrootName):
         assertType(subrootName, 'subrootName', SubroutineName)
