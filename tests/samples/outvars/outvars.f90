@@ -20,6 +20,11 @@ MODULE outvars
 
 CONTAINS
 
+  FUNCTION primitive()
+    INTEGER :: primitive
+    primitive = t1%second
+  END FUNCTION primitive
+
   FUNCTION get(i)
    INTEGER, INTENT(in) :: i
    TYPE(ttest) :: get
