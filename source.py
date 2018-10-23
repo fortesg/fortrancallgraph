@@ -162,8 +162,10 @@ class Variable(object):
     __intents = ['in', 'out', 'inout', '']
     
     def __init__(self, variableName, typeName, parameter=False, allocatable=False, pointer=False, target=False, dimension=0, intent='', optional=False, public=False, private=False):
+        assertType(variableName, 'variableName', str)
         if not Variable.validIdentifier(variableName):
             raise ValueError("variableName is not a valid identifier: " + variableName);
+        assertType(typeName, 'typeName', str)
         if not Variable.validType(typeName):
             raise ValueError('Invalid type name: ' + typeName)
         assertType(parameter, 'parameter', bool)
@@ -383,12 +385,14 @@ class Variable(object):
         return self.__declaredIn.getModule()
     
     def setOriginalName(self, originalName):
+        assertType(originalName, 'name', str, True)
         self.__originalName = originalName
         
     def getOriginalName(self):
         return self.__originalName
     
     def getAlias(self, name = None):
+        assertType(name, 'name', str, True)
         if name is None:
             name = self.__name
         
