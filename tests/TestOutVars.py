@@ -50,10 +50,12 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.assertEqual({'get'}, set(map(SubroutineFullName.getSimpleName, self.callGraphGet.getAllSubroutineNames())))
-        self.assertEqual({'testfunc1', 'get'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc1.getAllSubroutineNames())))
-        self.assertEqual({'testfunc2', 'part'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc2.getAllSubroutineNames())))
-        self.assertEqual({'testfunc3', 'part'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc3.getAllSubroutineNames())))
+        self.assertEqual({'get'}, set([name.getSimpleName() for name in self.callGraphGet.getAllSubroutineNames()]))
+        self.assertEqual({'testfunc1', 'get'}, set([name.getSimpleName() for name in self.callGraphTestFunc1.getAllSubroutineNames()]))
+        self.assertEqual({'testfunc1'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc1.getCallers(self.get))))
+        self.assertEqual({'testfunc2', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc2.getAllSubroutineNames()]))
+        self.assertEqual({'testfunc3', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc3.getAllSubroutineNames()]))
+        
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -84,12 +86,17 @@ class OutVarsTest(unittest.TestCase):
 
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.testFunc1)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
-        self.assertEqual(0, len(tracker.outAssignments))
         
-        refs = tracker.trackVariables([t1], self.callGraphGet)
+        trackerGet = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        self.assertEqual(0, len(trackerGet.outAssignments))
+        refs = trackerGet.trackVariables([t1], self.callGraphGet)
         self.assertFalse(refs)
-        self.assertEqual(1, len(tracker.outAssignments))
+        self.assertEqual(1, len(trackerGet.outAssignments))
+        
+        trackerTestFunc1 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        refs = trackerTestFunc1.trackVariables([t1], self.callGraphTestFunc1)
+        self.assertFalse(refs)
+        self.assertEqual(0, len(trackerTestFunc1.outAssignments))
                  
     def testArgumentAsFunctionResult(self):
         if not self.filesExist:
