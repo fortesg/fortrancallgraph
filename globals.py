@@ -4,7 +4,7 @@ import sys
 import re
 from assertions import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer
-from source import SourceFiles
+from source import SourceFiles, VariableReference
 from callgraph import CallGraph
 from trackvariable import VariableTracker, VariableReference
 from usetraversal import UseTraversal
@@ -104,9 +104,12 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                     normalVariables.add(variable)
         self.__variableTracker.clearOutAssignments()
         typeVariableReferences = set(self.__variableTracker.trackVariables(typeVariables, callGraph))
+        assignmentOriginalReferences = []
         for aliasVar, originalReference in self.__variableTracker.getOutAssignments():
             if aliasVar.isFunctionResult():
-                typeVariableReferences.update(self.__trackFunctionResult(subroutineName, originalReference))
+                assignmentOriginalReferences.append(originalReference)
+        if assignmentOriginalReferences:
+            typeVariableReferences.update(self.__trackFunctionResult(subroutineName, assignmentOriginalReferences))
         
         normalVariableReferences = set(self.__trackVariables(normalVariables, subroutineName))
         
@@ -119,17 +122,20 @@ class GlobalVariableTracker(CallGraphAnalyzer):
 
         return references
     
-    def __trackFunctionResult(self, functionName, originalReference):
-        dummyVar = originalReference.getLevelNVariable().getAlias(functionName.getSimpleName()) # TODO interfaces!!! type-bound-procedures???
+    def __trackFunctionResult(self, functionName, originalReferences):
+        dummyVar = originalReferences[0].getLevelNVariable().getAlias(functionName.getSimpleName()) # TODO interfaces!!! type-bound-procedures???
         tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
         functionReferences = set()
         for callerName in self.__callGraph.getCallers(functionName):
             callGraph = self.__callGraph.extractSubgraph(callerName) 
             functionReferences.update(tracker.trackVariables([dummyVar], callGraph))
-        for variableReference in functionReferences:
-            variableReference.setLevel0Variable(originalReference.getLevel0Variable(), originalReference.getMembers())
-            
-        return functionReferences
+        variableReferences = set()
+        for functionReference in functionReferences:
+            for originalReference in originalReferences:
+                variableReference = functionReference.cleanCopy()
+                variableReference.setLevel0Variable(originalReference.getLevel0Variable(), originalReference.getMembers())
+                variableReferences.add(variableReference)
+        return variableReferences
     
     def __trackVariables(self, variables, subroutineName):
 
