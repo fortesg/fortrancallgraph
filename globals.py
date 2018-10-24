@@ -122,12 +122,16 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         return references
     
     def __trackFunctionResult(self, functionName, originalReferences):
-        dummyVar = originalReferences[0].getLevelNVariable().getAlias(functionName.getSimpleName()) # TODO interfaces!!! type-bound-procedures???
+        variables = [originalReferences[0].getLevelNVariable().getAlias(functionName.getSimpleName())] # TODO interfaces!!! type-bound-procedures???
+        for interface in self.__interfaces.itervalues():
+            print '*** DEBUG *** ' + interface.getName() + ' : ' + (str(map(str, interface.getProcedures())))
+            if functionName.getSimpleName() in interface:
+                variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
         tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
         functionReferences = set()
         for callerName in self.__callGraph.getCallers(functionName):
             callGraph = self.__callGraph.extractSubgraph(callerName) 
-            functionReferences.update(tracker.trackVariables([dummyVar], callGraph))
+            functionReferences.update(tracker.trackVariables(variables, callGraph))
         variableReferences = set()
         for functionReference in functionReferences:
             for originalReference in originalReferences:
