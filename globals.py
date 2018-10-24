@@ -124,7 +124,6 @@ class GlobalVariableTracker(CallGraphAnalyzer):
     def __trackFunctionResult(self, functionName, originalReferences):
         variables = [originalReferences[0].getLevelNVariable().getAlias(functionName.getSimpleName())] # TODO interfaces!!! type-bound-procedures???
         for interface in self.__interfaces.itervalues():
-            print '*** DEBUG *** ' + interface.getName() + ' : ' + (str(map(str, interface.getProcedures())))
             if functionName.getSimpleName() in interface:
                 variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
         tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
