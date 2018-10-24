@@ -117,7 +117,7 @@ class OutVarsTest(unittest.TestCase):
          
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc2)
         globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'mother%child%second'}, globalVars)
+        self.assertEqual({'mother%child%second', 'mother%child%third'}, globalVars)
          
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc3)
         globalVars = set([ref.getExpression() for ref in refs])
@@ -141,7 +141,7 @@ class OutVarsTest(unittest.TestCase):
          
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc1)
         globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'t1%first', 't2%first'}, globalVars)
+        self.assertEqual({'t1%first', 't2%first', 't1%second', 't2%second'}, globalVars)
         
 if __name__ == "__main__":
     unittest.main()
