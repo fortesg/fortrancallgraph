@@ -8,6 +8,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
+from _ast import alias
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -403,7 +404,8 @@ class VariableTracker(CallGraphAnalyzer):
                         return (set(), set()) 
                 originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
                 before = functionRegExMatch.group('before').strip()
-                return self.__analyzeCall(calledRoutineName, originalReference, "@@@, " + before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
+                after = functionRegExMatch.group('after').strip()
+                return self.__analyzeCall(calledRoutineName, originalReference, "@@@, " + before, after, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
             
         return (set(), set())
     
@@ -422,9 +424,10 @@ class VariableTracker(CallGraphAnalyzer):
         originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
         
         before = functionRegExMatch.group('before').strip()
-        return self.__analyzeCall(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum steht hier False? Weil es sonst zu viele Fehlermeldungen gaebe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
+        after = functionRegExMatch.group('after').strip()
+        return self.__analyzeCall(calledRoutineName, originalReference, before, after, subroutine, lineNumber, False) # Warum steht hier False? Weil es sonst zu viele Fehlermeldungen gaebe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
     
-    def __analyzeCall(self, calledRoutineName, originalReference, before, subroutine, lineNumber, warnIfNotFound = True):
+    def __analyzeCall(self, calledRoutineName, originalReference, before, after, subroutine, lineNumber, warnIfNotFound = True):
         if self._ignoreRegex is not None and self._ignoreRegex.match(calledRoutineName):
             return (set(), set())
         
@@ -471,6 +474,11 @@ class VariableTracker(CallGraphAnalyzer):
                             variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                         for assignment in outAssignments:
                             assignment[1].setLevel0Variable(self.__variable, originalReference.getMembers())
+                        for asgmtAlias, asgmtReference in outAssignments:
+                            if asgmtAlias.isOutArgument():
+                                aliasPosition = subroutine.getArgumentPosition(asgmtAlias)
+                                if aliasPosition >= 0:
+                                    pass #TODO
         
                         return (variableReferences, outAssignments)
                 else:

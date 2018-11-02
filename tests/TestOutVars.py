@@ -36,6 +36,9 @@ class OutVarsTest(unittest.TestCase):
         self.get = SubroutineFullName('__outvars_MOD_get')
         self.callGraphGet = callGraphBuilder.buildCallGraph(self.get)
         
+        self.withouta = SubroutineFullName('__outvars_MOD_withouta')
+        self.callGraphWithOutA = callGraphBuilder.buildCallGraph(self.withouta)
+        
         self.testFunc1 = SubroutineFullName('__outvars_MOD_testFunc1')
         self.callGraphTestFunc1 = callGraphBuilder.buildCallGraph(self.testFunc1)
         
@@ -106,9 +109,21 @@ class OutVarsTest(unittest.TestCase):
         trackerGet.trackVariables([t1, t2], self.callGraphGet)
         self.assertEqual(2, len(trackerGet.getOutAssignments()))
         
+        trackerWithOutA = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerWithOutA.trackDerivedTypeArguments(self.callGraphWithOutA)
+        self.assertEqual(1, len(trackerWithOutA.getOutAssignments()))
+        
         trackerTestFunc1 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         trackerTestFunc1.trackVariables([t1, t2], self.callGraphTestFunc1)
         self.assertEqual(0, len(trackerTestFunc1.getOutAssignments()))
+        
+        trackerTestFunc4 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerTestFunc4.trackDerivedTypeArguments(self.callGraphTestFunc4)
+        self.assertEqual(0, len(trackerTestFunc4.getOutAssignments()))
+        
+        trackerTestFunc4 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerTestFunc4.trackDerivedTypeArguments(self.callGraphTestFunc4)
+        self.assertEqual(0, len(trackerTestFunc4.getOutAssignments()))
                  
     def testArgumentAsFunctionResult(self):
         if not self.filesExist:
