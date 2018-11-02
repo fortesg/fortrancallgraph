@@ -45,6 +45,9 @@ class OutVarsTest(unittest.TestCase):
         self.testFunc3 = SubroutineFullName('__outvars_MOD_testFunc3')
         self.callGraphTestFunc3 = callGraphBuilder.buildCallGraph(self.testFunc3)
         
+        self.testFunc4 = SubroutineFullName('__outvars_MOD_testFunc4')
+        self.callGraphTestFunc4 = callGraphBuilder.buildCallGraph(self.testFunc4)
+        
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
         self.assertTrue(os.path.exists(self.assFile), 'Test will fail. Assembler file not found: ' + self.assFile)
@@ -59,6 +62,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertEqual({'testfunc1'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc1.getCallers(self.get))))
         self.assertEqual({'testfunc2', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc2.getAllSubroutineNames()]))
         self.assertEqual({'testfunc3', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc3.getAllSubroutineNames()]))
+        self.assertEqual({'testfunc4', 'withouta'}, set([name.getSimpleName() for name in self.callGraphTestFunc4.getAllSubroutineNames()]))
         
                 
     def testSourceFiles(self):
@@ -76,7 +80,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'primitive', 'get', 'part', 'testfunc1', 'testfunc2', 'testfunc3'}, simpleNames)
+        self.assertEqual({'primitive', 'get', 'part', 'withouta', 'testfunc1', 'testfunc2', 'testfunc3', 'testfunc4'}, simpleNames)
         
         
     def testOutArguments(self):
@@ -101,7 +105,6 @@ class OutVarsTest(unittest.TestCase):
         trackerGet = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         trackerGet.trackVariables([t1, t2], self.callGraphGet)
         self.assertEqual(2, len(trackerGet.getOutAssignments()))
-        
         
         trackerTestFunc1 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         trackerTestFunc1.trackVariables([t1, t2], self.callGraphTestFunc1)
@@ -142,6 +145,18 @@ class OutVarsTest(unittest.TestCase):
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc1)
         globalVars = set([ref.getExpression() for ref in refs])
         self.assertEqual({'t1%first', 't2%first'}, globalVars)
+                         
+    def testArgumentAsSubroutineOutVar(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+         
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.testFunc4)
+        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+         
+        refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc4)
+        globalVars = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'father%child%first'}, globalVars)
         
 if __name__ == "__main__":
     unittest.main()
