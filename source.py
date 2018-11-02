@@ -1240,6 +1240,7 @@ class Subroutine(SubroutineContainer):
                 arguments[argumentNames.index(variable.getName().lower())] = variable
         return arguments
     
+    
     def findArgument(self, name):
         assertType(name, 'name', str)
         if not Variable.validIdentifier(name):
@@ -1250,6 +1251,19 @@ class Subroutine(SubroutineContainer):
             if argument.getName().lower() == name:
                 return argument
         return None
+    
+    def getArgumentPosition(self, name):
+        assertType(name, 'name', [str, Variable])
+        if isinstance(name, str) and not Variable.validIdentifier(name):
+            raise ValueError("Not a valid identifier: " + name)
+        elif isinstance(name, Variable):
+            name = name.getName()
+
+        name = name.lower()
+        for i, argument in enumerate(self.getArguments()):
+            if argument.getName().lower() == name:
+                return i
+        return -1
     
     def getInArguments(self):
         return [a for a in self.getArguments() if a.isInArgument()]
