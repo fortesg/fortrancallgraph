@@ -8,7 +8,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from os.path import stat
+from _ast import alias
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -273,22 +273,27 @@ class VariableTracker(CallGraphAnalyzer):
                 if aliasType is not None:
                     aliasVar.setType(aliasType)
             originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
-            if not originalReference.isRecursive():
-                variable = self.__findLevelNVariable(originalReference)
-                if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
-                    newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
-                    newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                    variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
-                    for variableReference in variableReferences:
-                        variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
-                    for asgmtAlias, asgmtReference in newSubroutineAnalyzer.__outAssignments:
-                        self.__outAssignments.add((asgmtAlias, asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())))
-                    if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
-                        self.__outAssignments.add((aliasVar, originalReference))                    
-                        
-                    return variableReferences
-            else:
-                print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
+            return self.__followAssignment(aliasVar, originalReference, lineNumber)
+                
+        return set();
+    
+    def __followAssignment(self, aliasVar, originalReference, lineNumber):
+        if not originalReference.isRecursive():
+            variable = self.__findLevelNVariable(originalReference)
+            if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
+                newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
+                variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
+                for variableReference in variableReferences:
+                    variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
+                for asgmtAlias, asgmtReference in newSubroutineAnalyzer.__outAssignments:
+                    self.__outAssignments.add((asgmtAlias, asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())))
+                if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
+                    self.__outAssignments.add((aliasVar, originalReference))                    
+                    
+                return variableReferences
+        else:
+            print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
                 
         return set();
                 
@@ -399,7 +404,8 @@ class VariableTracker(CallGraphAnalyzer):
                         return (set(), set()) 
                 originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
                 before = functionRegExMatch.group('before').strip()
-                return self.__analyzeCall(calledRoutineName, originalReference, "@@@, " + before, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
+                after = functionRegExMatch.group('after').strip()
+                return self.__analyzeCall(calledRoutineName, originalReference, "@@@, " + before, after, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
             
         return (set(), set())
     
@@ -418,9 +424,10 @@ class VariableTracker(CallGraphAnalyzer):
         originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
         
         before = functionRegExMatch.group('before').strip()
-        return self.__analyzeCall(calledRoutineName, originalReference, before, subroutine, lineNumber, False) # Warum steht hier False? Weil es sonst zu viele Fehlermeldungen gaebe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
+        after = functionRegExMatch.group('after').strip()
+        return self.__analyzeCall(calledRoutineName, originalReference, before, after, subroutine, lineNumber, False) # Warum steht hier False? Weil es sonst zu viele Fehlermeldungen gaebe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
     
-    def __analyzeCall(self, calledRoutineName, originalReference, before, subroutine, lineNumber, warnIfNotFound = True):
+    def __analyzeCall(self, calledRoutineName, originalReference, before, after, subroutine, lineNumber, warnIfNotFound = True):
         if self._ignoreRegex is not None and self._ignoreRegex.match(calledRoutineName):
             return (set(), set())
         
@@ -467,6 +474,11 @@ class VariableTracker(CallGraphAnalyzer):
                             variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                         for assignment in outAssignments:
                             assignment[1].setLevel0Variable(self.__variable, originalReference.getMembers())
+                        for asgmtAlias, asgmtReference in outAssignments:
+                            if asgmtAlias.isOutArgument():
+                                aliasPosition = subroutine.getArgumentPosition(asgmtAlias)
+                                if aliasPosition >= 0:
+                                    pass #TODO
         
                         return (variableReferences, outAssignments)
                 else:

@@ -50,6 +50,14 @@ CONTAINS
    part = p%child
   END FUNCTION part
 
+  SUBROUTINE withOutA(a, b, c)
+    INTEGER, INTENT(in) :: a
+    TYPE(parent), INTENT(inout) :: b
+    TYPE(ttest), INTENT(out) :: c
+
+    c = b%child
+  END SUBROUTINE withOutA
+
   SUBROUTINE testFunc1()
     TYPE(ttest) :: var1, var2
     var1 = get(1)
@@ -73,5 +81,12 @@ CONTAINS
     temp = part(grandpa%child)
     WRITE (*,*) 'third: ', temp%third
   END SUBROUTINE testFunc3
+
+  SUBROUTINE testFunc4(father)
+    TYPE(parent), INTENT(inout) :: father
+    TYPE(ttest) :: temp
+    CALL withOutA(42, father, temp)
+    WRITE (*,*) 'third: ', temp%first
+  END SUBROUTINE testFunc4
 
 END MODULE outvars
