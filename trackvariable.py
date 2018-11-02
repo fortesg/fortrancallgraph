@@ -8,7 +8,6 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from os.path import stat
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -273,22 +272,27 @@ class VariableTracker(CallGraphAnalyzer):
                 if aliasType is not None:
                     aliasVar.setType(aliasType)
             originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
-            if not originalReference.isRecursive():
-                variable = self.__findLevelNVariable(originalReference)
-                if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
-                    newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
-                    newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
-                    variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
-                    for variableReference in variableReferences:
-                        variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
-                    for asgmtAlias, asgmtReference in newSubroutineAnalyzer.__outAssignments:
-                        self.__outAssignments.add((asgmtAlias, asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())))
-                    if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
-                        self.__outAssignments.add((aliasVar, originalReference))                    
-                        
-                    return variableReferences
-            else:
-                print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
+            return self.__followAssignment(aliasVar, originalReference, lineNumber)
+                
+        return set();
+    
+    def __followAssignment(self, aliasVar, originalReference, lineNumber):
+        if not originalReference.isRecursive():
+            variable = self.__findLevelNVariable(originalReference)
+            if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
+                newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
+                newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
+                variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
+                for variableReference in variableReferences:
+                    variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
+                for asgmtAlias, asgmtReference in newSubroutineAnalyzer.__outAssignments:
+                    self.__outAssignments.add((asgmtAlias, asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())))
+                if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
+                    self.__outAssignments.add((aliasVar, originalReference))                    
+                    
+                return variableReferences
+        else:
+            print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
                 
         return set();
                 
