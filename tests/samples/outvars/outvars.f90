@@ -58,6 +58,14 @@ CONTAINS
     c = b%child
   END SUBROUTINE withOutA
 
+  SUBROUTINE withOutG(a, b, c)
+    INTEGER, INTENT(in) :: a
+    TYPE(parent), INTENT(inout) :: b
+    TYPE(ttest), INTENT(out) :: c
+
+    c = t1
+  END SUBROUTINE withOutG
+
   SUBROUTINE testFunc1()
     TYPE(ttest) :: var1, var2
     var1 = get(1)
@@ -86,7 +94,9 @@ CONTAINS
     TYPE(parent), INTENT(inout) :: father
     TYPE(ttest) :: temp
     CALL withOutA(42, father, temp)
-    WRITE (*,*) 'third: ', temp%first
+    WRITE (*,*) 'first: ', temp%first
+    CALL withOutG(109, father, temp)
+    WRITE (*,*) 'second: ', temp%second
   END SUBROUTINE testFunc4
 
 END MODULE outvars

@@ -39,6 +39,9 @@ class OutVarsTest(unittest.TestCase):
         self.withouta = SubroutineFullName('__outvars_MOD_withouta')
         self.callGraphWithOutA = callGraphBuilder.buildCallGraph(self.withouta)
         
+        self.withoutg = SubroutineFullName('__outvars_MOD_withoutg')
+        self.callGraphWithOutG = callGraphBuilder.buildCallGraph(self.withoutg)
+        
         self.testFunc1 = SubroutineFullName('__outvars_MOD_testFunc1')
         self.callGraphTestFunc1 = callGraphBuilder.buildCallGraph(self.testFunc1)
         
@@ -65,7 +68,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertEqual({'testfunc1'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc1.getCallers(self.get))))
         self.assertEqual({'testfunc2', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc2.getAllSubroutineNames()]))
         self.assertEqual({'testfunc3', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc3.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc4', 'withouta'}, set([name.getSimpleName() for name in self.callGraphTestFunc4.getAllSubroutineNames()]))
+        self.assertEqual({'testfunc4', 'withouta', 'withoutg'}, set([name.getSimpleName() for name in self.callGraphTestFunc4.getAllSubroutineNames()]))
         
                 
     def testSourceFiles(self):
@@ -83,7 +86,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'primitive', 'get', 'part', 'withouta', 'testfunc1', 'testfunc2', 'testfunc3', 'testfunc4'}, simpleNames)
+        self.assertEqual({'primitive', 'get', 'part', 'withouta', 'withoutg', 'testfunc1', 'testfunc2', 'testfunc3', 'testfunc4'}, simpleNames)
         
         
     def testOutArguments(self):
@@ -171,7 +174,7 @@ class OutVarsTest(unittest.TestCase):
          
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc4)
         globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'father%child%first'}, globalVars)
+        self.assertEqual({'father%child%first', 'father%child%second', 't1%second'}, globalVars)
         
 if __name__ == "__main__":
     unittest.main()
