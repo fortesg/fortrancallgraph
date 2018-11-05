@@ -93,9 +93,9 @@ CONTAINS
   SUBROUTINE testFunc4(father)
     TYPE(parent), INTENT(inout) :: father
     TYPE(ttest) :: temp
-    CALL withOutA(42, father, temp)
+    CALL withOutA(INT(SQRT(36.0), 4), father, temp)
     WRITE (*,*) 'first: ', temp%first
-    CALL withOutG(109, father, temp)
+    CALL withOutG(INT(SQRT(36.0), 4), father, temp)
     WRITE (*,*) 'second: ', temp%second
   END SUBROUTINE testFunc4
 

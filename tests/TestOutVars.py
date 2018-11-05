@@ -170,11 +170,16 @@ class OutVarsTest(unittest.TestCase):
          
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.testFunc4)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
          
-        refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc4)
-        globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'father%child%first', 'father%child%second', 't1%second'}, globalVars)
+        argTracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        refs = argTracker.trackDerivedTypeArguments(self.callGraphTestFunc4)
+        expressions = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'father%child%first', 'father%child%second'}, expressions)
+        
+        globalTracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        refs = globalTracker.trackGlobalVariables(self.callGraphTestFunc4)
+        expressions = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'t1%second'}, expressions)
         
 if __name__ == "__main__":
     unittest.main()
