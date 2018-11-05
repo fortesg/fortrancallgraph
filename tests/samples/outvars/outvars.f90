@@ -26,6 +26,11 @@ MODULE outvars
     MODULE PROCEDURE part
   END INTERFACE p
 
+  INTERFACE withOut
+    MODULE PROCEDURE withOutA
+    MODULE PROCEDURE withOutG
+  END INTERFACE withOut
+
 CONTAINS
 
   FUNCTION primitive()
@@ -51,7 +56,7 @@ CONTAINS
   END FUNCTION part
 
   SUBROUTINE withOutA(a, b, c)
-    INTEGER, INTENT(in) :: a
+    REAL, INTENT(in) :: a
     TYPE(parent), INTENT(inout) :: b
     TYPE(ttest), INTENT(out) :: c
 
@@ -93,9 +98,9 @@ CONTAINS
   SUBROUTINE testFunc4(father)
     TYPE(parent), INTENT(inout) :: father
     TYPE(ttest) :: temp
-    CALL withOutA(INT(SQRT(36.0), 4), father, temp)
+    CALL withOut(SQRT(36.0), father, temp)
     WRITE (*,*) 'first: ', temp%first
-    CALL withOutG(INT(SQRT(36.0), 4), father, temp)
+    CALL withOut(INT(SQRT(36.0), 4), father, temp)
     WRITE (*,*) 'second: ', temp%second
   END SUBROUTINE testFunc4
 

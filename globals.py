@@ -162,22 +162,28 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         callee = self.__findSubroutine(calleeName)
         callGraph = self.__callGraph.extractSubgraph(callerName) 
 
-        tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
         variableReferences = set()
-        for lineNumber, statement, _ in caller.getStatements():
-            for calleeNameAlternative in calleeNameAlternatives:
-                procedureRegEx = re.compile(r'^.*[^a-z0-9_]+' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
-                procedureRegExMatch = procedureRegEx.match(statement)
-                if procedureRegExMatch is not None:
-                    arguments = procedureRegExMatch.group('arguments')
-                    arguments = SourceFile.removeUnimportantParentheses(arguments)
-                    arguments = arguments.split(',')
-                    for alias, originalReference in assignments:
-                        aliasPosition = callee.getArgumentPosition(alias)
-                        if aliasPosition >= 0 and aliasPosition < len(arguments):
-                            argument = arguments[aliasPosition]
-                            variableReferences.update(tracker.trackAssignment(argument, originalReference, callGraph, lineNumber))
-                break
+        if caller is not None and callee is not None:
+            tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+            for lineNumber, statement, _ in caller.getStatements():
+                for calleeNameAlternative in calleeNameAlternatives:
+                    procedureRegEx = re.compile(r'^.*[^a-z0-9_]+' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
+                    procedureRegExMatch = procedureRegEx.match(statement)
+                    if procedureRegExMatch is not None:
+                        isCall = True
+                        if calleeNameAlternative != calleeName.getSimpleName():
+                            assemblerLineNumber = lineNumber - caller.getSourceFile().getPreprocessorOffset(lineNumber)
+                            isCall = calleeName in self.__callGraph.findNextCalleesFromLine(callerName, assemblerLineNumber)
+                        if isCall:
+                            arguments = procedureRegExMatch.group('arguments')
+                            arguments = SourceFile.removeUnimportantParentheses(arguments)
+                            arguments = arguments.split(',')
+                            for alias, originalReference in assignments:
+                                aliasPosition = callee.getArgumentPosition(alias)
+                                if aliasPosition >= 0 and aliasPosition < len(arguments):
+                                    argument = arguments[aliasPosition]
+                                    variableReferences.update(tracker.trackAssignment(argument, originalReference, callGraph, lineNumber))
+                            break
             
         return variableReferences
         
