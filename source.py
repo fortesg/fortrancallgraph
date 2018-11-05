@@ -1764,6 +1764,29 @@ class SourceFile(object):
         return statements;
     
     @staticmethod
+    def removeUnimportantParentheses(statement, regEx = None):
+        clean = ''
+        pString = ''
+        pCount = 0
+        for c in statement:
+            if c == '(':
+                pCount += 1
+            
+            if pCount == 0:
+                clean += c
+            else:
+                pString += c
+                
+            if c == ')':
+                pCount -= 1
+                if pCount == 0:
+                    pString = pString[1:-1]
+                    if regEx is not None and regEx.match(pString) is not None:
+                        clean += '(' + SourceFile.removeUnimportantParentheses(pString, regEx) + ')'
+                    pString = ''
+        return clean
+    
+    @staticmethod
     def __removeCommentFromLine(line):
         'TODO Testen!!!'
         cleanLine = '';

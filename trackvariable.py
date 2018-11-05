@@ -4,7 +4,7 @@ import re
 import sys
 from assertions import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer
-from source import SourceFiles, Variable, VariableReference, SubroutineFullName, InnerSubroutineName
+from source import SourceFiles, Variable, VariableReference, SubroutineFullName, InnerSubroutineName, SourceFile
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
@@ -178,7 +178,7 @@ class VariableTracker(CallGraphAnalyzer):
         variableReferences = set()
         functionResultReference = None
         while variableRegEx.match(statement) is not None:
-            statement = self.__removeUnimportantParentheses(statement, variableRegEx)
+            statement = SourceFile.removeUnimportantParentheses(statement, variableRegEx)
             assignmentRegExMatch = assignmentRegEx.match(statement)
             if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
                 variableReferences.update(self.__analyzeExplicitAssignment(assignmentRegExMatch, subroutine, lineNumber))
@@ -236,7 +236,7 @@ class VariableTracker(CallGraphAnalyzer):
         
         return re.sub(re.escape(functionExpression), variableReference.getExpression(), statement, 1)
     
-    def __removeUnimportantParentheses(self, statement, regEx):
+    def __removeUnimportantParentheses(self, statement, regEx = None):
         clean = ''
         pString = ''
         pCount = 0
@@ -253,7 +253,7 @@ class VariableTracker(CallGraphAnalyzer):
                 pCount -= 1
                 if pCount == 0:
                     pString = pString[1:-1]
-                    if regEx.match(pString) is not None:
+                    if regEx is not None and regEx.match(pString) is not None:
                         clean += '(' + self.__removeUnimportantParentheses(pString, regEx) + ')'
                     pString = ''
         return clean
@@ -449,9 +449,11 @@ class VariableTracker(CallGraphAnalyzer):
         if calledRoutineFullName is not None and calledRoutineFullName.getModuleName().lower() not in self.__excludeModules:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
             
-            parathesisRegEx = re.compile(r'\([^\(\)]*\)');
-            before = parathesisRegEx.sub('', before);
-            arguments = parathesisRegEx.sub('', arguments);
+#             parathesisRegEx = re.compile(r'\([^\(\)]*\)');
+#             before = parathesisRegEx.sub('', before);
+#             arguments = parathesisRegEx.sub('', arguments);
+            before = SourceFile.removeUnimportantParentheses(before)
+            arguments = SourceFile.removeUnimportantParentheses(arguments)
             
             calledSubroutine = self.__sourceFiles.findSubroutine(calledRoutineFullName);
             if calledSubroutine is not None:
