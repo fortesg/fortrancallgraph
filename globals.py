@@ -4,11 +4,12 @@ import sys
 import re
 from assertions import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer
-from source import SourceFiles, VariableReference
+from source import SourceFiles, VariableReference, SourceFile
 from callgraph import CallGraph
 from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
+from _ast import alias
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
@@ -103,12 +104,17 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                     normalVariables.add(variable)
         self.__variableTracker.clearOutAssignments()
         typeVariableReferences = set(self.__variableTracker.trackVariables(typeVariables, callGraph))
-        assignmentOriginalReferences = []
+        funtionResultOriginalReferences = []
+        outVarAssignments = []
         for aliasVar, originalReference in self.__variableTracker.getOutAssignments():
             if aliasVar.isFunctionResult():
-                assignmentOriginalReferences.append(originalReference)
-        if assignmentOriginalReferences:
-            typeVariableReferences.update(self.__trackFunctionResult(subroutineName, assignmentOriginalReferences))
+                funtionResultOriginalReferences.append(originalReference)
+            elif aliasVar.isOutArgument():
+                outVarAssignments.append((aliasVar, originalReference))
+        if funtionResultOriginalReferences:
+            typeVariableReferences.update(self.__trackFunctionResult(subroutineName, funtionResultOriginalReferences))
+        if outVarAssignments:
+            typeVariableReferences.update(self.__trackOutVariables(subroutineName, outVarAssignments))
         
         normalVariableReferences = set(self.__trackVariables(normalVariables, subroutineName))
         
@@ -139,6 +145,42 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                 variableReferences.add(variableReference)
         return variableReferences
     
+    def __trackOutVariables(self, calleeName, assignments):
+        variableReferences = set()
+        for callerName in self.__callGraph.getCallers(calleeName):
+            variableReferences.update(self.__analyzeCallingSubroutineForOutVars(callerName, calleeName, assignments))
+                
+        return variableReferences
+    
+    def __analyzeCallingSubroutineForOutVars(self, callerName, calleeName, assignments):
+        calleeNameAlternatives = [calleeName.getSimpleName().lower()]
+        for interface in self.__interfaces.itervalues():
+            if calleeName.getSimpleName() in interface:
+                calleeNameAlternatives.append(interface.getName().lower())
+        
+        caller = self.__findSubroutine(callerName)
+        callee = self.__findSubroutine(calleeName)
+        callGraph = self.__callGraph.extractSubgraph(callerName) 
+
+        tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+        variableReferences = set()
+        for lineNumber, statement, _ in caller.getStatements():
+            for calleeNameAlternative in calleeNameAlternatives:
+                procedureRegEx = re.compile(r'^.*[^a-z0-9_]+' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
+                procedureRegExMatch = procedureRegEx.match(statement)
+                if procedureRegExMatch is not None:
+                    arguments = procedureRegExMatch.group('arguments')
+                    arguments = SourceFile.removeUnimportantParentheses(arguments)
+                    arguments = arguments.split(',')
+                    for alias, originalReference in assignments:
+                        aliasPosition = callee.getArgumentPosition(alias)
+                        if aliasPosition >= 0 and aliasPosition < len(arguments):
+                            argument = arguments[aliasPosition]
+                            variableReferences.update(tracker.trackAssignment(argument, originalReference, callGraph, lineNumber))
+                break
+            
+        return variableReferences
+        
     def __trackVariables(self, variables, subroutineName):
 
         variableReferences = [];

@@ -10,6 +10,7 @@ from usetraversal import UseTraversal
 from typefinder import TypeCollection
 from _ast import alias
 from pkg_resources._vendor.pyparsing import line
+import callgraph
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -131,10 +132,32 @@ class VariableTracker(CallGraphAnalyzer):
         
         return variableReferences;
     
+    def trackAssignment(self, alias, originalReference, callGraph, lineNumber):
+        assertType(alias, 'alias', str) 
+        assertType(originalReference, 'originalReference', VariableReference) 
+        assertType(callGraph, 'callGraph', CallGraph) 
+        assertType(lineNumber, 'lineNumber', int) 
+        
+        self.__variable = originalReference.getLevel0Variable();
+        if self.__variable.hasDerivedType and self.__variable.getDerivedTypeName() in self.__ignoredTypes:
+            return []
+        
+        self.__callGraph = callGraph;
+        subroutineFullName = callGraph.getRoot()
+        self.__excludeFromRecursionVariables = {self.__variable} 
+        self.__excludeFromRecursionRoutines = {(subroutineFullName, self.__variable)} 
+        
+        subroutine = self.__sourceFiles.findSubroutine(subroutineFullName)
+        if subroutine is not None:
+            variableReferences = self.__analyzeAssignment(alias, originalReference, subroutine, lineNumber)
+            variableReferences = VariableReference.sort(variableReferences)
+        
+        return variableReferences
+    
     def __trackVariable(self, variable, callGraph, excludeFromRecursionVariables = set(), excludeFromRecursionRoutines = set(), startAtLine = 0):
         self.__variable = variable;
         if self.__variable.hasDerivedType and self.__variable.getDerivedTypeName() in self.__ignoredTypes:
-            return set()
+            return []
         
         self.__callGraph = callGraph;
         subroutineFullName = callGraph.getRoot();
