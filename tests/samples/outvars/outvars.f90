@@ -10,6 +10,8 @@ MODULE outvars
 
   TYPE :: parent
     TYPE(ttest) :: child
+  CONTAINS
+    PROCEDURE :: teil => part
   END TYPE parent
 
   TYPE :: grand
@@ -50,7 +52,7 @@ CONTAINS
   END FUNCTION get
 
   FUNCTION part(p)
-   TYPE(parent) :: p
+   CLASS(parent) :: p
    TYPE(ttest)  :: part
    part = p%child
   END FUNCTION part
@@ -91,7 +93,7 @@ CONTAINS
   SUBROUTINE testFunc3(grandpa)
     TYPE(grand), INTENT(in) :: grandpa
     TYPE(ttest) :: temp
-    temp = part(grandpa%child)
+    temp = p(grandpa%child)
     WRITE (*,*) 'third: ', temp%third
   END SUBROUTINE testFunc3
 
@@ -103,5 +105,12 @@ CONTAINS
     CALL withOut(INT(SQRT(36.0), 4), father, temp)
     WRITE (*,*) 'second: ', temp%second
   END SUBROUTINE testFunc4
+
+  SUBROUTINE testFunc5(m)
+    TYPE(parent), INTENT(inout) :: m
+    TYPE(ttest) :: temp(2)
+    temp(:) = m%teil()
+    WRITE (*,*) 'first: ', temp(1)%first
+  END SUBROUTINE testFunc5
 
 END MODULE outvars
