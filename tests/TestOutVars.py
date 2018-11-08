@@ -66,6 +66,11 @@ class OutVarsTest(unittest.TestCase):
         self.testFunc8 = SubroutineFullName('__outvars_MOD_testFunc8')
         self.callGraphTestFunc8 = callGraphBuilder.buildCallGraph(self.testFunc8)
         
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.testFunc1)
+        self.types = useTraversal.getTypes()
+        self.interfaces = useTraversal.getInterfaces()
+        
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -89,6 +94,20 @@ class OutVarsTest(unittest.TestCase):
         simpleNames = set(module.getSubroutines().keys())
         self.assertEqual({'primitive', 'get', 'get2', 'part', 'part2', 'part3', 'withouta', 'withoutg', 'witha', 'withg', 
                           'testfunc1', 'testfunc2', 'testfunc3', 'testfunc4', 'testfunc5', 'testfunc6', 'testfunc7', 'testfunc8'}, simpleNames)
+                
+                
+    def testTypes(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        self.assertEqual({'ttest', 'parent', 'grand', 'proxy'}, set([t.getName() for t in self.types]))
+                
+                
+    def testInterfaces(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        self.assertEqual({'g', 'p', 'without'}, set(self.interfaces.keys()))
 
 
     def testCallGraphs(self):
@@ -119,35 +138,32 @@ class OutVarsTest(unittest.TestCase):
         t2 = module.getVariable('t2')
         self.assertIsNotNone(t2)
  
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc1)
-         
-        trackerPrimitive = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerPrimitive = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         self.assertEqual(0, len(trackerPrimitive.getOutAssignments()))
         trackerPrimitive.trackVariables([t1, t2], self.callGraphPrimitive)
         self.assertEqual(0, len(trackerPrimitive.getOutAssignments()))
          
-        trackerGet = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerGet = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         trackerGet.trackVariables([t1, t2], self.callGraphGet)
         self.assertEqual(2, len(trackerGet.getOutAssignments()))
          
-        trackerWithOutA = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerWithOutA = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         trackerWithOutA.trackDerivedTypeArguments(self.callGraphWithOutA)
         self.assertEqual(1, len(trackerWithOutA.getOutAssignments()))
          
-        trackerTestFunc1 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerTestFunc1 = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         trackerTestFunc1.trackVariables([t1, t2], self.callGraphTestFunc1)
         self.assertEqual(0, len(trackerTestFunc1.getOutAssignments()))
          
-        trackerTestFunc4 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerTestFunc4 = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         trackerTestFunc4.trackDerivedTypeArguments(self.callGraphTestFunc4)
         self.assertEqual(0, len(trackerTestFunc4.getOutAssignments()))
          
-        trackerTestFunc5 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerTestFunc5 = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         trackerTestFunc5.trackDerivedTypeArguments(self.callGraphTestFunc5)
         self.assertEqual(0, len(trackerTestFunc5.getOutAssignments()))
          
-        trackerTestFunc6 = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        trackerTestFunc6 = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         trackerTestFunc6.trackDerivedTypeArguments(self.callGraphTestFunc6)
         self.assertEqual(0, len(trackerTestFunc6.getOutAssignments()))
                   
@@ -155,9 +171,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
           
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc2)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
           
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc2)
         globalVars = set([ref.getExpression() for ref in refs])
@@ -171,9 +185,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
           
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc1)
-        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
           
         refs = tracker.trackGlobalVariables(self.callGraphPrimitive)
         globalVars = set([ref.getExpression() for ref in refs])
@@ -191,10 +203,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
           
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc4)
-          
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc4)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'father%child%first', 'father%child%second'}, expressions)
@@ -203,10 +212,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
          
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc4)
-        
-        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc4)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'t1%second'}, expressions)
@@ -218,7 +224,7 @@ class OutVarsTest(unittest.TestCase):
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.testFunc5)
           
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc5)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'m%child%first'}, expressions)
@@ -227,10 +233,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
           
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc5)
-          
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc7)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'stepmother%child%first'}, expressions)
@@ -239,10 +242,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
           
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc5)
-          
-        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc5)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'t1%second'}, expressions)
@@ -251,10 +251,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
           
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc8)
-          
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc8)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'stepfather%child%third'}, expressions)
@@ -263,10 +260,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
           
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc6)
-          
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc6)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'f%child%first', 'f%child%third'}, expressions)
@@ -275,10 +269,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
          
-        useTraversal = UseTraversal(self.sourceFiles, [])
-        useTraversal.parseModules(self.testFunc6)
-        
-        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc6)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'t1%third'}, expressions)
