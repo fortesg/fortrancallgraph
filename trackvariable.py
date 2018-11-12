@@ -212,11 +212,14 @@ class VariableTracker(CallGraphAnalyzer):
                     foundReferences = self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber)
                     variableReferences.update(foundReferences)
                 if not foundReferences:
+                    (functionCallVariableReferences, outAssignments) = (set(), set())
                     if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                        variableReferences.update(self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber)[0])
+                        (functionCallVariableReferences, outAssignments) = self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber) 
                     elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
                         (functionCallVariableReferences, outAssignments) = self.__analyzeFunctionCall(subroutine, statement, lineNumber)
+                    if functionCallVariableReferences:
                         variableReferences.update(functionCallVariableReferences)
+                    if outAssignments:
                         for aliasVar, originalReference in outAssignments:
                             if aliasVar.isFunctionResult():
                                 functionResultReference = originalReference
@@ -235,7 +238,7 @@ class VariableTracker(CallGraphAnalyzer):
     
     def __replaceFunctionNameByResultVar(self, statement, variableReference):
         #TODO Teste mehrere Function Calls in einem statement
-        functionRegEx = re.compile(r'^.*[^a-z0-9_]+(?P<routine>[a-z0-9_]+)(?P<before>\s*\((.*[^a-z0-9_%])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?\)).*$', re.IGNORECASE);
+        functionRegEx = re.compile(r'^(?P<outside>.*[^a-z0-9_]+)(?P<routine>[a-z0-9_]+)(?P<before>\s*\((.*[^a-z0-9_%])?)(?P<reference>' + self.__variable.getName() + r'((\([a-z0-9_\,\:]+\))?%[a-z0-9_]+)*)(?P<after>([^a-z0-9_=].*)?\)).*$', re.IGNORECASE)
         functionRegExMatch = functionRegEx.match(statement)
         if functionRegExMatch is None:
             return statement
@@ -247,6 +250,7 @@ class VariableTracker(CallGraphAnalyzer):
             return statement
         functionExpression += before
         functionExpression += functionRegExMatch.group('reference')
+
         for c in functionRegExMatch.group('after'):
             if paranthCount > 0:
                 functionExpression += c
@@ -256,6 +260,11 @@ class VariableTracker(CallGraphAnalyzer):
                     paranthCount -= 1
             else:
                 break
+            
+        outsideRegEx = re.compile(r'^.*[^a-z0-9_](?P<prefix>([a-z0-9_]+%)+)$', re.IGNORECASE)
+        outsideRegExMatch = outsideRegEx.match(functionRegExMatch.group('outside'))
+        if outsideRegExMatch:
+            functionExpression = outsideRegExMatch.group('prefix') + functionExpression
         
         return re.sub(re.escape(functionExpression), variableReference.getExpression(), statement, 1)
     
@@ -472,9 +481,6 @@ class VariableTracker(CallGraphAnalyzer):
         if calledRoutineFullName is not None and calledRoutineFullName.getModuleName().lower() not in self.__excludeModules:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
             
-#             parathesisRegEx = re.compile(r'\([^\(\)]*\)');
-#             before = parathesisRegEx.sub('', before);
-#             arguments = parathesisRegEx.sub('', arguments);
             before = SourceFile.removeUnimportantParentheses(before)
             arguments = SourceFile.removeUnimportantParentheses(arguments)
             

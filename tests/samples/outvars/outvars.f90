@@ -179,10 +179,10 @@ CONTAINS
   END SUBROUTINE testFunc6
 
   SUBROUTINE testFunc7(grandma, stepmother)
-    TYPE(grand), INTENT(in) :: grandma
+    TYPE(grand), INTENT(in) :: grandma(:)
     TYPE(parent), INTENT(in) :: stepmother
     TYPE(ttest) :: temp
-    temp = grandma%teil(stepmother)
+    temp = grandma(INT(SQRT(36.0), 4))%teil(stepmother)
     WRITE (*,*) 'first: ', temp%first
   END SUBROUTINE testFunc7
 
