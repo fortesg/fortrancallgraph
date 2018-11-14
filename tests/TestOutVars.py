@@ -227,7 +227,7 @@ class OutVarsTest(unittest.TestCase):
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc5)
         expressions = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'m%child%first'}, expressions)
+        self.assertEqual({'m%child%first', 'm%child%second'}, expressions)
         
     def testArgumentAsTypeBoundFunctionResultOnOther(self):
         if not self.filesExist:
