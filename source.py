@@ -625,6 +625,22 @@ class VariableReference(object):
     def containsProcedure(self):
         return self.findFirstProcedure() is not None
     
+    def findFirstProcedureAlias(self):
+        var = self.getLevel0Variable()
+        for l in self.getLevels(start = 1):
+            if not var.isTypeAvailable():
+                return None
+            typE = var.getType()
+            varName = self.getVariableName(l)
+            if typE.hasProcedure(varName):
+                return varName
+            elif not typE.hasMember(varName):
+                return None
+            else: 
+                var = typE.getMember(varName)
+        
+        return None
+    
     def findFirstProcedure(self):
         var = self.getLevel0Variable()
         for l in self.getLevels(start = 1):
