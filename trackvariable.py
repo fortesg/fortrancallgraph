@@ -207,10 +207,10 @@ class VariableTracker(CallGraphAnalyzer):
             if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
                 foundReferences = self.__analyzeExplicitAssignment(assignmentRegExMatch, subroutine, lineNumber)
             else:
-                accessRegExMatch = accessRegEx.match(statement)
                 outAssignments = set() 
+                accessRegExMatch = accessRegEx.match(statement)
                 if accessRegExMatch is not None:
-                    foundReferences = self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber)
+                    (foundReferences, outAssignments) = self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber)
                 if not foundReferences:
                     outAssignments = set()
                     if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
@@ -335,18 +335,18 @@ class VariableTracker(CallGraphAnalyzer):
             if not variableReference.containsProcedure():
                 variable = self.__findLevelNVariable(variableReference)
                 if variable is None or not variable.hasDerivedType():
-                    return {variableReference}
+                    return ({variableReference}, set())
             else:
                 return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber)
         else:
             print >> sys.stderr, '*** WARNING [VariableTracker] Ignored access to recursive data structure: ' + str(variableReference) + ') ***';
         
-        return set();    
+        return (set(), set())    
     
-    def __analyzeTypeBoundProcedureCallOnThis(self, variableReference, subroutine, lineNumber, warnIfNotFound = True):
-        calledRoutineFullName = self.__findCalledTypeBoundProcedure(variableReference, subroutine)
+    def __analyzeTypeBoundProcedureCallOnThis(self, originalReference, subroutine, lineNumber, warnIfNotFound = True):
+        calledRoutineFullName = self.__findCalledTypeBoundProcedure(originalReference, subroutine)
         
-        subReference = variableReference.getSubReferenceBeforeFirstProcedure()
+        subReference = originalReference.getSubReferenceBeforeFirstProcedure()
         if calledRoutineFullName is not None:
             subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
 
@@ -366,15 +366,15 @@ class VariableTracker(CallGraphAnalyzer):
                         for variableReference in variableReferences:
                             variableReference.setLevel0Variable(self.__variable, subReference.getMembers())
         
-                        return variableReferences
+                        return (variableReferences, set())
                 else:
                     print >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutine.getName().getModuleName() + ':' + str(lineNumber) + ') ***';
             else:
                 VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
-            VariableTracker.__routineNotFoundWarning(variableReference.getExpression(), subroutine.getName(), lineNumber)
+            VariableTracker.__routineNotFoundWarning(originalReference.getExpression(), subroutine.getName(), lineNumber)
         
-        return set();   
+        return (set(), set())   
     
     def __findLevelNVariable(self, variableReference):
         # Kann aus unbekannten Gründen nicht ersetzt werden durch VariableReference.getLevelNVariable()
