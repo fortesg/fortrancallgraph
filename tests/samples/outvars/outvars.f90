@@ -31,8 +31,8 @@ MODULE outvars
   TYPE(ttest) :: t1, t2
 
   INTERFACE g
-    MODULE PROCEDURE :: get
-    MODULE PROCEDURE :: get2
+    MODULE PROCEDURE get
+    MODULE PROCEDURE get2
   END INTERFACE g
 
   INTERFACE p
