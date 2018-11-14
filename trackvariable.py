@@ -9,8 +9,6 @@ from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
 from _ast import alias
-from pkg_resources._vendor.pyparsing import line
-import callgraph
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -201,6 +199,7 @@ class VariableTracker(CallGraphAnalyzer):
         variableReferences = set()
         while variableRegEx.match(statement) is not None:
             replaced = False
+            originalStatement = statement
             statement = SourceFile.removeUnimportantParentheses(statement, variableRegEx)
             assignmentRegExMatch = assignmentRegEx.match(statement)
             foundReferences = set()
@@ -209,7 +208,7 @@ class VariableTracker(CallGraphAnalyzer):
             else:
                 accessRegExMatch = accessRegEx.match(statement)
                 if accessRegExMatch is not None:
-                    (foundReferences, typeBoundOutAssignments) = self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber)
+                    (foundReferences, typeBoundOutAssignments) = self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber, originalStatement)
                     if typeBoundOutAssignments:
                         for aliasVar, originalReference in typeBoundOutAssignments:
                             if aliasVar.isFunctionResult():
@@ -334,12 +333,12 @@ class VariableTracker(CallGraphAnalyzer):
                         self.__outAssignments.add((aliasVar, originalReference))                    
                         
                     return variableReferences
-        else:
-            print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
+            else:
+                print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
                 
         return set();
                 
-    def __analyzeAccess(self, regExMatch, subroutine, lineNumber):
+    def __analyzeAccess(self, regExMatch, subroutine, lineNumber, originalStatement):
         ref = regExMatch.group('reference').strip()
         ref = re.sub(r'\([^\)]*\)', '', ref)
         variableReference = VariableReference(ref, subroutine.getName(), lineNumber, self.__variable)
@@ -349,13 +348,13 @@ class VariableTracker(CallGraphAnalyzer):
                 if variable is None or not variable.hasDerivedType():
                     return ({variableReference}, set())
             else:
-                return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber)
+                return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber, originalStatement)
         else:
             print >> sys.stderr, '*** WARNING [VariableTracker] Ignored access to recursive data structure: ' + str(variableReference) + ') ***';
         
         return (set(), set())    
     
-    def __analyzeTypeBoundProcedureCallOnThis(self, originalReference, subroutine, lineNumber, warnIfNotFound = True):
+    def __analyzeTypeBoundProcedureCallOnThis(self, originalReference, subroutine, lineNumber, originalStatement):
         calledRoutineFullName = self.__findCalledTypeBoundProcedure(originalReference, subroutine)
         
         subReference = originalReference.getSubReferenceBeforeFirstProcedure()
@@ -380,14 +379,22 @@ class VariableTracker(CallGraphAnalyzer):
                         outAssignments = calledSubroutineAnalyzer.__outAssignments
                         for assignment in outAssignments:
                             assignment[1].setLevel0Variable(self.__variable, subReference.getMembers())
-                        #variableReferences += self.__analyzeOutArguments(outAssignments, arguments, subroutine, calledSubroutine, lineNumber)
+                            
+                        routineAlias = originalReference.findFirstProcedureAlias()
+                        argumentsRegEx = re.compile(r'.*%' + routineAlias + '\((?P<arguments>.*)\).*', re.IGNORECASE)
+                        argumentsRegExMatch = argumentsRegEx.match(originalStatement)
+                        if argumentsRegExMatch is not None:
+                            arguments = argumentsRegExMatch.group('arguments')
+                            arguments = SourceFile.removeUnimportantParentheses(arguments)
+                            arguments = '@@@, ' + arguments
+                            variableReferences += self.__analyzeOutArguments(outAssignments, arguments, subroutine, calledSubroutine, lineNumber)
         
                         return (variableReferences, outAssignments)
                 else:
                     print >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutine.getName().getModuleName() + ':' + str(lineNumber) + ') ***';
             else:
                 VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
-        elif warnIfNotFound:
+        else:
             VariableTracker.__routineNotFoundWarning(originalReference.getExpression(), subroutine.getName(), lineNumber)
         
         return (set(), set())   
@@ -450,7 +457,7 @@ class VariableTracker(CallGraphAnalyzer):
                         return (set(), set()) 
                 originalReference = VariableReference(functionRegExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
                 before = functionRegExMatch.group('before').strip()
-                virtualBefore = "@@@, " + before
+                virtualBefore = '@@@, ' + before
                 arguments = functionRegExMatch.group('arguments').strip()
                 virtualArguments = arguments.replace(before, virtualBefore)
                 return self.__analyzeCall(calledRoutineName, originalReference, virtualBefore, virtualArguments, subroutine, lineNumber, False) # Warum stand hier mal False? Weil es sonst zu viele Fehlermeldungen gäbe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen
@@ -537,6 +544,7 @@ class VariableTracker(CallGraphAnalyzer):
     def __analyzeOutArguments(self, assignments, arguments, callingSubroutine, calledSubroutine, lineNumber):
         variableReferences = set()
         arguments = arguments.split(',')
+        arguments = [arg.strip() for arg in arguments]
         for alias, originalReference in assignments:
             if alias.isOutArgument():
                 aliasPosition = calledSubroutine.getArgumentPosition(alias)
