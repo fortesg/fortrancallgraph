@@ -203,27 +203,26 @@ class VariableTracker(CallGraphAnalyzer):
         while variableRegEx.match(statement) is not None:
             statement = SourceFile.removeUnimportantParentheses(statement, variableRegEx)
             assignmentRegExMatch = assignmentRegEx.match(statement)
+            foundReferences = set()
             if assignmentRegExMatch is not None and self.__isAssignmentToDerivedType(assignmentRegExMatch, subroutine, lineNumber):
-                variableReferences.update(self.__analyzeExplicitAssignment(assignmentRegExMatch, subroutine, lineNumber))
+                foundReferences = self.__analyzeExplicitAssignment(assignmentRegExMatch, subroutine, lineNumber)
             else:
                 accessRegExMatch = accessRegEx.match(statement)
-                foundReferences = {} 
+                outAssignments = set() 
                 if accessRegExMatch is not None:
                     foundReferences = self.__analyzeAccess(accessRegExMatch, subroutine, lineNumber)
-                    variableReferences.update(foundReferences)
                 if not foundReferences:
-                    (functionCallVariableReferences, outAssignments) = (set(), set())
+                    outAssignments = set()
                     if typeBoundFunctionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                        (functionCallVariableReferences, outAssignments) = self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber) 
+                        (foundReferences, outAssignments) = self.__analyzeTypeBoundProcedureCallOnOther(subroutine, statement, lineNumber) 
                     elif functionCallRegEx.match(statement) is not None and declarationRegEx.match(statement) is None and selectTypeRegEx.match(statement) is None:
-                        (functionCallVariableReferences, outAssignments) = self.__analyzeFunctionCall(subroutine, statement, lineNumber)
-                    if functionCallVariableReferences:
-                        variableReferences.update(functionCallVariableReferences)
-                    if outAssignments:
-                        for aliasVar, originalReference in outAssignments:
-                            if aliasVar.isFunctionResult():
-                                functionResultReference = originalReference
-                                break
+                        (foundReferences, outAssignments) = self.__analyzeFunctionCall(subroutine, statement, lineNumber)
+                if outAssignments:
+                    for aliasVar, originalReference in outAssignments:
+                        if aliasVar.isFunctionResult():
+                            functionResultReference = originalReference
+                            break
+            variableReferences.update(foundReferences)
             if functionResultReference is not None:
                 statement = self.__replaceFunctionNameByResultVar(statement, functionResultReference)
                 functionResultReference = None      
