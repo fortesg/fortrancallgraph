@@ -9,8 +9,6 @@ from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
 from _ast import alias
-from pkg_resources._vendor.pyparsing import line
-import callgraph
 
 class VariableTracker(CallGraphAnalyzer):
 
