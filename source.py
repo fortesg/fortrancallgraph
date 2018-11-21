@@ -76,19 +76,34 @@ class Type(object):
         
     def hasProcedure(self, alias):
         assertType(alias, 'alias', str)
-        return alias.lower() in self.__procedures or ( self.__extends is not None and self.__extends.hasProcedure(alias)) 
+        return alias.lower() in self.__procedures or (self.__extends is not None and self.__extends.hasProcedure(alias)) 
         
-    def getProcedure(self, name):
-        assertType(name, 'name', str)
+    def getProcedure(self, alias):
+        assertType(alias, 'alias', str)
         
-        name = name.lower()
-        if not self.hasProcedure(name):
+        alias = alias.lower()
+        if not self.hasProcedure(alias):
             return None
         
-        if name in self.__procedures:
-            return self.__procedures[name]
+        if alias in self.__procedures:
+            return self.__procedures[alias]
         else:
-            return self.__extends.getProcedure(name)
+            return self.__extends.getProcedure(alias)
+    
+    def containsSubroutine(self, name):
+        assertType(name, 'name', str)
+        return name in self.__procedures.values() or (self.__extends is not None and self.__extends.containsSubroutine(name))
+    
+    def getSubroutineAlias(self, name):
+        assertType(name, 'name', str)
+        
+        if not self.containsSubroutine(name):
+            return None
+        
+        if name in self.__procedures.values():
+            return self.__procedures.keys()[self.__procedures.values().index(name)]
+        else:
+            return self.__extends.getSubroutineAlias(name)
         
     def getName(self):
         return self.__typeName
