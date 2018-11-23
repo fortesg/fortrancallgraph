@@ -10,6 +10,7 @@ from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
 from _ast import alias
+import callgraph
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
@@ -128,10 +129,14 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         return references
     
     def __trackFunctionResult(self, functionName, originalReferences):
-        variables = [originalReferences[0].getLevelNVariable().getAlias(functionName.getSimpleName())] # TODO interfaces!!! type-bound-procedures???
+        variables = [originalReferences[0].getLevelNVariable().getAlias(functionName.getSimpleName())] # TODO type-bound-procedures???
         for interface in self.__interfaces.itervalues():
             if functionName.getSimpleName() in interface:
                 variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
+        for typE in self.__types:
+            if typE.containsSubroutine(functionName.getSimpleName()):
+                variables.append(originalReferences[0].getLevelNVariable().getAlias(typE.getSubroutineAlias(functionName.getSimpleName())))
+                #TODO...
         tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
         functionReferences = set()
         for callerName in self.__callGraph.getCallers(functionName):
@@ -157,6 +162,9 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         for interface in self.__interfaces.itervalues():
             if calleeName.getSimpleName() in interface:
                 calleeNameAlternatives.append(interface.getName().lower())
+        for typE in self.__types:
+            if typE.containsSubroutine(calleeName.getSimpleName()):
+                calleeNameAlternatives.append(typE.getSubroutineAlias(calleeName.getSimpleName()).lower())
         
         caller = self.__findSubroutine(callerName)
         callee = self.__findSubroutine(calleeName)
@@ -164,10 +172,10 @@ class GlobalVariableTracker(CallGraphAnalyzer):
 
         variableReferences = set()
         if caller is not None and callee is not None:
-            tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
             for lineNumber, statement, _ in caller.getStatements():
+                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
                 for calleeNameAlternative in calleeNameAlternatives:
-                    procedureRegEx = re.compile(r'^.*[^a-z0-9_]+' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
+                    procedureRegEx = re.compile(r'^.*(?P<prefix>[^a-z0-9_]+)' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
                     procedureRegExMatch = procedureRegEx.match(statement)
                     if procedureRegExMatch is not None:
                         isCall = True
@@ -178,12 +186,16 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                             arguments = procedureRegExMatch.group('arguments')
                             arguments = SourceFile.removeUnimportantParentheses(arguments)
                             arguments = arguments.split(',')
+                            typeBound = procedureRegExMatch.group('prefix')[-1:] == '%'
                             for alias, originalReference in assignments:
                                 aliasPosition = callee.getArgumentPosition(alias)
+                                if typeBound:
+                                    aliasPosition -= 1
                                 if aliasPosition >= 0 and aliasPosition < len(arguments):
                                     argument = arguments[aliasPosition]
                                     variableReferences.update(tracker.trackAssignment(argument, originalReference, callGraph, lineNumber))
                             break
+                variableReferences.update(self.__trackOutVariables(callerName, tracker.getOutAssignments()))
             
         return variableReferences
         
