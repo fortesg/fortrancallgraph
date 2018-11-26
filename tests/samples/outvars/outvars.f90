@@ -160,11 +160,11 @@ CONTAINS
   END SUBROUTINE testFunc4
 
   SUBROUTINE testFunc5(m)
-    TYPE(parent), INTENT(inout) :: m
+    TYPE(parent), INTENT(inout) :: m(:)
     TYPE(ttest) :: temp(2)
-    temp(:) = m%teil()
+    temp(:) = m(1)%teil()
     WRITE (*,*) 'first: ', temp(1)%first
-    temp(:) = m%gib(42)
+    temp(:) = m(INT(SQRT(36.0), 4))%gib(42)
     WRITE (*,*) 'second: ', temp(2)%second
   END SUBROUTINE testFunc5
 

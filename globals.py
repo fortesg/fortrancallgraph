@@ -133,21 +133,21 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         for interface in self.__interfaces.itervalues():
             if functionName.getSimpleName() in interface:
                 variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
-        for typE in self.__types:
-            if typE.containsSubroutine(functionName.getSimpleName()):
-                variables.append(originalReferences[0].getLevelNVariable().getAlias(typE.getSubroutineAlias(functionName.getSimpleName())))
-                #TODO...
         tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
-        functionReferences = set()
-        for callerName in self.__callGraph.getCallers(functionName):
-            callGraph = self.__callGraph.extractSubgraph(callerName) 
-            functionReferences.update(tracker.trackVariables(variables, callGraph))
         variableReferences = set()
-        for functionReference in functionReferences:
-            for originalReference in originalReferences:
-                variableReference = functionReference.cleanCopy()
-                variableReference.setLevel0Variable(originalReference.getLevel0Variable(), originalReference.getMembers())
-                variableReferences.add(variableReference)
+        for callerName in self.__callGraph.getCallers(functionName):
+            callGraph = self.__callGraph.extractSubgraph(callerName)
+            functionReferences = set(tracker.trackVariables(variables, callGraph))
+            for functionReference in functionReferences:
+                for originalReference in originalReferences:
+                    variableReference = functionReference.cleanCopy()
+                    variableReference.setLevel0Variable(originalReference.getLevel0Variable(), originalReference.getMembers())
+                    variableReferences.add(variableReference)
+            if not functionReferences:
+                for originalReference in originalReferences:
+                    functionReferences.update(self.__analyzeCallingSubroutineForTypeBoundFunctionResult(callerName, functionName, originalReference))
+            variableReferences.update(functionReferences)
+            
         return variableReferences
     
     def __trackOutVariables(self, calleeName, assignments):
@@ -155,6 +155,32 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         for callerName in self.__callGraph.getCallers(calleeName):
             variableReferences.update(self.__analyzeCallingSubroutineForOutVars(callerName, calleeName, assignments))
                 
+        return variableReferences
+    
+    def __analyzeCallingSubroutineForTypeBoundFunctionResult(self, callerName, calleeName, originalReference):
+        calleeNameAlternatives = []
+        for typE in self.__types:
+            if typE.containsSubroutine(calleeName.getSimpleName()):
+                calleeNameAlternatives.append(typE.getSubroutineAlias(calleeName.getSimpleName()).lower())
+        
+        caller = self.__findSubroutine(callerName)
+        callee = self.__findSubroutine(calleeName)
+        callGraph = self.__callGraph.extractSubgraph(callerName) 
+        
+        variableReferences = set()
+        if caller is not None and callee is not None:
+            for lineNumber, statement, _ in caller.getStatements():
+                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+                for calleeNameAlternative in calleeNameAlternatives:
+                    assignmentRegEx = re.compile(r'^(?P<alias>[a-z0-9_]+)(\(.*\))?\s*\=\>?\s*.*%' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
+                    assignmentRegExMatch = assignmentRegEx.match(statement)
+                    if assignmentRegExMatch is not None:
+                        assemblerLineNumber = lineNumber - caller.getSourceFile().getPreprocessorOffset(lineNumber)
+                        if calleeName in self.__callGraph.findNextCalleesFromLine(callerName, assemblerLineNumber):
+                            alias = assignmentRegExMatch.group('alias')
+                            variableReferences.update(tracker.trackAssignment(alias, originalReference, callGraph, lineNumber))
+                variableReferences.update(self.__trackOutVariables(callerName, tracker.getOutAssignments()))
+            
         return variableReferences
     
     def __analyzeCallingSubroutineForOutVars(self, callerName, calleeName, assignments):

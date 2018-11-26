@@ -245,7 +245,7 @@ class OutVarsTest(unittest.TestCase):
         tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc5)
         expressions = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'t1%second'}, expressions)
+        self.assertEqual({'t1%second', 't2%second'}, expressions)
                           
     def testArgumentAsTypeBoundSubroutineOutVarOnThis(self):
         if not self.filesExist:
