@@ -113,20 +113,27 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
             elif line == '.cfi_endproc':
                 inFunction = False
              
-            if inFunction and line.startswith('call\t'):
-                callee = line.replace('call\t', '', 1)
-                atPos = callee.find('@')
-                if atPos >= 0:
-                    callee = callee[:atPos] 
-                hashtagPos = callee.find('#')
-                if hashtagPos >= 0:
-                    callee = callee[:(hashtagPos - 1)] 
-                callee = callee.strip()
-                
-                if SubroutineFullName.validFullName(callee):
-                    calls.append((SubroutineFullName(callee),) + self.__findLineNumberAndDiscriminator(lines, i))
-                elif InnerSubroutineName.validInnerSubroutineName(callee):
-                    calls.append((InnerSubroutineName(callee, hostForInnerSubroutines),) + self.__findLineNumberAndDiscriminator(lines, i))
+            if inFunction:
+                if line.startswith('call\t'):
+                    callee = line.replace('call\t', '', 1)
+                    atPos = callee.find('@')
+                    if atPos >= 0:
+                        callee = callee[:atPos] 
+                    hashtagPos = callee.find('#')
+                    if hashtagPos >= 0:
+                        callee = callee[:(hashtagPos - 1)] 
+                    callee = callee.strip()
+                    
+                    if SubroutineFullName.validFullName(callee):
+                        calls.append((SubroutineFullName(callee),) + self.__findLineNumberAndDiscriminator(lines, i))
+                    elif InnerSubroutineName.validInnerSubroutineName(callee):
+                        calls.append((InnerSubroutineName(callee, hostForInnerSubroutines),) + self.__findLineNumberAndDiscriminator(lines, i))
+                elif line.startswith('leaq\t') and line.find('._omp_fn.') >= 0:
+                    ompRegion = line.replace('leaq\t', '', 1)
+                    parathPos = ompRegion.find('(')
+                    if parathPos >= 0:
+                        ompRegion = ompRegion[:parathPos] 
+                    calls += self.__findCalledSubroutines(ompRegion, filePath)
         openFile.close();            
         return calls             
 
