@@ -575,7 +575,7 @@ class VariableTracker(CallGraphAnalyzer):
         if calledSubroutineFullName is not None:
             return calledSubroutineFullName
         else:
-            aliases = callerSubroutine.getSourceFile().getUseAliases()
+            aliases = callerSubroutine.getModule().getUseAliases()
             if calledSubroutineSimpleName in aliases:
                 alias = aliases[calledSubroutineSimpleName]
                 if SubroutineFullName.validParts(*alias):

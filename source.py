@@ -1703,48 +1703,11 @@ class SourceFile(object):
 
         return modules;
 
-    
-    def getModuleName(self):
-        '''DEPRECATED'''
-        if self.__modules:
-            return self.__modules.values()[0].getName()
-        return ''
-    
-    def getContainsLineNumber(self):
-        '''DEPRECATED'''
-        if self.__modules:
-            return self.__getAnyModule().getContainsLineNumber()
-        return -1
-    
-    def getLastUseLineNumber(self):
-        '''DEPRECATED'''
-        if self.__modules:
-            return self.__getAnyModule().getLastUseLineNumber()
-        return -1
-    
-    def isPublic(self):
-        '''DEPRECATED'''
-        if self.__modules:
-            return self.__getAnyModule().isPublic()
-        return False
-    
-    def getModuleVariables(self):
-        '''DEPRECATED'''
-        if self.__modules:
-            return self.__getAnyModule().getVariables()
-        return dict()
-    
     def getPublicElements(self):
         '''DEPRECATED'''
         if self.__modules:
             return self.__getAnyModule().getPublicElements()
         return []
-    
-    def getUseAliases(self):
-        '''DEPRECATED'''
-        if self.__modules:
-            return self.__getAnyModule().getUseAliases()
-        return dict()
 
     def getPreprocessorOffset(self, lineNumber):
         if self.__preprocessed:
