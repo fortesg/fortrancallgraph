@@ -8,7 +8,7 @@ MODULE functions
 
 CONTAINS
 
-  INTEGER FUNCTION func1(var)
+  PURE INTEGER FUNCTION func1(var)
     INTEGER, INTENT(in) :: var
     func1 = var
   END FUNCTION func1

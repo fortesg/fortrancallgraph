@@ -11,10 +11,7 @@ ASSEMBLER_DIR = SOURCE_DIR
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
-from assembler import FromAssemblerCallGraphBuilder
-from source import SourceFiles, SubroutineFullName, VariableReference
-from trackvariable import VariableTracker
-from usetraversal import UseTraversal
+from source import SourceFiles, SubroutineFullName
 
 ''' 
 Tests whether type-bound procedures are handled correctly
