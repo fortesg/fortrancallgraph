@@ -33,7 +33,7 @@ class OpenMPTest(unittest.TestCase):
         self.start = SubroutineFullName('__openmp_MOD_start')
         self.callGraph = callGraphBuilder.buildCallGraph(self.start)
         
-        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal = UseTraversal(self.sourceFiles, ['omp_lib'])
         useTraversal.parseModules(self.start)
         self.types = useTraversal.getTypes()
         self.interfaces = useTraversal.getInterfaces()
@@ -79,7 +79,7 @@ class OpenMPTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
            
-        tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
+        tracker = VariableTracker(self.sourceFiles, ['omp_lib'], [], self.interfaces, self.types)
            
         refs = tracker.trackDerivedTypeArguments(self.callGraph)
         expressions = set([ref.getExpression() for ref in refs])
@@ -89,7 +89,7 @@ class OpenMPTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
            
-        tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
+        tracker = GlobalVariableTracker(self.sourceFiles, ['omp_lib'], [], [], self.interfaces, self.types)
            
         refs = tracker.trackGlobalVariables(self.callGraph)
         expressions = set([ref.getExpression() for ref in refs])
