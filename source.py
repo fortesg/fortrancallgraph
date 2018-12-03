@@ -1316,13 +1316,13 @@ class Subroutine(SubroutineContainer):
                     variable.setIsFunctionResult(True)
                     return variable
                 
-                resultTypeRegEx = re.compile(r'.*(?P<type>((INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))(\s*\(.*\))?).*\s+FUNCTION\s+.*', re.IGNORECASE);
-                resultTypeRegExMatch = resultTypeRegEx.match(self.getDeclaration())
-                if resultTypeRegExMatch is not None:
-                    typeName = resultTypeRegExMatch.group('type').strip()
-                    variable = Variable(name, typeName) 
-                    variable.setIsFunctionResult(True)
-                    return variable
+            resultTypeRegEx = re.compile(r'(.+\s+)?(?P<type>((INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))(\s*\(.*\))?).*\s+FUNCTION\s+.*', re.IGNORECASE);
+            resultTypeRegExMatch = resultTypeRegEx.match(self.getDeclaration())
+            if resultTypeRegExMatch is not None:
+                typeName = resultTypeRegExMatch.group('type').strip()
+                variable = Variable(name, typeName) 
+                variable.setIsFunctionResult(True)
+                return variable
         
         return None
     
