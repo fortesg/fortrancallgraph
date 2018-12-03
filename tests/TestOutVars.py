@@ -174,12 +174,11 @@ class OutVarsTest(unittest.TestCase):
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
           
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc2)
-        globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'mother%child%second', 'mother%child%third'}, globalVars)
+        self.assertEqual({'mother%child%second', 'mother%child%third'}, set([ref.getExpression() for ref in refs]))
           
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc3)
-        globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'grandpa%child%child%third'}, globalVars)
+        expressions = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'grandpa%child%child%third'}, expressions)
                   
     def testGlobalAsFunctionResult(self):
         if not self.filesExist:
@@ -188,16 +187,16 @@ class OutVarsTest(unittest.TestCase):
         tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
           
         refs = tracker.trackGlobalVariables(self.callGraphPrimitive)
-        globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'t1%second'}, globalVars)
+        expressions = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'t1%second'}, expressions)
           
         refs = tracker.trackGlobalVariables(self.callGraphGet)
-        globalVars = set([ref.getExpression() for ref in refs])
-        self.assertFalse(globalVars)
+        expressions = set([ref.getExpression() for ref in refs])
+        self.assertFalse(expressions)
           
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc1)
-        globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'t1%first', 't2%first', 'g3%child%child%first', 't1%second', 't2%second', 'g3%child%child%second'}, globalVars)
+        expressions = set([ref.getExpression() for ref in refs])
+        self.assertEqual({'t1%first', 't2%first', 'g3%child%child%first', 't1%second', 't2%second', 'g3%child%child%second'}, expressions)
                           
     def testArgumentAsSubroutineOutVar(self):
         if not self.filesExist:
