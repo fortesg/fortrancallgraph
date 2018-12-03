@@ -1,15 +1,11 @@
 FF = gfortran
 FFLAGS = 
 
-all: modules assembler run
+all: modules assembler
 
 modules: openmp.o
 
 assembler: openmp.s
-
-run: openmp
-	export OMP_NUM_THREADS=4
-	./openmp
 
 %: %.o
 	$(FF) -fopenmp -o $@ $<

@@ -1,4 +1,4 @@
-PROGRAM openmp
+MODULE openmp
 
   USE omp_lib
 
@@ -10,10 +10,6 @@ PROGRAM openmp
   END TYPE test
 
   TYPE(test) :: tester(32)
-  tester(:)%var1 = 23
-  tester(:)%var2 = 42
-
-  CALL start(tester)
 
 CONTAINS
 
@@ -39,4 +35,4 @@ CONTAINS
     random = INT(harvest * tester(i)%var2)
   END FUNCTION random
 
-END PROGRAM openmp
+END MODULE openmp
