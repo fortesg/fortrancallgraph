@@ -1396,7 +1396,7 @@ class Module(SubroutineContainer):
         self.__name = name.lower()
         self.__sourceFile = sourceFile
         self.__index = index
-        self.__variableList = None
+        self.__variables = None
         self.__publicElements = None
         self.__uses = None
         
@@ -1485,9 +1485,9 @@ class Module(SubroutineContainer):
         return None
     
     def getVariables(self):
-        if self.__variableList is None:
-            self.__variableList = self.__findVariables()
-        return self.__variableList
+        if self.__variables is None:
+            self.__variables = self.__findVariables()
+        return self.__variables
      
     def __findVariables(self):
         typeRegEx = Type.DECLARATION_REGEX
