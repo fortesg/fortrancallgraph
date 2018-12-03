@@ -83,7 +83,7 @@ class OpenMPTest(unittest.TestCase):
            
         refs = tracker.trackDerivedTypeArguments(self.callGraph)
         expressions = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'arg%var2'}, expressions)
+        self.assertEqual({'arg%var1'}, expressions)
 
     def testGlobal(self):
         if not self.filesExist:
@@ -93,7 +93,7 @@ class OpenMPTest(unittest.TestCase):
            
         refs = tracker.trackGlobalVariables(self.callGraph)
         expressions = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'tester%var1'}, expressions)
+        self.assertEqual({'tester%var2'}, expressions)
          
 if __name__ == "__main__":
     unittest.main()

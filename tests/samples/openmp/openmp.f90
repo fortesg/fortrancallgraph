@@ -21,8 +21,8 @@ CONTAINS
 
     !$OMP PARALLEL DO
     DO i = 1, SIZE(arg)
-      arg(i)%var2 = random(i)
-      WRITE (*,*) i, ': ', arg(i)%var2
+      arg(i)%var1 = random(i)
+      WRITE (*,*) i, ': ', arg(i)%var1
     END DO
     !$OMP END PARALLEL DO
 
