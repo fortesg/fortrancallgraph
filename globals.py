@@ -135,18 +135,18 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                 variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
         tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
         variableReferences = set()
+                            
         for callerName in self.__callGraph.getCallers(functionName):
             callGraph = self.__callGraph.extractSubgraph(callerName)
             functionReferences = set(tracker.trackVariables(variables, callGraph))
+            if not functionReferences:
+                for originalReference in originalReferences:
+                    functionReferences.update(self.__analyzeCallingSubroutineForTypeBoundFunctionResult(callerName, functionName, originalReference))
             for functionReference in functionReferences:
                 for originalReference in originalReferences:
                     variableReference = functionReference.cleanCopy()
                     variableReference.setLevel0Variable(originalReference.getLevel0Variable(), originalReference.getMembers())
                     variableReferences.add(variableReference)
-            if not functionReferences:
-                for originalReference in originalReferences:
-                    functionReferences.update(self.__analyzeCallingSubroutineForTypeBoundFunctionResult(callerName, functionName, originalReference))
-            variableReferences.update(functionReferences)
             
         return variableReferences
     

@@ -29,6 +29,7 @@ MODULE outvars
   END TYPE proxy
 
   TYPE(ttest) :: t1, t2
+  TYPE(grand) :: g3
 
   INTERFACE g
     MODULE PROCEDURE get
@@ -58,8 +59,10 @@ CONTAINS
 
    IF (i == 1) THEN
      get = t1
-   ELSE
+   ELSE IF (i == 1) THEN
      get = t2
+   ELSE
+     get = g3%child%child
    END IF
   END FUNCTION get
 

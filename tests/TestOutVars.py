@@ -197,7 +197,7 @@ class OutVarsTest(unittest.TestCase):
           
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc1)
         globalVars = set([ref.getExpression() for ref in refs])
-        self.assertEqual({'t1%first', 't2%first', 't1%second', 't2%second'}, globalVars)
+        self.assertEqual({'t1%first', 't2%first', 'g3%child%child%first', 't1%second', 't2%second', 'g3%child%child%second'}, globalVars)
                           
     def testArgumentAsSubroutineOutVar(self):
         if not self.filesExist:
