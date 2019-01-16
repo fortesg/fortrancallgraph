@@ -12,7 +12,7 @@ FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
 from tree import TreeLikeCallGraphPrinter
-from assembler import FromAssemblerCallGraphBuilder
+from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
@@ -23,7 +23,7 @@ from interfaces import InterfaceFinder
 class SampleTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {'next' : 'middle.f90'}
-        callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
+        callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
         
         self.srcFile = SOURCE_DIR + '/top.f90'

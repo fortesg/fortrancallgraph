@@ -11,7 +11,7 @@ ASSEMBLER_DIR = SOURCE_DIR
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
-from assembler import FromAssemblerCallGraphBuilder
+from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, VariableReference
 from trackvariable import VariableTracker
 from usetraversal import UseTraversal
@@ -22,7 +22,7 @@ Tests whether type-bound procedures are handled correctly
 class TypeProcedureTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
-        callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
+        callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles, True);
         
         self.srcFile = SOURCE_DIR + '/preprocessed.f90'

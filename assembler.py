@@ -8,7 +8,7 @@ from callgraph import CallGraph
 from assertions import assertType, assertTypeAll
 from supertypes import CallGraphBuilder
 
-class FromAssemblerCallGraphBuilder(CallGraphBuilder):
+class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
     
     FILE_SUFFIX = '.s'
 
@@ -49,7 +49,7 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
             if filePath is None:
                 filePath = oldFilePath
             if filePath is None:
-                print  >> sys.stderr, '*** WARNING [FromAssemblerCallGraphBuilder]: No Assembler file to start with for subroutine: ' + str(rootSubroutine) + ' ***';
+                print  >> sys.stderr, '*** WARNING [GNUx86AssemblerCallGraphBuilder]: No Assembler file to start with for subroutine: ' + str(rootSubroutine) + ' ***';
                 return;
             elif not os.path.isfile(filePath):
                 filename = os.path.basename(filePath).lower()
@@ -61,7 +61,7 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
                         foundFile = True
                         break
                 if not foundFile:
-                    print  >> sys.stderr, '*** WARNING [FromAssemblerCallGraphBuilder]: Assembler file not found for subroutine: ' + str(rootSubroutine) + '. Expected: ' + filePath + ' ***';
+                    print  >> sys.stderr, '*** WARNING [GNUx86AssemblerCallGraphBuilder]: Assembler file not found for subroutine: ' + str(rootSubroutine) + '. Expected: ' + filePath + ' ***';
                 return;
             else:  
                 for callTriple in self.__findCalledSubroutines(rootSubroutine, filePath):
@@ -83,9 +83,9 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
             
         if moduleName in self.__specialModuleFiles:
             fileName = self.__specialModuleFiles[moduleName]
-            fileName = fileName[:fileName.rfind('.')] + FromAssemblerCallGraphBuilder.FILE_SUFFIX
+            fileName = fileName[:fileName.rfind('.')] + GNUx86AssemblerCallGraphBuilder.FILE_SUFFIX
         else:
-            fileName = moduleName + FromAssemblerCallGraphBuilder.FILE_SUFFIX;
+            fileName = moduleName + GNUx86AssemblerCallGraphBuilder.FILE_SUFFIX;
         
         fileName = fileName.lower()
         for baseDir in self.__baseDirs:
@@ -151,3 +151,6 @@ class FromAssemblerCallGraphBuilder(CallGraphBuilder):
                 break
         
         return (lineNumber, discriminator)
+    
+class FromAssemblerCallGraphBuilder(GNUx86AssemblerCallGraphBuilder):
+    '''DEPRECATED: exists only for compatiblity with older version'''

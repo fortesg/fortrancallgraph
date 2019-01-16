@@ -12,14 +12,14 @@ FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
 from tree import TreeLikeCallGraphPrinter
-from assembler import FromAssemblerCallGraphBuilder
+from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, InnerSubroutineName
 from globals import GlobalVariableTracker
 
 class TestInner(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
-        callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
+        callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
         
         self.srcFile = SOURCE_DIR + '/inner.f90'

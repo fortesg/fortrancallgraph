@@ -11,7 +11,7 @@ ASSEMBLER_DIR = SOURCE_DIR
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
-from assembler import FromAssemblerCallGraphBuilder
+from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from usetraversal import UseTraversal
 from trackvariable import VariableTracker
@@ -23,7 +23,7 @@ Tests whether assignments of function results are tracked correctly
 class OpenMPTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
-        callGraphBuilder = FromAssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
+        callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
         
         self.srcFile = SOURCE_DIR + '/openmp.f90'

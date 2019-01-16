@@ -19,7 +19,7 @@ from dumper import SourceLineDumper, SourceStatementDumper
 from linenumbers import DeclarationLineNumberFinder, EndStatementLineNumberFinder, FirstDocumentationLineFinder, LastSpecificationLineFinder, AllLineFinder,\
     LastUseLineFinder, ContainsLineFinder
 from useprinter import UsedModuleNamePrinter, UsedFileNamePrinter
-from assembler import FromAssemblerCallGraphBuilder
+from assembler import GNUx86AssemblerCallGraphBuilder
 from treecache import CachedAssemblerCallGraphBuilder
 from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_SOURCE_DIRS, CFG_ASSEMBLER_DIRS, CFG_SPECIAL_MODULE_FILES,\
     CFG_CACHE_DIR, CFG_SOURCE_FILES_PREPROCESSED, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES
@@ -109,7 +109,7 @@ def main():
     if config is None:
         exit(3)
 
-    graphBuilder = FromAssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
+    graphBuilder = GNUx86AssemblerCallGraphBuilder(config[CFG_ASSEMBLER_DIRS], config[CFG_SPECIAL_MODULE_FILES])
     if config[CFG_CACHE_DIR]:
         graphBuilder = CachedAssemblerCallGraphBuilder(config[CFG_CACHE_DIR], graphBuilder)
     sourceFiles = SourceFiles(config[CFG_SOURCE_DIRS], config[CFG_SPECIAL_MODULE_FILES], config[CFG_SOURCE_FILES_PREPROCESSED])
