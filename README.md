@@ -29,7 +29,7 @@ The meaning of the variables is documented in the [sample configuration file](co
 
 ### 3. Create assembler files
 
-Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `-save-temps -g -O0` to generate assembler files. **Do not compile with OpenMP** since assembler files containing OpenMP code are currently [not supported](https://github.com/fortesg/fortrancallgraph/issues/7).
+Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) and the options `-S -g -O0` or `-save-temps -g -O0` to generate assembler files.
 
 ### 4. Run `./FortranCallGraph.py`
 
@@ -146,7 +146,6 @@ I have done it like this:
   $> find build/x86_64-unknown-linux-gnu -name *.f90 -delete 
   $> export FFLAGS='' && ./configure && make
   ```
-* [Disable OpenMP for creating assembler files!](https://github.com/fortesg/fortrancallgraph/issues/7)
 #### 2. Configuration
 
 [My configuration file for ICON](https://github.com/fortesg/config-examples/blob/master/icon/config_fortrancallgraph.py)
