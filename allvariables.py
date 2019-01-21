@@ -7,6 +7,7 @@ from supertypes import CallGraphAnalyzer
 from trackvariable import VariableTracker
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
+import callgraph
 
 class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
 
@@ -37,6 +38,11 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
         argumentTracker.setMinimalOutput(self._minimalOutput)
         argumentTracker.setPointersOnly(self._pointersOnly)
         argumentTracker.analyzeCallgraph(callGraph)
+        
+        function = self.__sourceFiles.findSubroutine(callGraph.getRoot())
+        if function.isFunction():
+            argumentTracker.setVariable(function.getResultVariable())
+            argumentTracker.analyzeCallgraph(callGraph)
         
         globalTracker = GlobalVariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredModulesForGlobals, self.__ignoredTypes, interfaces, types)
         globalTracker.setIgnoreRegex(self._ignoreRegex)

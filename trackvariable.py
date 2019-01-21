@@ -62,6 +62,7 @@ class VariableTracker(CallGraphAnalyzer):
             return None;
         
         if self.__variable is not None:
+            self.__variableName = self.__variable.getName()
             variables = {self.__variable}
         elif self.__variableName is not None:
             self.__variable = rootSubroutine.getVariable(self.__variableName)
