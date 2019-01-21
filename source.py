@@ -170,9 +170,11 @@ class Interface(object):
 
 class Variable(object):
 
-    __types = '((LOGICAL)|(INTEGER)|(DOUBLE PRECISION)|(REAL)|(COMPLEX)|(CHARACTER\*?)|(TYPE)|(CLASS))\s*(\*\s*\d+)?\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/]+\s*\))?'
-    __declarationReg = re.compile(r'^(?P<typespecifier>' + __types + '\s*(.*\:\:)?)(?P<varlist>.+)$', re.IGNORECASE)
-    __typeRegEx = re.compile(r'^' + __types + '\s*$', re.IGNORECASE)
+    __types = '((LOGICAL)|(INTEGER)|(DOUBLE PRECISION)|(REAL)|(COMPLEX)|(CHARACTER\*?)|(TYPE)|(CLASS))\s*(\*\s*\d+)?'
+    __typesEasyParsing = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/]+\s*\))?'
+    __typesAll = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/\(\)]+\s*\))?'
+    __declarationReg = re.compile(r'^(?P<typespecifier>' + __typesEasyParsing + '\s*(.*\:\:)?)(?P<varlist>.+)$', re.IGNORECASE)
+    __typeRegEx = re.compile(r'^' + __typesAll + '\s*$', re.IGNORECASE)
     __dimensionRegEx = re.compile(r'^DIMENSION\s*\((?P<dimension>.*)\)\s*$', re.IGNORECASE)
     __intentRegEx = re.compile(r'^INTENT\s*\(\s*(?P<intent>(in)|(out)|(inout))\s*\)\s*$', re.IGNORECASE)
     __intents = ['in', 'out', 'inout', '']
