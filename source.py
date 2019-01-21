@@ -5,6 +5,7 @@ import re
 import sys
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
+from pkg_resources import declare_namespace
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -460,7 +461,25 @@ class Variable(object):
         result = []        
 
         varRegExMatch = Variable.__declarationReg.match(declarationStatement)
-        typeSpecifiers = Variable.__extractListedElements(varRegExMatch.group('typespecifier'))
+        typeSpecifierPart = varRegExMatch.group('typespecifier')
+        variablePart = varRegExMatch.group('varlist')
+        if declarationStatement.find('::') < 0:
+            foundVariablePart = variablePart
+            if foundVariablePart[0] == '(':
+                bracketCount = 0
+                pos = 0
+                for c in foundVariablePart:
+                    typeSpecifierPart += c
+                    pos += 1
+                    if c == '(': bracketCount += 1
+                    elif c == ')': bracketCount -= 1
+                    if bracketCount == 0:
+                        break
+                variablePart = foundVariablePart[pos:]
+            
+        typeSpecifiers = Variable.__extractListedElements(typeSpecifierPart)
+        variables = Variable.__extractListedElements(variablePart)
+            
         parameter = False
         allocatable = False
         pointer = False
@@ -494,8 +513,6 @@ class Variable(object):
                     dimensionRegExMatch = Variable.__dimensionRegEx.match(typeSpecifier)
                     if dimensionRegExMatch != None:
                         dimension = Variable.__extractDimension(dimensionRegExMatch.group('dimension'))
-
-        variables = Variable.__extractListedElements(varRegExMatch.group('varlist'))
         
         for var in variables:
             varName = var
@@ -527,9 +544,9 @@ class Variable(object):
         for part in spec.split(','):
             for c in part:
                 if c == '(': roundBracketCount += 1
-                if c == ')': roundBracketCount -= 1
-                if c == '[': squareBracketCount += 1
-                if c == ']': squareBracketCount -= 1
+                elif c == ')': roundBracketCount -= 1
+                elif c == '[': squareBracketCount += 1
+                elif c == ']': squareBracketCount -= 1
             element += ',' + part
             if roundBracketCount == 0 and squareBracketCount == 0:
                 element = element.strip(' ,')
