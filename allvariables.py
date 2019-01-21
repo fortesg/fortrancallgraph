@@ -7,7 +7,6 @@ from supertypes import CallGraphAnalyzer
 from trackvariable import VariableTracker
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
-import callgraph
 
 class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
 
