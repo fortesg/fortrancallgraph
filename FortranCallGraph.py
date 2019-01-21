@@ -37,12 +37,14 @@ def graphPrinter(key):
     else: raise NotImplementedError('CallGraphPrinter not yet implemented: ' + str(key))
 
 GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
+                 'result': 'only function result',
                  'globals': 'only module variables',
                  'all': 'both arguments and globals'}
 def graphAnalysis(key, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes):
     if key not in GRAPH_ANALYSIS: raise KeyError('No such CallGraphAnalyzer: ' + str(key))
     elif key == 'globals': return GlobalVariableTracker(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
     elif key == 'arguments': return VariableTracker(sourceFiles, excludeModules, ignoreDerivedTypes)
+    elif key == 'result': return VariableTracker(sourceFiles, excludeModules, ignoreDerivedTypes)
     elif key == 'all': return AllVariablesCallGraphAnalysis(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
     else: raise NotImplementedError('CallGraphAnalyzer not yet implemented: ' + str(key))
 
@@ -159,7 +161,7 @@ def main():
         try:
             ignoreRegex = re.compile(args.ignore)
         except re.error:
-            print >> sys.stderr, 'Invalid regular expression for -i/--ignore option!';
+            print >> sys.stderr, 'ERROR: Invalid regular expression for -i/--ignore option!';
             exit(1);
         
     maxLevel = -1
@@ -177,6 +179,12 @@ def main():
         analysis = graphAnalysis(args.analysis, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
+        elif args.analysis == 'result':
+            function = sourceFiles.findSubroutine(subroutineFullName)
+            if not function.isFunction():
+                print >> sys.stderr, 'ERROR: Subroutine ' + str(subroutineFullName) + ' not a function!';
+                exit(3);
+            analysis.setVariableName(function.getResultVariable().getName())
         if args.pointersOnly:
             analysis.setPointersOnly(True)
         if args.quiet:

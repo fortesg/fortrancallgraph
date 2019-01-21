@@ -65,9 +65,9 @@ class VariableTracker(CallGraphAnalyzer):
             variables = {self.__variable}
         else:
             if self.__variableName is not None:
-                self.__variable = self.__findTypeArgument(self.__variableName, rootSubroutine)
+                self.__variable = self.__findTypeVariable(self.__variableName, rootSubroutine)
                 if self.__variable is None:
-                    print  >> sys.stderr, '*** ERROR [VariableTracker] No type argument with name: ' + self.__variableName + '. ***';
+                    print  >> sys.stderr, '*** ERROR [VariableTracker] No type variable with name: ' + self.__variableName + '. ***';
                     return None;
                 variables = {self.__variable}
             else:
@@ -89,6 +89,12 @@ class VariableTracker(CallGraphAnalyzer):
                 for variableReference in variableReferences:
                     if not self._pointersOnly or variableReference.isLevelNPointer():
                         print variableReference.getExpression()
+    
+    def __findTypeVariable(self, variableName, subroutine):
+        variable = subroutine.getVariable(variableName)
+        if variable != None and variable.hasDerivedType():
+            return variable
+        return None
     
     def __findTypeArgument(self, argumentName, subroutine):
         argument = subroutine.findArgument(argumentName)
