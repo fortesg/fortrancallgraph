@@ -63,23 +63,28 @@ class VariableTracker(CallGraphAnalyzer):
         
         if self.__variable is not None:
             variables = {self.__variable}
+        elif self.__variableName is not None:
+            self.__variable = rootSubroutine.getVariable(self.__variableName)
+            if self.__variable is None:
+                print  >> sys.stderr, '*** ERROR [VariableTracker] No variable with name: ' + self.__variableName + '. ***';
+                return None;
+            variables = {self.__variable}
         else:
-            if self.__variableName is not None:
-                self.__variable = self.__findTypeVariable(self.__variableName, rootSubroutine)
-                if self.__variable is None:
-                    print  >> sys.stderr, '*** ERROR [VariableTracker] No type variable with name: ' + self.__variableName + '. ***';
-                    return None;
-                variables = {self.__variable}
+            variables = rootSubroutine.getArguments()
+
+        derivedTypeVariables = []
+        primitiveTypeVariables =  []
+        for variable in variables:
+            if variable.hasDerivedType():
+                derivedTypeVariables.append(variable)
             else:
-                variables = rootSubroutine.getDerivedTypeArguments()
-                
-        if self.__variableName is None : 
-            variableNames = map(Variable.getName, variables)    
-            for argument in rootSubroutine.getArguments():
-                if argument.getName() not in variableNames and (not self._pointersOnly or argument.isPointer()):
-                    print argument.getName()
+                primitiveTypeVariables.append(variable)
+            
+        for variable in primitiveTypeVariables:
+            if not self._pointersOnly or variable.isPointer():
+                print variable.getName()
         
-        variableReferences = self.trackVariables(variables, callGraph)
+        variableReferences = self.trackVariables(derivedTypeVariables, callGraph)
         if not quiet:
             if not self._minimalOutput:
                 for variableReference in variableReferences:
