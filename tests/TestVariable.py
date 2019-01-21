@@ -16,11 +16,13 @@ Tests for strange variable declarations
 class VariableTest(unittest.TestCase):
 
     def testGrb2(self):
-        
         decl = "CHARACTER(LEN=LEN(grb2_grid_info)),PARAMETER::grb2_grid_info_lc=''"
-        variable = Variable.fromDeclarationStatement(decl, 'VariableTest')
-        self.assertIsNotNone(variable)
-        self.assertEqual('grb2_grid_info_lc', variable.getName())
+        variables = Variable.fromDeclarationStatement(decl, 'VariableTest')
+        self.assertTrue(variables)
+        grb2_grid_info_lc = variables[0]
+        self.assertIsNotNone(grb2_grid_info_lc)
+        self.assertEqual('grb2_grid_info_lc', grb2_grid_info_lc.getName())
+        self.assertEqual('CHARACTER(LEN=LEN(grb2_grid_info))', grb2_grid_info_lc.getTypeName())
 
 if __name__ == "__main__":
     unittest.main()
