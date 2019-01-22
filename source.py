@@ -1721,12 +1721,6 @@ class SourceFile(object):
 
         return modules;
 
-    def getPublicElements(self):
-        '''DEPRECATED'''
-        if self.__modules:
-            return self.__getAnyModule().getPublicElements()
-        return []
-
     def getPreprocessorOffset(self, lineNumber):
         if self.__preprocessed:
             if self.__preprocessorLineDirectives is None:
