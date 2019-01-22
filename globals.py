@@ -9,8 +9,6 @@ from callgraph import CallGraph
 from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from _ast import alias
-import callgraph
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 

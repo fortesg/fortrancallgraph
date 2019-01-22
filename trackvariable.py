@@ -8,7 +8,6 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from _ast import alias
 
 class VariableTracker(CallGraphAnalyzer):
 
