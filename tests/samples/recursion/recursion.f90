@@ -7,6 +7,12 @@ MODULE recursion
     INTEGER :: second
   END TYPE test
 
+  TYPE :: rtest
+    INTEGER :: first
+    INTEGER :: second
+    TYPE(rtest), POINTER :: next
+  END TYPE rtest
+
 CONTAINS
 
   RECURSIVE SUBROUTINE recurse(var)
@@ -74,5 +80,13 @@ CONTAINS
     END IF
 
   END SUBROUTINE position
+
+  SUBROUTINE recdata(r)
+    TYPE(rtest), INTENT(in) :: r
+
+    WRITE (*,*) r%next%next%next%first
+    WRITE (*,*) r%second
+
+  END SUBROUTINE recdata
 
 END MODULE recursion

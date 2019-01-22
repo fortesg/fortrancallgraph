@@ -41,6 +41,9 @@ class RecursionTest(unittest.TestCase):
         self.position = SubroutineFullName('__recursion_MOD_position')
         self.callGraphPosition = callGraphBuilder.buildCallGraph(self.position)
         
+        self.recdata = SubroutineFullName('__recursion_MOD_recdata')
+        self.callGraphRecdata = callGraphBuilder.buildCallGraph(self.recdata)
+        
         #sys.tracebacklimit = 0
         
     def testAssemberFileExists(self):
@@ -62,7 +65,7 @@ class RecursionTest(unittest.TestCase):
         self.assertIsNotNone(module)
         
         simpleNames = set(module.getSubroutines().keys())
-        self.assertEqual({'recurse', 'indirect1', 'indirect2', 'refunc', 'position'}, simpleNames)
+        self.assertEqual({'recurse', 'indirect1', 'indirect2', 'refunc', 'position', 'recdata'}, simpleNames)
 
     def testCallGraphs(self):
         if not self.filesExist:
@@ -72,6 +75,7 @@ class RecursionTest(unittest.TestCase):
         self.assertEqual({'indirect1', 'indirect2'}, set(map(SubroutineFullName.getSimpleName, self.callGraphIndirect.getAllSubroutineNames())))
         self.assertEqual({'refunc'}, set(map(SubroutineFullName.getSimpleName, self.callGraphFunc.getAllSubroutineNames())))
         self.assertEqual({'position'}, set(map(SubroutineFullName.getSimpleName, self.callGraphPosition.getAllSubroutineNames())))
+        self.assertEqual({'recdata'}, set(map(SubroutineFullName.getSimpleName, self.callGraphRecdata.getAllSubroutineNames())))
         
     def testDirect(self):
         if not self.filesExist:
@@ -117,6 +121,21 @@ class RecursionTest(unittest.TestCase):
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
         self.assertEqual({'var1%first', 'var1%second', 'var2%first', 'var2%second'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphPosition))))
+        
+
+    def testRecdata(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+
+        subroutine = self.sourceFiles.findSubroutine(self.recdata)
+        self.assertIsNotNone(subroutine)
+        self.assertEquals(['r'], subroutine.getArgumentNames())
+        
+        useTraversal = UseTraversal(self.sourceFiles, [])
+        useTraversal.parseModules(self.position)
+        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        
+        self.assertEqual({'r%second'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphRecdata))))
         
 
     #TODO Functions
