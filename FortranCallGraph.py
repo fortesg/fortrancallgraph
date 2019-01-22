@@ -101,8 +101,8 @@ def parseArguments():
     argParser.add_argument('-q', '--quiet', action="store_true", help='Reduce the output. Applicable with -a and -l.');
     argParser.add_argument('-i', '--ignore', type=str, help='Leave out subroutines matching a given regular expression. Applicable with -p and -a.');
     argParser.add_argument('-cf', '--configFile', type=str, help='Import configuration from this file.');
-    argParser.add_argument('module');
-    argParser.add_argument('subroutine', nargs='?', default=None);
+    argParser.add_argument('module', help='Module name');
+    argParser.add_argument('subroutine', nargs='?', default=None, help='Subroutine or function name');
     return argParser.parse_args();
 
 def main():
