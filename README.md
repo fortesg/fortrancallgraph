@@ -1,7 +1,7 @@
 # FortranCallGraph
 
 `FortranCallGraph` (FCG) is a static source code analysis tool for Fortran. 
-It's main purpose is to track recursively the usage of variables within a subroutine and its called subroutines and functions.
+It's main purpose is to track recursively the usage of variables within a subroutine or function and its called subroutines and functions.
 Therefore it creates a call graph by parsing [GCC assembler files](https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html#index-S) and then traverses this call graph while analyzing the original source code of the routines.
 
 The analysis result will be a list of used global variables and a list of used members of derived type arguments. 
@@ -43,8 +43,8 @@ usage: FortranCallGraph.py [-h]
 Print or analyse a subroutine's call graph.
 
 positional arguments:
-  module
-  subroutine
+  module                Module name
+  subroutine            Subroutine or function name
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -123,9 +123,14 @@ $> ./FortranCallGraph.py -a arguments my_module my_subroutine
 $> ./FortranCallGraph.py -a arguments -v arg1 my_module my_subroutine
 ```  
 
-* List both, used globals and arguments:  
+* List basic type result variable or used members of derived type result variable:  
 ```
-$> ./FortranCallGraph.py -a all my_module my_subroutine
+$> ./FortranCallGraph.py -a result my_module my_function
+```  
+
+* List both, used globals, arguments (and return variable):  
+```
+$> ./FortranCallGraph.py -a all my_module my_function
 ```
 
 Everything else you have to find out on your own, so far.
