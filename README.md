@@ -35,7 +35,7 @@ Compile your Fortran application with [gfortran](https://gcc.gnu.org/fortran) an
 
 ```
 usage: FortranCallGraph.py [-h]
-                           (-p {list-modules,list-subroutines,tree,dot} | -a {all,globals,arguments} | -d {statements,lines} | -l {use,last,doc,contains,all,specs,first} | -u {files,modules})
+                           (-p {list-modules,list-subroutines,tree,dot} | -a {all,globals,arguments,result} | -d {statements,lines} | -l {use,last,doc,contains,all,specs,first} | -u {files,modules})
                            [-v VARIABLE] [-ml MAXLEVEL] [-po] [-ln] [-cc] [-q]
                            [-i IGNORE] [-cf CONFIGFILE]
                            module [subroutine]
@@ -53,10 +53,11 @@ optional arguments:
                         containing subroutines from the call graph, list-
                         subroutines: only list subroutines, tree: in a tree-
                         like form, dot: in DOT format for Graphviz).
-  -a {all,globals,arguments}, --analysis {all,globals,arguments}
+  -a {all,globals,arguments,result}, --analysis {all,globals,arguments,result}
                         Analyze variable usage (all: both arguments and
                         globals, globals: only module variables, arguments:
-                        only subroutine arguments).
+                        only subroutine arguments, result: only function
+                        result).
   -d {statements,lines}, --dump {statements,lines}
                         Dump subroutine or module source code (statements:
                         normalized source lines, lines: original source
