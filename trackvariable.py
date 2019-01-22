@@ -122,6 +122,25 @@ class VariableTracker(CallGraphAnalyzer):
         variables = subroutine.getDerivedTypeArguments()
         return self.trackVariables(variables, callGraph)
     
+    def trackDerivedTypeResult(self, callGraph):
+        assertType(callGraph, 'callGraph', CallGraph)
+        assert self.__interfaces is not None, 'No Interfaces set'
+        assert self.__types is not None, 'No Types set'
+        
+        subroutineName = callGraph.getRoot()
+        subroutine = self.__sourceFiles.findSubroutine(subroutineName)
+        if subroutine is None:
+            VariableTracker.__routineNotFoundWarning(subroutineName)
+            return []
+        elif not subroutine.isFunction():
+            return []
+        
+        variable = subroutine.getResultVariable()
+        if not variable.hasDerivedType():
+            return [] 
+        
+        return self.trackVariables([variable], callGraph)
+    
     def trackVariables(self, variables, callGraph):
         assertTypeAll(variables, 'variables', Variable) 
         assertType(callGraph, 'callGraph', CallGraph) 
