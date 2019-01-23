@@ -1811,7 +1811,7 @@ class SourceFile(object):
     
     @staticmethod
     def __removeUnnecessaryBlanksFromStatement(statement):
-        statement = re.sub(r' *([%\(,\:=]) *', r'\1', statement)
+        statement = re.sub(r' *([%\(,\.\:=\+\-\*\/\>\<]) *', r'\1', statement)
         statement = re.sub(r' *\)', r')', statement)
         return statement
     
