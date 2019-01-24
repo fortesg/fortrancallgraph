@@ -1371,7 +1371,10 @@ class Subroutine(SubroutineContainer):
             
     def getVariable(self, name):
         name = name.lower()
-        for variable in self.getVariables():
+        variables = self.getVariables()
+        if self.isFunction():
+            variables.append(self.getResultVariable())
+        for variable in variables:
             if variable.getName().lower() == name:
                 return variable
             
