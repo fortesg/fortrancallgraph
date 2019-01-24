@@ -16,6 +16,7 @@ import TestVariableReference
 import TestTypeProcedure
 import TestOutVars
 import TestPreprocessed
+import TestOpenMP
 import TestVariable
 import TestLines2Statements
 
@@ -37,6 +38,7 @@ suite.addTests(loader.loadTestsFromModule(TestVariableReference))
 suite.addTests(loader.loadTestsFromModule(TestTypeProcedure))
 suite.addTests(loader.loadTestsFromModule(TestOutVars))
 suite.addTests(loader.loadTestsFromModule(TestPreprocessed))
+suite.addTests(loader.loadTestsFromModule(TestOpenMP))
 suite.addTests(loader.loadTestsFromModule(TestVariable))
 suite.addTests(loader.loadTestsFromModule(TestLines2Statements))
 
