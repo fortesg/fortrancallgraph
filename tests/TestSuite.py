@@ -16,6 +16,8 @@ import TestVariableReference
 import TestTypeProcedure
 import TestOutVars
 import TestPreprocessed
+import TestVariable
+import TestLines2Statements
 
 # initialize the test suite
 loader = unittest.TestLoader()
@@ -35,6 +37,8 @@ suite.addTests(loader.loadTestsFromModule(TestVariableReference))
 suite.addTests(loader.loadTestsFromModule(TestTypeProcedure))
 suite.addTests(loader.loadTestsFromModule(TestOutVars))
 suite.addTests(loader.loadTestsFromModule(TestPreprocessed))
+suite.addTests(loader.loadTestsFromModule(TestVariable))
+suite.addTests(loader.loadTestsFromModule(TestLines2Statements))
 
 # initialize a runner, pass it your suite and run it
 runner = unittest.TextTestRunner(verbosity=3)
