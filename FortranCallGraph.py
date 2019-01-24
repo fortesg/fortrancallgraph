@@ -149,7 +149,7 @@ def main():
     if subroutineFullName is not None and not sourceFiles.existsSubroutine(subroutineFullName):
         print >> sys.stderr, 'ERROR: Subroutine ' + str(subroutineFullName) + ' not found!';
         exit(2);
-    elif sourceFileName is not None and sourceFiles.existsSourceFile(sourceFileName):
+    elif sourceFileName is not None and not sourceFiles.existsSourceFile(sourceFileName):
         print >> sys.stderr, 'ERROR: Source file ' + sourceFileName + ' not found!';
         exit(2);
     elif subroutineFullName is None and sourceFileName is None and not sourceFiles.existsModule(moduleName):
