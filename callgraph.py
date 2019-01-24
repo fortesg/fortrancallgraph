@@ -138,12 +138,6 @@ class _CallGraphSubroutine(object):
                 nextCallees.append(call.getCalleeName())
         
         return nextCallees
-    
-    def getLineNumberOfFirstCall(self, calleeName):
-        for call in sorted(self.__calls):
-            if call.getName() == calleeName:
-                return call.getLineNumber()
-        return -1
 
 class CallGraph(object):
     
@@ -265,16 +259,6 @@ class CallGraph(object):
                 callers.add(subroutineName)
                 
         return callers
-    
-    def getLineNumberOfFirstCall(self, callerName, calleeName):
-        assertType(callerName, 'callerName', SubroutineName)      
-        if not callerName in self:
-            raise ValueError("Caller subroutine not found in CallGraph: " + str(callerName))
-        assertType(calleeName, 'calleeName', SubroutineName)      
-        if not calleeName in self:
-            raise ValueError("Callee subroutine not found in CallGraph: " + str(calleeName))
-        return self.__subroutines[callerName].getLineNumberOfFirstCall()
-        
  
     def extractSubgraph(self, subrootName):
         assertType(subrootName, 'subrootName', SubroutineName)

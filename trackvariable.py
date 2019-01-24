@@ -308,29 +308,6 @@ class VariableTracker(CallGraphAnalyzer):
 
         return re.sub(re.escape(functionExpression), variableReference.getExpression(), statement, 1)
     
-    def __removeUnimportantParentheses(self, statement, regEx = None):
-        clean = ''
-        pString = ''
-        pCount = 0
-        for c in statement:
-            if c == '(':
-                pCount += 1
-            
-            if pCount == 0:
-                clean += c
-            else:
-                pString += c
-                
-            if c == ')':
-                pCount -= 1
-                if pCount == 0:
-                    pString = pString[1:-1]
-                    if regEx is not None and regEx.match(pString) is not None:
-                        clean += '(' + self.__removeUnimportantParentheses(pString, regEx) + ')'
-                    pString = ''
-        return clean
-        
-    
     def __isAssignmentToDerivedType(self, regExMatch, subroutine, lineNumber):
         originalReference = VariableReference(regExMatch.group('reference'), subroutine.getName(), lineNumber, self.__variable)
         variable = self.__findLevelNVariable(originalReference)
