@@ -67,7 +67,7 @@ class Type(object):
 
         if isinstance(procedure, list):
             assertTypeAll(procedure, 'procedure', str)
-            procedure = map(str.lower, procedure)
+            procedure = [proc.lower() for proc in procedure]
         else:
             procedure = procedure.lower()
             
@@ -1278,7 +1278,7 @@ class Subroutine(SubroutineContainer):
         declaration = declaration[nameEnd:]
         argumentsListing = declaration[:(declaration.find(')'))]
         arguments = argumentsListing.lower().split(',')
-        arguments = map(str.strip, arguments)
+        arguments = [arg.strip() for arg in arguments]
         return arguments
     
     def getArguments(self):
