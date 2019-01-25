@@ -109,9 +109,8 @@ class TypeCollection(object):
         # Type imported with alias?
         if usingModule is not None:
             useAliases = usingModule.getUseAliases()
-            for alias in useAliases:
+            for alias, (usedModuleName, original) in useAliases.items():
                 if alias == typeName:
-                    (usedModuleName, original) = useAliases[alias]
                     if original in self:
                         for typE in self.__typeDict[original]:
                             if typE.getModule().getName() == usedModuleName:
@@ -162,8 +161,8 @@ class TypeCollection(object):
                         member.setType(memberType)
                     
     def __setExtendedTypes(self):
-        for typE in self.__extends:
-            extendsType = self.getType(self.__extends[typE], typE.getModule())
+        for typE, extends in self.__extends.items():
+            extendsType = self.getType(extends, typE.getModule())
             if extendsType is not None:
                 typE.setExtends(extendsType)
         self.__extends = dict()

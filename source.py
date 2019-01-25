@@ -101,7 +101,7 @@ class Type(object):
             return None
         
         if name in self.__procedures.values():
-            return self.__procedures.keys()[self.__procedures.values().index(name)]
+            return list(self.__procedures.keys())[list(self.__procedures.values()).index(name)]
         else:
             return self.__extends.getSubroutineAlias(name)
         
@@ -648,9 +648,9 @@ class VariableReference(object):
         assertType(decrementing, 'decrementing', bool)
         
         if decrementing:
-            return range(self.getLevel(), start - 1, -1)
+            return list(range(self.getLevel(), start - 1, -1))
         else:
-            return range(start, self.getLevel() + 1) 
+            return list(range(start, self.getLevel() + 1)) 
         
     def getSubReference(self, level = -1):
         return VariableReference(self.getExpression(level), self.__subroutine, self.__lineNumber, self.__level0Variable)
@@ -1867,8 +1867,8 @@ class SourceFiles(object):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         
         self.__specialModuleFiles = dict()
-        for module in specialModuleFiles:
-            self.__specialModuleFiles[module.lower()] = specialModuleFiles[module]
+        for module, filE in specialModuleFiles.items():
+            self.__specialModuleFiles[module.lower()] = filE
 
         self.__filesByModules = dict() # Clear Module Cache
         
