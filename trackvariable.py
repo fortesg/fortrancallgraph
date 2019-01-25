@@ -8,6 +8,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
+from printout import printError, printLine, printWarning
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -57,7 +58,7 @@ class VariableTracker(CallGraphAnalyzer):
         rootSubroutineName = callGraph.getRoot()
         rootSubroutine = self.__sourceFiles.findSubroutine(rootSubroutineName)
         if rootSubroutine is None:
-            print  >> sys.stderr, '*** ERROR [VariableTracker] Subroutine ' + str(rootSubroutineName) + ' not found. ***';
+            printError('Subroutine ' + str(rootSubroutineName), 'VariableTracker')
             return None;
         
         if self.__variable is not None:
@@ -66,7 +67,7 @@ class VariableTracker(CallGraphAnalyzer):
         elif self.__variableName is not None:
             self.__variable = rootSubroutine.getVariable(self.__variableName)
             if self.__variable is None:
-                print  >> sys.stderr, '*** ERROR [VariableTracker] No variable with name: ' + self.__variableName + '. ***';
+                printError('No variable with name: ' + self.__variableName, 'VariableTracker')
                 return None;
             variables = {self.__variable}
         else:
@@ -82,18 +83,18 @@ class VariableTracker(CallGraphAnalyzer):
             
         for variable in primitiveTypeVariables:
             if not self._pointersOnly or variable.isPointer():
-                print variable.getName()
+                printLine(variable.getName())
         
         variableReferences = self.trackVariables(derivedTypeVariables, callGraph)
         if not quiet:
             if not self._minimalOutput:
                 for variableReference in variableReferences:
                     if not self._pointersOnly or variableReference.isLevelNPointer():
-                        print str(variableReference);
+                        printLine(variableReference)
             else:
                 for variableReference in variableReferences:
                     if not self._pointersOnly or variableReference.isLevelNPointer():
-                        print variableReference.getExpression()
+                        printLine(variableReference.getExpression())
     
     def __findTypeVariable(self, variableName, subroutine):
         variable = subroutine.getVariable(variableName)
@@ -341,7 +342,7 @@ class VariableTracker(CallGraphAnalyzer):
                         
                     return variableReferences
             else:
-                print >> sys.stderr, '*** WARNING [VariableTracker] Ignored assignment to recursive data structure: ' + str(originalReference) + ') ***';
+                printWarning('Ignored assignment to recursive data structure: ' + str(originalReference), 'VariableTracker')
                 
         return set();
                 
@@ -357,7 +358,7 @@ class VariableTracker(CallGraphAnalyzer):
             else:
                 return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber, originalStatement)
         else:
-            print >> sys.stderr, '*** WARNING [VariableTracker] Ignored access to recursive data structure: ' + str(variableReference) + ') ***';
+            printWarning('Ignored access to recursive data structure: ' + str(variableReference), 'VariableTracker')
         
         return (set(), set())    
     
@@ -398,7 +399,7 @@ class VariableTracker(CallGraphAnalyzer):
         
                         return (variableReferences, outAssignments)
                 else:
-                    print >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutine.getName().getModuleName() + ':' + str(lineNumber) + ') ***';
+                    printWarning('No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutine.getName().getModuleName() + ':' + str(lineNumber), 'VariableTracker')
             else:
                 VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         else:
@@ -499,7 +500,7 @@ class VariableTracker(CallGraphAnalyzer):
             return (set(), set())
         
         if originalReference.isRecursive():
-            print >> sys.stderr, '*** WARNING [VariableTracker] Ignored argument with recursive data structure: ' + str(originalReference) + ') ***';
+            printWarning('Ignored argument with recursive data structure: ' + str(originalReference), 'VariableTracker')
             return (set(), set())
 
         if isinstance(calledRoutineName, SubroutineFullName):
@@ -540,7 +541,7 @@ class VariableTracker(CallGraphAnalyzer):
         
                         return (variableReferences, outAssignments)
                 else:
-                    print  >> sys.stderr, '*** WARNING [VariableTracker] No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber) + ') ***';
+                    printWarning('No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber), 'VariableTracker')
             else:
                 VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
@@ -633,17 +634,15 @@ class VariableTracker(CallGraphAnalyzer):
         
             VariableTracker.__routineWarnings.add(subroutineName)
             
-            warning = '*** WARNING [VariableTracker] '
             if text:
-                warning += text
+                warning = text
             else:
-                warning += 'Routine not found'
+                warning = 'Routine not found'
             warning += ': ' + str(subroutineName)
             if callerName is not None and callerName.getModuleName():
                 warning += ' (' + str(callerName.getModuleName())
                 if lineNumber:
                     warning += ':' + str(lineNumber)
                 warning += ')'
-            warning += ' ***'
             
-            print  >> sys.stderr, warning
+            printWarning(warning)

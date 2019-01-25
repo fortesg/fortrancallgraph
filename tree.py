@@ -1,6 +1,7 @@
 from assertions import assertType
 from callgraph import CallGraph
 from supertypes import CallGraphPrinter
+from printout import printLine
 
 class TreeLikeCallGraphPrinter(CallGraphPrinter):
 
@@ -16,10 +17,10 @@ class TreeLikeCallGraphPrinter(CallGraphPrinter):
         level = len(callStack);
         if self._maxLevel is None or level <= self._maxLevel:
             if rootSubroutine in callStack:
-                print self.__getTreeLine(level, rootSubroutine) + " [RECURSIVE]";
+                printLine(self.__getTreeLine(level, rootSubroutine) + " [RECURSIVE]")
                 return;
             else:
-                print self.__getTreeLine(level, rootSubroutine);
+                printLine(self.__getTreeLine(level, rootSubroutine))
                 callStack = callStack + (rootSubroutine,);
                 for calledSubroutine in callGraph.getCallees(rootSubroutine):
                         self.__printCallGraphRecursive(calledSubroutine, callGraph, callStack);

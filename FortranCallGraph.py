@@ -4,7 +4,6 @@
 @author: Christian Hovy
 '''
 
-import sys;
 import argparse;
 import re
 
@@ -23,6 +22,7 @@ from assembler import GNUx86AssemblerCallGraphBuilder
 from treecache import CachedAssemblerCallGraphBuilder
 from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_SOURCE_DIRS, CFG_ASSEMBLER_DIRS, CFG_SPECIAL_MODULE_FILES,\
     CFG_CACHE_DIR, CFG_SOURCE_FILES_PREPROCESSED, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES
+from printout import printErrorAndExit
 
 GRAPH_PRINTERS = {'tree': 'in a tree-like form',
                   'dot': 'in DOT format for Graphviz',
@@ -125,8 +125,7 @@ def main():
     sourceFileName = None
     
     if not moduleName:
-        print >> sys.stderr, 'Missing Module (and Subroutine) name!';
-        exit(1);
+        printErrorAndExit(1, 'Missing Module (and Subroutine) name!')
     elif not subroutineName:
         if SubroutineFullName.validFullName(moduleName):
             subroutineFullName = SubroutineFullName(moduleName)
@@ -135,34 +134,27 @@ def main():
                 if args.dump is not None and moduleName.lower().endswith('.f90'):
                     sourceFileName = moduleName
                 else:
-                    print >> sys.stderr, 'Invalid Module name!';
-                    exit(1);
+                    printErrorAndExit(1, 'Invalid Module name!')
         else: 
-            print >> sys.stderr, 'Missing Subroutine name!';
-            exit(1);
+            printErrorAndExit(1, 'Missing Subroutine name!')
     elif SubroutineFullName.validParts(moduleName, subroutineName):
         subroutineFullName = SubroutineFullName.fromParts(moduleName, subroutineName)
     else:
-        print >> sys.stderr, 'Invalid Module and/or Subroutine name!';
-        exit(1);
+        printErrorAndExit(1, 'Invalid Module and/or Subroutine name!')
         
     if subroutineFullName is not None and not sourceFiles.existsSubroutine(subroutineFullName):
-        print >> sys.stderr, 'ERROR: Subroutine ' + str(subroutineFullName) + ' not found!';
-        exit(2);
+        printErrorAndExit(2, 'Subroutine ' + str(subroutineFullName) + ' not found!')
     elif sourceFileName is not None and not sourceFiles.existsSourceFile(sourceFileName):
-        print >> sys.stderr, 'ERROR: Source file ' + sourceFileName + ' not found!';
-        exit(2);
+        printErrorAndExit(2, 'Source file ' + sourceFileName + ' not found!')
     elif subroutineFullName is None and sourceFileName is None and not sourceFiles.existsModule(moduleName):
-        print >> sys.stderr, 'ERROR: Module ' + moduleName + ' not found!';
-        exit(2);
+        printErrorAndExit(2, 'Module ' + moduleName + ' not found!')
         
     ignoreRegex = None
     if args.ignore is not None:
         try:
             ignoreRegex = re.compile(args.ignore)
         except re.error:
-            print >> sys.stderr, 'ERROR: Invalid regular expression for -i/--ignore option!';
-            exit(1);
+            printErrorAndExit(1, 'Invalid regular expression for -i/--ignore option!')
         
     maxLevel = -1
     if args.maxLevel is not None:
@@ -182,8 +174,7 @@ def main():
         elif args.analysis == 'result':
             function = sourceFiles.findSubroutine(subroutineFullName)
             if not function.isFunction():
-                print >> sys.stderr, 'ERROR: Subroutine ' + str(subroutineFullName) + ' not a function!';
-                exit(3);
+                printErrorAndExit(3, 'Subroutine ' + str(subroutineFullName) + ' not a function!')
             analysis.setVariableName(function.getResultVariable().getName())
         if args.pointersOnly:
             analysis.setPointersOnly(True)

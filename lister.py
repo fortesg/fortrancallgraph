@@ -1,6 +1,7 @@
 from assertions import assertType
 from callgraph import CallGraph
 from supertypes import CallGraphPrinter
+from printout import printLine
 
 class SubroutineListingCallGraphPrinter(CallGraphPrinter):
 
@@ -13,7 +14,7 @@ class SubroutineListingCallGraphPrinter(CallGraphPrinter):
                 subroutinesNames.append(str(subroutine));
             
         for subroutineName in sorted(subroutinesNames):
-            print subroutineName;
+            printLine(subroutineName)
 
 class ModuleListingCallGraphPrinter(CallGraphPrinter):
 
@@ -25,4 +26,4 @@ class ModuleListingCallGraphPrinter(CallGraphPrinter):
             moduleNames.add(subroutine.getModuleName());
             
         for moduleName in sorted(moduleNames):
-            print moduleName;
+            printLine(moduleName)

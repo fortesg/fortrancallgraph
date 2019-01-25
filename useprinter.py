@@ -3,6 +3,7 @@ from supertypes import UsePrinter, UseTraversalPassenger
 from assertions import assertTypeAll, assertType
 from source import SourceFiles, SubroutineFullName, Module
 from usetraversal import UseTraversal
+from printout import printLines
 
 class UseCollector(UseTraversalPassenger):
  
@@ -42,7 +43,7 @@ class UsedModuleNamePrinter(UsePrinter):
         self._printModules(modules)
         
     def _printModules(self, modules):
-        print '\n'.join(sorted(modules))
+        printLines(sorted(modules))
         
 
 class UsedFileNamePrinter(UsedModuleNamePrinter):
@@ -62,4 +63,4 @@ class UsedFileNamePrinter(UsedModuleNamePrinter):
                 path = self._sourceFiles.getRelativePath(sourceFile)
                 files.add(path)
         
-        print '\n'.join(sorted(files))
+        printLines(sorted(files))

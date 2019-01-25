@@ -1,6 +1,7 @@
 from assertions import assertType
 from supertypes import SourceDumper
 from source import SubroutineFullName
+from printout import printInline, printLine
 
 class SourceLineDumper(SourceDumper):
 
@@ -12,8 +13,8 @@ class SourceLineDumper(SourceDumper):
             numberLength = len(str(subroutine.getLastLineNumber()));
             for i, line in subroutine.getLines():
                 if (self._printLineNumbers):
-                    print str(i).zfill(numberLength) + '  ',;
-                print line,;
+                    printInline(str(i).zfill(numberLength) + '  ')
+                printInline(line)
 
     def dumpModule(self, moduleName):
         assertType(moduleName, 'moduleName', str)
@@ -23,8 +24,8 @@ class SourceLineDumper(SourceDumper):
             numberLength = len(str(module.getLastLineNumber()));
             for i, line in module.getLines():
                 if (self._printLineNumbers):
-                    print str(i).zfill(numberLength) + '  ',;
-                print line,;
+                    printInline(str(i).zfill(numberLength) + '  ')
+                printInline(line)
 
     def dumpSourceFile(self, fileName):
         assertType(fileName, 'fileName', str)
@@ -35,8 +36,8 @@ class SourceLineDumper(SourceDumper):
             numberLength = len(str(len(lines)));
             for i, line in lines:
                 if (self._printLineNumbers):
-                    print str(i).zfill(numberLength) + '  ',;
-                print line,;
+                    printInline(str(i).zfill(numberLength) + '  ')
+                printInline(line)
 
 class SourceStatementDumper(SourceDumper):
 
@@ -48,8 +49,8 @@ class SourceStatementDumper(SourceDumper):
             numberLength = len(str(subroutine.getLastLineNumber()));
             for i, statement, _ in subroutine.getStatements():
                 if (self._printLineNumbers):
-                    print str(i).zfill(numberLength) + '  ',;
-                print statement;
+                    printInline(str(i).zfill(numberLength) + '  ')
+                printLine(statement)
 
     def dumpModule(self, moduleName):
         assertType(moduleName, 'moduleName', str)
@@ -59,8 +60,8 @@ class SourceStatementDumper(SourceDumper):
             numberLength = len(str(module.getLastLineNumber()));
             for i, statement, _ in module.getStatements():
                 if (self._printLineNumbers):
-                    print str(i).zfill(numberLength) + '  ',;
-                print statement;
+                    printInline(str(i).zfill(numberLength) + '  ')
+                printLine(statement)
 
     def dumpSourceFile(self, fileName):
         assertType(fileName, 'fileName', str)
@@ -71,5 +72,5 @@ class SourceStatementDumper(SourceDumper):
             numberLength = len(str(len(statements)));
             for i, statement, _ in statements:
                 if (self._printLineNumbers):
-                    print str(i).zfill(numberLength) + '  ',;
-                print statement;
+                    printInline(str(i).zfill(numberLength) + '  ')
+                printLine(statement)

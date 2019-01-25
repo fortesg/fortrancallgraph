@@ -7,6 +7,7 @@ from source import SubroutineFullName, SourceFiles
 from interfaces import InterfaceFinder
 from typefinder import TypeFinder
 from supertypes import UseTraversalPassenger
+from printout import printWarning
 
 class UseTraversal(object):
     
@@ -53,11 +54,10 @@ class UseTraversal(object):
                     self.__parseStatement(i, statement, j, module)
         elif moduleName not in UseTraversal.__moduleWarnings:
             UseTraversal.__moduleWarnings.add(moduleName)
-            warning = '*** WARNING [UseTraversal] Source file not found for module: ' + moduleName
+            warning = 'Source file not found for module: ' + moduleName
             if parent:
                 warning += ' (in: ' + parent + ')'
-            warning += ' ***'
-            print  >> sys.stderr, warning;
+            printWarning(warning)
 
         for usedModule in usedModules:
             self.__parseModulesRecursive(usedModule, moduleName)

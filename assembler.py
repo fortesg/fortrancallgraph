@@ -1,12 +1,12 @@
 # coding=utf8
 
-import sys;
 import os.path;
 import re
 from source import SubroutineFullName, InnerSubroutineName
 from callgraph import CallGraph
 from assertions import assertType, assertTypeAll
 from supertypes import CallGraphBuilder
+from printout import printWarning
 
 class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
     
@@ -49,7 +49,7 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
             if filePath is None:
                 filePath = oldFilePath
             if filePath is None:
-                print  >> sys.stderr, '*** WARNING [GNUx86AssemblerCallGraphBuilder]: No Assembler file to start with for subroutine: ' + str(rootSubroutine) + ' ***';
+                printWarning('No Assembler file to start with for subroutine: ' + str(rootSubroutine), 'GNUx86AssemblerCallGraphBuilder')
                 return;
             elif not os.path.isfile(filePath):
                 filename = os.path.basename(filePath).lower()
@@ -61,7 +61,7 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
                         foundFile = True
                         break
                 if not foundFile:
-                    print  >> sys.stderr, '*** WARNING [GNUx86AssemblerCallGraphBuilder]: Assembler file not found for subroutine: ' + str(rootSubroutine) + '. Expected: ' + filePath + ' ***';
+                    printWarning('Assembler file not found for subroutine: ' + str(rootSubroutine) + '. Expected: ' + filePath, 'GNUx86AssemblerCallGraphBuilder')
                 return;
             else:  
                 for callTriple in self.__findCalledSubroutines(rootSubroutine, filePath):

@@ -2,6 +2,7 @@ from assertions import assertType, REGEX_TYPE, assertTypeAll
 from source import SubroutineFullName, Subroutine, SourceFiles, Module
 from callgraph import CallGraph
 import re
+from printout import printLine, printInline
 
 class CallGraphBuilder(object):
 
@@ -143,10 +144,10 @@ class LineNumberFinder(object):
         assertType(container, 'container', [Subroutine, Module]) 
         
         line = self._findLineNumber(container)
-        print str(line),
+        printInline(line)
         if line >= 0 and not self._minimalOutput:
-            print ' | ' + container.getLine(line).rstrip(),
-        print
+            printInline(' | ' + container.getLine(line).rstrip())
+        printLine()
     
     def _findLineNumber(self, container):
         'Finds one specific line number for the Subroutine or Module. What kind of line number is defined by subclasses.'

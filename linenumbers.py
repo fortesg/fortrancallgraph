@@ -3,6 +3,7 @@
 from assertions import assertType
 from supertypes import LineNumberFinder
 from source import SourceFiles, Subroutine, Module
+from printout import printLine
 
 class DeclarationLineNumberFinder(LineNumberFinder):
     
@@ -77,5 +78,5 @@ class AllLineFinder(LineNumberFinder):
         
         for description, lineNumberFinder in self.__lineNumberFinders.items():
             if not self._minimalOutput:
-                print description + ': '
+                printLine(description + ': ')
             lineNumberFinder._printLineNumber(block)

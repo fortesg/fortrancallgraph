@@ -2,9 +2,9 @@
 
 import os.path;
 import re
-import sys
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
+from printout import printWarning
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -146,7 +146,7 @@ class Interface(object):
         self.__interfaceName = interfaceName
         self.__procedures = []
         
-    def __str__(self, *args, **kwargs):
+    def __str__(self): 
         string = 'INTERFACE ' + self.__interfaceName + "\n"
         for procedure in self.__procedures:
             string += '  MODULE PROCEDURE ' + str(procedure) + "\n"
@@ -1882,7 +1882,7 @@ class SourceFiles(object):
         assertType(subroutineName, 'subroutineName', SubroutineName)
         sourceFile = self.findModuleFile(subroutineName.getModuleName())
         if sourceFile is None:
-            print >> sys.stderr, '*** WARNING [SourceFiles]: Module file not found for subroutine: ' + str(subroutineName) + ' ***'
+            printWarning('Module file not found for subroutine: ' + str(subroutineName), 'SourceFiles')
             return None
         else:
             return sourceFile.getSubroutine(subroutineName)

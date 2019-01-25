@@ -9,6 +9,7 @@ from callgraph import CallGraph
 from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
+from printout import printLine, printWarning
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
@@ -46,7 +47,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         if not self._minimalOutput:
             for variableReference in variableReferences:
                 if not self._pointersOnly or variableReference.isPointer():
-                    print str(variableReference);
+                    printLine(variableReference)
         else:
             for variableReference in variableReferences:
                 if not self._pointersOnly or variableReference.isPointer():
@@ -55,7 +56,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                     else:
                         declaredIn = ''
                         
-                    print variableReference.getExpression() + declaredIn;
+                    printLine(variableReference.getExpression() + declaredIn)
                     
     def trackGlobalVariables(self, callGraph):
         assertType(callGraph, 'callGraph', CallGraph)
@@ -319,7 +320,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         subroutine = self.__sourceFiles.findSubroutine(subroutineName);
         if subroutine is None and subroutineName not in GlobalVariableTracker.__routineWarnings:
             GlobalVariableTracker.__routineWarnings.add(subroutineName)
-            print >> sys.stderr, '*** WARNING [GlobalVariableTracker] Routine not found: ' + str(subroutineName) + ' ***';
+            printWarning('Routine not found: ' + str(subroutineName), 'GlobalVariableTracker')
             
         return subroutine
 
@@ -327,7 +328,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         module = self.__sourceFiles.findModule(moduleName);
         if module is None and moduleName not in GlobalVariableTracker.__moduleWarnings:
             GlobalVariableTracker.__moduleWarnings.add(moduleName)
-            print >> sys.stderr, '*** WARNING [GlobalVariableTracker] Module not found: ' + str(moduleName) + ' ***'
+            printWarning('Module not found: ' + str(moduleName), 'GlobalVariableTracker')
             
         return module
                 
