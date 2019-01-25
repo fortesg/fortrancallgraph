@@ -1,6 +1,5 @@
 #coding=utf8
 
-import sys
 import re
 from assertions import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer
@@ -129,7 +128,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
     
     def __trackFunctionResult(self, functionName, originalReferences):
         variables = [originalReferences[0].getLevelNVariable().getAlias(functionName.getSimpleName())] # TODO type-bound-procedures???
-        for interface in self.__interfaces.itervalues():
+        for interface in self.__interfaces.values():
             if functionName.getSimpleName() in interface:
                 variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
         tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
@@ -184,7 +183,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
     
     def __analyzeCallingSubroutineForOutVars(self, callerName, calleeName, assignments):
         calleeNameAlternatives = [calleeName.getSimpleName().lower()]
-        for interface in self.__interfaces.itervalues():
+        for interface in self.__interfaces.values():
             if calleeName.getSimpleName() in interface:
                 calleeNameAlternatives.append(interface.getName().lower())
         for typE in self.__types:
