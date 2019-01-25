@@ -101,9 +101,7 @@ class TestInner(unittest.TestCase):
         self.assertIsNotNone(module)
         self.assertEqual(4, len(module.getSubroutines()))
         
-        simpleNames = module.getSubroutines().keys()
-        simpleNames.sort()
-        self.assertEqual(['i1', 's0', 'sa', 'sb'], simpleNames)
+        self.assertEqual({'i1', 's0', 'sa', 'sb'}, set(module.getSubroutines().keys()))
         
         self.assertEqual(11, self.sourceFiles.findSubroutine(self.s0).getDeclarationLineNumber())
         self.assertEqual(20, self.sourceFiles.findSubroutine(self.sa).getDeclarationLineNumber())

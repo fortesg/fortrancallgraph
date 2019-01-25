@@ -68,8 +68,8 @@ class SampleTest(unittest.TestCase):
         self.assertIsNotNone(module)
         self.assertEqual(1, len(module.getSubroutines()))
         
-        simpleNames = module.getSubroutines().keys()
-        self.assertEqual(['func'], simpleNames)
+        simpleNames = set(module.getSubroutines().keys())
+        self.assertEqual({'func'}, simpleNames)
         
 if __name__ == "__main__":
     unittest.main()

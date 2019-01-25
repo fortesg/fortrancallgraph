@@ -113,8 +113,8 @@ class RecursionTest(unittest.TestCase):
 
         subroutine = self.sourceFiles.findSubroutine(self.position)
         self.assertIsNotNone(subroutine)
-        self.assertEquals(['var1', 'var2', 'i'], subroutine.getArgumentNames())
-        self.assertEquals(['TYPE(test), INTENT(in) :: var1', 'TYPE(test), INTENT(in) :: var2', 'INTEGER, INTENT(in) :: i'], map(str, subroutine.getArguments()))
+        self.assertEqual(['var1', 'var2', 'i'], subroutine.getArgumentNames())
+        self.assertEqual(['TYPE(test), INTENT(in) :: var1', 'TYPE(test), INTENT(in) :: var2', 'INTEGER, INTENT(in) :: i'], [str(a) for a in subroutine.getArguments()])
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.position)
@@ -129,7 +129,7 @@ class RecursionTest(unittest.TestCase):
 
         subroutine = self.sourceFiles.findSubroutine(self.recdata)
         self.assertIsNotNone(subroutine)
-        self.assertEquals(['r'], subroutine.getArgumentNames())
+        self.assertEqual(['r'], subroutine.getArgumentNames())
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.position)
