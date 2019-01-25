@@ -14,7 +14,7 @@ class _CallGraphCall(object):
         self.__lineNumber = lineNumber
         self.__discriminator = discriminator
         
-    def __str__(self, *args, **kwargs):
+    def __str__(self):
         return 'call ' + str(self.__calleeName) + ' ' + str(self.__lineNumber) + ' ' + str(self.__discriminator) 
     
     def __cmp__(self, other):
@@ -160,8 +160,8 @@ class CallGraph(object):
         ser = dict()
         ser[CallGraph.ATTR_ROOT_SUBROUTINE] = str(self.__rootSubroutine)
         ser[CallGraph.ATTR_SUBROUTINES] = dict()
-        for name, subroutine in self.__subroutines.iteritems():
-            ser[CallGraph.ATTR_SUBROUTINES][str(name)] = subroutine.serialize()
+        for subroutineName in self.__subroutines:
+            ser[CallGraph.ATTR_SUBROUTINES][str(subroutineName)] = self.__subroutines[subroutineName].serialize()
         
         return ser
     
@@ -254,8 +254,8 @@ class CallGraph(object):
         if not calleeName in self:
             raise ValueError("Callee subroutine not found in CallGraph: " + str(calleeName))
         callers = set()
-        for subroutineName, subroutine in self.__subroutines.iteritems():
-            if calleeName in subroutine.getCallees():
+        for subroutineName in self.__subroutines:
+            if calleeName in self.__subroutines[subroutineName].getCallees():
                 callers.add(subroutineName)
                 
         return callers
