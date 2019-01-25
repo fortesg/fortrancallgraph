@@ -26,7 +26,7 @@ class Type(object):
         if extends is not None:
             self.setExtends(extends)
         
-    def __str__(self, *args, **kwargs):
+    def __str__(self):
         string = 'TYPE ' + self.__typeName + '\n'
         for member in self.__members:
             string += '  ' + str(member) + '\n'
@@ -1867,8 +1867,8 @@ class SourceFiles(object):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         
         self.__specialModuleFiles = dict()
-        for module, filE in specialModuleFiles.iteritems():
-            self.__specialModuleFiles[module.lower()] = filE
+        for module in specialModuleFiles:
+            self.__specialModuleFiles[module.lower()] = specialModuleFiles[module]
 
         self.__filesByModules = dict() # Clear Module Cache
         
