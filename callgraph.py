@@ -23,6 +23,24 @@ class _CallGraphCall(object):
         else:
             return self.__lineNumber - other.__lineNumber
         
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+        
+    def __ne__(self, other):
+        return self.__cmp__(other) != 0
+        
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+        
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+        
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+        
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+        
     def serialize(self):
         ser = dict()
         ser[_CallGraphCall.ATTR_CALLEE_NAME] = str(self.__calleeName)
@@ -160,8 +178,8 @@ class CallGraph(object):
         ser = dict()
         ser[CallGraph.ATTR_ROOT_SUBROUTINE] = str(self.__rootSubroutine)
         ser[CallGraph.ATTR_SUBROUTINES] = dict()
-        for subroutineName in self.__subroutines:
-            ser[CallGraph.ATTR_SUBROUTINES][str(subroutineName)] = self.__subroutines[subroutineName].serialize()
+        for subroutineName, subroutine in self.__subroutines.items():
+            ser[CallGraph.ATTR_SUBROUTINES][str(subroutineName)] = subroutine.serialize()
         
         return ser
     
@@ -254,8 +272,8 @@ class CallGraph(object):
         if not calleeName in self:
             raise ValueError("Callee subroutine not found in CallGraph: " + str(calleeName))
         callers = set()
-        for subroutineName in self.__subroutines:
-            if calleeName in self.__subroutines[subroutineName].getCallees():
+        for subroutineName, subroutine in self.__subroutines.items():
+            if calleeName in subroutine.getCallees():
                 callers.add(subroutineName)
                 
         return callers
