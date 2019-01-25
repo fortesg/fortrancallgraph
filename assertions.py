@@ -14,7 +14,7 @@ def assertType(var, varName, expectedType, noneAccepted = False):
         try:
             assert any(isinstance(var, t) for t in expectedType)
         except AssertionError:
-            raise TypeError('Variable ' + varName + ' has type ' + str(type(var)) + ', expected one of: ' + str(map(str,expectedType)))
+            raise TypeError('Variable ' + varName + ' has type ' + str(type(var)) + ', expected one of: ' + str([e.__name__ for e in expectedType]))
     else:
         try:
             assert isinstance(var, expectedType)
