@@ -142,7 +142,7 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
         discriminator = 0;
         regEx = re.compile(r'^\s*\.loc\s*\d+\s*(?P<linenumber>\d+)\s*\d+\s*(((basic_block)|(prologue_end)|(epilogue_begin)|(is_stmt)|(isa))\s*\d*\s*)*(discriminator\s*(?P<discriminator>\d+))?.*$');
         i = startLine
-        for i in xrange(startLine, 0, -1):  # @UndefinedVariable
+        for i in range(startLine, 0, -1):
             regExMatch = regEx.match(lines[i]);
             if regExMatch is not None:
                 lineNumber = (int) (regExMatch.group('linenumber'))
