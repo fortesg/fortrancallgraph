@@ -28,9 +28,9 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         
         self.__sourceFiles = sourceFiles;
         self.__callGraph = None
-        self.__excludeModules = map(str.lower, excludeModules)
-        self.__ignoredModules = map(str.lower, ignoredModules)
-        self.__ignoredTypes = map(str.lower, ignoredTypes)
+        self.__excludeModules = [m.lower() for m in excludeModules]
+        self.__ignoredModules = [m.lower() for m in ignoredModules]
+        self.__ignoredTypes = [t.lower() for t in ignoredTypes]
         self.__interfaces = interfaces;
         self.__types = types;
         self.__variableTracker = None
@@ -295,10 +295,10 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                 if moduleName not in self.__ignoredModules:
                     moduleVariables = self.__getModuleVariables(moduleName)
                     importList = useOnlyRegExMatch.group('importlist').split(',')
-                    importList = map(str.strip, importList)
+                    importList = [i.strip() for i in importList]
                     for imported in importList:
                         names = imported.split('=>')
-                        names = map(str.strip, names)
+                        names = [n.strip() for n in names]
                         alias = names[0]
                         name = names[len(names) - 1]
                         name = name.lower()
