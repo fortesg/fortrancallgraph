@@ -125,7 +125,7 @@ def main():
     sourceFileName = None
     
     if not moduleName:
-        printErrorAndExit(1, 'Missing Module (and Subroutine) name!')
+        printErrorAndExit(2, 'Missing Module (and Subroutine) name!')
     elif not subroutineName:
         if SubroutineFullName.validFullName(moduleName):
             subroutineFullName = SubroutineFullName(moduleName)
@@ -134,27 +134,27 @@ def main():
                 if args.dump is not None and moduleName.lower().endswith('.f90'):
                     sourceFileName = moduleName
                 else:
-                    printErrorAndExit(1, 'Invalid Module name!')
+                    printErrorAndExit(3, 'Invalid Module name!')
         else: 
-            printErrorAndExit(1, 'Missing Subroutine name!')
+            printErrorAndExit(4, 'Missing Subroutine name!')
     elif SubroutineFullName.validParts(moduleName, subroutineName):
         subroutineFullName = SubroutineFullName.fromParts(moduleName, subroutineName)
     else:
-        printErrorAndExit(1, 'Invalid Module and/or Subroutine name!')
+        printErrorAndExit(5, 'Invalid Module and/or Subroutine name!')
         
     if subroutineFullName is not None and not sourceFiles.existsSubroutine(subroutineFullName):
-        printErrorAndExit(2, 'Subroutine ' + str(subroutineFullName) + ' not found!')
+        printErrorAndExit(6, 'Subroutine ' + str(subroutineFullName) + ' not found!')
     elif sourceFileName is not None and not sourceFiles.existsSourceFile(sourceFileName):
-        printErrorAndExit(2, 'Source file ' + sourceFileName + ' not found!')
+        printErrorAndExit(7, 'Source file ' + sourceFileName + ' not found!')
     elif subroutineFullName is None and sourceFileName is None and not sourceFiles.existsModule(moduleName):
-        printErrorAndExit(2, 'Module ' + moduleName + ' not found!')
+        printErrorAndExit(8, 'Module ' + moduleName + ' not found!')
         
     ignoreRegex = None
     if args.ignore is not None:
         try:
             ignoreRegex = re.compile(args.ignore)
         except re.error:
-            printErrorAndExit(1, 'Invalid regular expression for -i/--ignore option!')
+            printErrorAndExit(9, 'Invalid regular expression for -i/--ignore option!')
         
     maxLevel = -1
     if args.maxLevel is not None:
@@ -174,7 +174,7 @@ def main():
         elif args.analysis == 'result':
             function = sourceFiles.findSubroutine(subroutineFullName)
             if not function.isFunction():
-                printErrorAndExit(3, 'Subroutine ' + str(subroutineFullName) + ' not a function!')
+                printErrorAndExit(10, 'Subroutine ' + str(subroutineFullName) + ' not a function!')
             analysis.setVariableName(function.getResultVariable().getName())
         if args.pointersOnly:
             analysis.setPointersOnly(True)
