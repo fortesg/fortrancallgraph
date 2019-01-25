@@ -1,6 +1,5 @@
 # coding=utf8
 
-import sys
 import re
 from assertions import assertType
 from source import SubroutineFullName, SourceFiles
