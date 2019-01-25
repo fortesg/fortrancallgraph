@@ -124,9 +124,7 @@ def main():
     subroutineFullName = None
     sourceFileName = None
     
-    if not moduleName:
-        printErrorAndExit(2, 'Missing Module (and Subroutine) name!')
-    elif not subroutineName:
+    if not subroutineName:
         if SubroutineFullName.validFullName(moduleName):
             subroutineFullName = SubroutineFullName(moduleName)
         elif args.dump is not None or args.line is not None:
