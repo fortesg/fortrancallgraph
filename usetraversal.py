@@ -57,7 +57,7 @@ class UseTraversal(object):
             warning = 'Source file not found for module: ' + moduleName
             if parent:
                 warning += ' (in: ' + parent + ')'
-            printWarning(warning)
+            printWarning(warning, 'UseTraversal')
 
         for usedModule in usedModules:
             self.__parseModulesRecursive(usedModule, moduleName)

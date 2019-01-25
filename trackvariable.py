@@ -645,4 +645,4 @@ class VariableTracker(CallGraphAnalyzer):
                     warning += ':' + str(lineNumber)
                 warning += ')'
             
-            printWarning(warning)
+            printWarning(warning, 'Variable Tracker')
