@@ -203,7 +203,6 @@ def main():
             dumper.dumpModule(moduleName)
     elif args.line is not None:
         finder = lineNumberFinder(args.line, sourceFiles)
-        print '*** DEBUG *** ' + str(finder)
         if args.quiet:
             finder.setMinimalOutput(True)
         if subroutineFullName is not None:
