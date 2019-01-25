@@ -29,8 +29,8 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         
         self.__specialModuleFiles = dict()
-        for module, filE in specialModuleFiles.iteritems():
-            self.__specialModuleFiles[module.lower()] = filE;
+        for module in specialModuleFiles:
+            self.__specialModuleFiles[module.lower()] = specialModuleFiles[module];
         
     def buildCallGraph(self, rootSubroutine, clear = False):  # @UnusedVariable
         assertType(rootSubroutine, 'rootSubroutine', SubroutineFullName)     
