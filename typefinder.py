@@ -162,8 +162,8 @@ class TypeCollection(object):
                         member.setType(memberType)
                     
     def __setExtendedTypes(self):
-        for typE, extends in self.__extends.iteritems():
-            extendsType = self.getType(extends, typE.getModule())
+        for typE in self.__extends:
+            extendsType = self.getType(self.__extends[typE], typE.getModule())
             if extendsType is not None:
                 typE.setExtends(extendsType)
         self.__extends = dict()
