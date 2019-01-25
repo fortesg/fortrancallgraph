@@ -29,8 +29,8 @@ class VariableTracker(CallGraphAnalyzer):
         self.__callGraph = None;
         self.__interfaces = interfaces;
         self.__types = types;
-        self.__excludeModules = map(str.lower, excludeModules)
-        self.__ignoredTypes = map(str.lower, ignoredTypes)
+        self.__excludeModules = [m.lower() for m in excludeModules]
+        self.__ignoredTypes = [t.lower() for t in ignoredTypes]
         self.__excludeFromRecursionVariables = set()
         self.__excludeFromRecursionRoutines = set()
         self.__outAssignments = set()
