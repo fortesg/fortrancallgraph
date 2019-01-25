@@ -27,3 +27,10 @@ def printWarning(line, location = ''):
         msg += ' [' + location + ']'
     msg += ': ' + str(line) + ' ***'
     print(msg, file=sys.stderr)
+    
+def printDebug(line, location = ''):
+    msg = '*** DEBUG'
+    if location:
+        msg += ' [' + location + ']'
+    msg += ': ' + str(line) + ' ***'
+    print(msg, file=sys.stderr)
