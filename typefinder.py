@@ -108,8 +108,10 @@ class TypeCollection(object):
         
         # Type imported with alias?
         if usingModule is not None:
-            for alias, (usedModuleName, original) in usingModule.getUseAliases().iteritems():
+            useAliases = usingModule.getUseAliases()
+            for alias in useAliases:
                 if alias == typeName:
+                    (usedModuleName, original) = useAliases[alias]
                     if original in self:
                         for typE in self.__typeDict[original]:
                             if typE.getModule().getName() == usedModuleName:
