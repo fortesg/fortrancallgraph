@@ -83,7 +83,7 @@ def usePrinter(key, sourceFiles, excludeModules):
     else: raise NotImplementedError('UsePrinter not yet implemented: ' + str(key))
 
 def optionHelp(helps):
-    return ", ".join('%s: %s' % (key, string) for key, string in helps.iteritems())
+    return ", ".join('%s: %s' % (key, string) for key, string in helps.items())
 
 def parseArguments():
     argParser = argparse.ArgumentParser(description="Print or analyse a subroutine's call graph.");
