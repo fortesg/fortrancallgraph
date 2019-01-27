@@ -52,7 +52,7 @@ class TestBrackets(unittest.TestCase):
         self.usetraversal.parseModules(self.root)
         self.assertEqual(0, len(self.usetraversal.getInterfaces()))
         
-        types = set(map(Type.getName, self.usetraversal.getTypes()))
+        types = set(t.getName() for t in self.usetraversal.getTypes())
         self.assertEqual({'t_cdiparam'}, types)
                 
 if __name__ == "__main__":

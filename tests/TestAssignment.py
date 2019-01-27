@@ -50,10 +50,10 @@ class AssignmentTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.assertEqual({'testdirect'}, set(map(SubroutineFullName.getSimpleName, self.callGraphDirect.getAllSubroutineNames())))
-        self.assertEqual({'testindirect'}, set(map(SubroutineFullName.getSimpleName, self.callGraphIndirect.getAllSubroutineNames())))
-        self.assertEqual({'testmember'}, set(map(SubroutineFullName.getSimpleName, self.callGraphMember.getAllSubroutineNames())))
-        self.assertEqual({'testoperator', 'ttadd', 'dump'}, set(map(SubroutineFullName.getSimpleName, self.callGraphOperator.getAllSubroutineNames())))
+        self.assertEqual({'testdirect'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphDirect.getAllSubroutineNames()))
+        self.assertEqual({'testindirect'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphIndirect.getAllSubroutineNames()))
+        self.assertEqual({'testmember'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphMember.getAllSubroutineNames()))
+        self.assertEqual({'testoperator', 'ttadd', 'dump'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphOperator.getAllSubroutineNames()))
                 
     def testSourceFiles(self):
         if not self.filesExist:
@@ -106,7 +106,7 @@ class AssignmentTest(unittest.TestCase):
         useTraversal.parseModules(self.operator)
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
          
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphOperator)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphOperator))
         self.assertNotIn('tt1%second', expressions)
         self.assertNotIn('tt2%second', expressions)
         self.assertNotIn('tt1%third', expressions)

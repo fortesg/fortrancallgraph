@@ -80,13 +80,13 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.assertEqual({'test', 'dump'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTest.getAllSubroutineNames())))
-        self.assertEqual({'testindirect', 'test', 'dump'}, set(map(SubroutineFullName.getSimpleName, self.callGraphIndirect.getAllSubroutineNames())))
-        self.assertEqual({'testadd', 'addint'}, set(map(SubroutineFullName.getSimpleName, self.callGraphAddInt.getAllSubroutineNames())))
-        self.assertEqual({'testanother', 'addanother'}, set(map(SubroutineFullName.getSimpleName, self.callGraphAnother.getAllSubroutineNames())))
-        self.assertEqual({'testgeneric', 'addanother'}, set(map(SubroutineFullName.getSimpleName, self.callGraphGeneric.getAllSubroutineNames())))
-        self.assertEqual({'testchild', 'new_dump', 'addint'}, set(map(SubroutineFullName.getSimpleName, self.callGraphChild.getAllSubroutineNames())))
-        #self.assertEqual({'testdeferred', 'dump'}, set(map(SubroutineFullName.getSimpleName, self.callGraphDeferred.getAllSubroutineNames())))
+        self.assertEqual({'test', 'dump'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphTest.getAllSubroutineNames()))
+        self.assertEqual({'testindirect', 'test', 'dump'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphIndirect.getAllSubroutineNames()))
+        self.assertEqual({'testadd', 'addint'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphAddInt.getAllSubroutineNames()))
+        self.assertEqual({'testanother', 'addanother'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphAnother.getAllSubroutineNames()))
+        self.assertEqual({'testgeneric', 'addanother'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphGeneric.getAllSubroutineNames()))
+        self.assertEqual({'testchild', 'new_dump', 'addint'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphChild.getAllSubroutineNames()))
+        #self.assertEqual({'testdeferred', 'dump'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphDeferred.getAllSubroutineNames()))
         
     def testUseTraversal(self):
         if not self.fileExist:
@@ -111,7 +111,7 @@ class TypeProcedureTest(unittest.TestCase):
         
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphTest)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphTest))
         self.assertEqual({'t%first', 't%second'}, expressions)
                 
     def testTypeProcedureReferenceIndirect(self):
@@ -120,7 +120,7 @@ class TypeProcedureTest(unittest.TestCase):
         
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphIndirect)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect))
         self.assertEqual({'t%first', 't%second'}, expressions)
                 
     def testTypeProcedureCall(self):
@@ -129,7 +129,7 @@ class TypeProcedureTest(unittest.TestCase):
         
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphAddInt)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphAddInt))
         self.assertEqual({'t%first', 't%second'}, expressions)
                 
     def testTypeProcedureArgument(self):
@@ -138,7 +138,7 @@ class TypeProcedureTest(unittest.TestCase):
          
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphAnother)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphAnother))
         self.assertEqual({'t1%first', 't2%first', 't1%second', 't2%second'}, expressions)
                 
     def testGeneric(self):
@@ -147,7 +147,7 @@ class TypeProcedureTest(unittest.TestCase):
          
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphGeneric)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphGeneric))
         self.assertEqual({'t1%first', 't2%first', 't1%second', 't2%second'}, expressions)
                 
     def testChild(self):
@@ -156,7 +156,7 @@ class TypeProcedureTest(unittest.TestCase):
          
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphChild)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphChild))
         self.assertEqual({'t%ttest%second'}, expressions)
                 
     def testDeferred(self):
@@ -165,7 +165,7 @@ class TypeProcedureTest(unittest.TestCase):
          
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
-        expressions = set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphDeferred)))
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphDeferred))
         self.assertEqual(set(), expressions)
 
         

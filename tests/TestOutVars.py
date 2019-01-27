@@ -117,7 +117,7 @@ class OutVarsTest(unittest.TestCase):
         self.assertEqual({'primitive'}, set([name.getSimpleName() for name in self.callGraphPrimitive.getAllSubroutineNames()]))
         self.assertEqual({'get'}, set([name.getSimpleName() for name in self.callGraphGet.getAllSubroutineNames()]))
         self.assertEqual({'testfunc1', 'get'}, set([name.getSimpleName() for name in self.callGraphTestFunc1.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc1'}, set(map(SubroutineFullName.getSimpleName, self.callGraphTestFunc1.getCallers(self.get))))
+        self.assertEqual({'testfunc1'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphTestFunc1.getCallers(self.get)))
         self.assertEqual({'testfunc2', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc2.getAllSubroutineNames()]))
         self.assertEqual({'testfunc3', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc3.getAllSubroutineNames()]))
         self.assertEqual({'testfunc4', 'withouta', 'withoutg'}, set([name.getSimpleName() for name in self.callGraphTestFunc4.getAllSubroutineNames()]))

@@ -71,11 +71,11 @@ class RecursionTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.assertEqual({'recurse'}, set(map(SubroutineFullName.getSimpleName, self.callGraphDirect.getAllSubroutineNames())))
-        self.assertEqual({'indirect1', 'indirect2'}, set(map(SubroutineFullName.getSimpleName, self.callGraphIndirect.getAllSubroutineNames())))
-        self.assertEqual({'refunc'}, set(map(SubroutineFullName.getSimpleName, self.callGraphFunc.getAllSubroutineNames())))
-        self.assertEqual({'position'}, set(map(SubroutineFullName.getSimpleName, self.callGraphPosition.getAllSubroutineNames())))
-        self.assertEqual({'recdata'}, set(map(SubroutineFullName.getSimpleName, self.callGraphRecdata.getAllSubroutineNames())))
+        self.assertEqual({'recurse'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphDirect.getAllSubroutineNames()))
+        self.assertEqual({'indirect1', 'indirect2'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphIndirect.getAllSubroutineNames()))
+        self.assertEqual({'refunc'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphFunc.getAllSubroutineNames()))
+        self.assertEqual({'position'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphPosition.getAllSubroutineNames()))
+        self.assertEqual({'recdata'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphRecdata.getAllSubroutineNames()))
         
     def testDirect(self):
         if not self.filesExist:
@@ -85,7 +85,7 @@ class RecursionTest(unittest.TestCase):
         useTraversal.parseModules(self.direct)
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
-        self.assertEqual({'var%first'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphDirect))))
+        self.assertEqual({'var%first'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect)))
                 
     def testIndirect(self):
         if not self.filesExist:
@@ -95,7 +95,8 @@ class RecursionTest(unittest.TestCase):
         useTraversal.parseModules(self.indirect)
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
-        self.assertEqual({'var%first', 'var%second'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphIndirect))))
+        self.assertEqual({'var%first', 'var%second'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect)))
+        
         
     def testFunc(self):
         if not self.filesExist:
@@ -105,7 +106,7 @@ class RecursionTest(unittest.TestCase):
         useTraversal.parseModules(self.func)
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
-        self.assertEqual({'var%first'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphFunc))))
+        self.assertEqual({'var%first'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphFunc)))
 
     def testPosition(self):
         if not self.filesExist:
@@ -120,7 +121,7 @@ class RecursionTest(unittest.TestCase):
         useTraversal.parseModules(self.position)
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
-        self.assertEqual({'var1%first', 'var1%second', 'var2%first', 'var2%second'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphPosition))))
+        self.assertEqual({'var1%first', 'var1%second', 'var2%first', 'var2%second'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphPosition)))
         
 
     def testRecdata(self):
@@ -135,7 +136,7 @@ class RecursionTest(unittest.TestCase):
         useTraversal.parseModules(self.position)
         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
         
-        self.assertEqual({'r%second'}, set(map(VariableReference.getExpression, tracker.trackDerivedTypeArguments(self.callGraphRecdata))))
+        self.assertEqual({'r%second'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphRecdata)))
         
 
     #TODO Functions
