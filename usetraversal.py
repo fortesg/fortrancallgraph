@@ -6,7 +6,7 @@ from source import SubroutineFullName, SourceFiles
 from interfaces import InterfaceFinder
 from typefinder import TypeFinder
 from supertypes import UseTraversalPassenger
-from printout import printWarning
+from printout import printWarning, printDebug
 
 class UseTraversal(object):
     
@@ -16,7 +16,7 @@ class UseTraversal(object):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         
         self.__sourceFiles = sourceFiles;
-        self.__excludeModules = map(str.lower, excludeModules)
+        self.__excludeModules = [m.lower() for m in excludeModules]
         self.__visitedModules = set()
         self.__interfaceFinder = InterfaceFinder()
         self.__typeFinder = TypeFinder()
