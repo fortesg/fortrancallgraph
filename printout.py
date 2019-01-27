@@ -8,7 +8,7 @@ def printLine(line = ''):
     print(str(line))
 
 def printLines(lines):
-    print('\n'.join(map(str, lines)))
+    print('\n'.join([str(l) for l in lines]))
     
 def printError(line, location = ''):
     msg = '*** ERROR'
