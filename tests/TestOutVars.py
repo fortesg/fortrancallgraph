@@ -100,7 +100,7 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.assertEqual({'ttest', 'parent', 'grand', 'proxy'}, set([t.getName() for t in self.types]))
+        self.assertEqual({'ttest', 'parent', 'grand', 'proxy'}, set(t.getName() for t in self.types))
                 
                 
     def testInterfaces(self):
@@ -114,17 +114,17 @@ class OutVarsTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        self.assertEqual({'primitive'}, set([name.getSimpleName() for name in self.callGraphPrimitive.getAllSubroutineNames()]))
-        self.assertEqual({'get'}, set([name.getSimpleName() for name in self.callGraphGet.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc1', 'get'}, set([name.getSimpleName() for name in self.callGraphTestFunc1.getAllSubroutineNames()]))
+        self.assertEqual({'primitive'}, set(name.getSimpleName() for name in self.callGraphPrimitive.getAllSubroutineNames()))
+        self.assertEqual({'get'}, set(name.getSimpleName() for name in self.callGraphGet.getAllSubroutineNames()))
+        self.assertEqual({'testfunc1', 'get'}, set(name.getSimpleName() for name in self.callGraphTestFunc1.getAllSubroutineNames()))
         self.assertEqual({'testfunc1'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphTestFunc1.getCallers(self.get)))
-        self.assertEqual({'testfunc2', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc2.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc3', 'part'}, set([name.getSimpleName() for name in self.callGraphTestFunc3.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc4', 'withouta', 'withoutg'}, set([name.getSimpleName() for name in self.callGraphTestFunc4.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc5', 'part', 'get2'}, set([name.getSimpleName() for name in self.callGraphTestFunc5.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc6', 'witha', 'withg', 'withouta', 'withoutg'}, set([name.getSimpleName() for name in self.callGraphTestFunc6.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc7', 'part2'}, set([name.getSimpleName() for name in self.callGraphTestFunc7.getAllSubroutineNames()]))
-        self.assertEqual({'testfunc8', 'part3'}, set([name.getSimpleName() for name in self.callGraphTestFunc8.getAllSubroutineNames()]))
+        self.assertEqual({'testfunc2', 'part'}, set(name.getSimpleName() for name in self.callGraphTestFunc2.getAllSubroutineNames()))
+        self.assertEqual({'testfunc3', 'part'}, set(name.getSimpleName() for name in self.callGraphTestFunc3.getAllSubroutineNames()))
+        self.assertEqual({'testfunc4', 'withouta', 'withoutg'}, set(name.getSimpleName() for name in self.callGraphTestFunc4.getAllSubroutineNames()))
+        self.assertEqual({'testfunc5', 'part', 'get2'}, set(name.getSimpleName() for name in self.callGraphTestFunc5.getAllSubroutineNames()))
+        self.assertEqual({'testfunc6', 'witha', 'withg', 'withouta', 'withoutg'}, set(name.getSimpleName() for name in self.callGraphTestFunc6.getAllSubroutineNames()))
+        self.assertEqual({'testfunc7', 'part2'}, set(name.getSimpleName() for name in self.callGraphTestFunc7.getAllSubroutineNames()))
+        self.assertEqual({'testfunc8', 'part3'}, set(name.getSimpleName() for name in self.callGraphTestFunc8.getAllSubroutineNames()))   
         
          
     def testOutArguments(self):
@@ -174,10 +174,10 @@ class OutVarsTest(unittest.TestCase):
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
           
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc2)
-        self.assertEqual({'mother%child%second', 'mother%child%third'}, set([ref.getExpression() for ref in refs]))
+        self.assertEqual({'mother%child%second', 'mother%child%third'}, set(ref.getExpression() for ref in refs))
           
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc3)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'grandpa%child%child%third'}, expressions)
                   
     def testGlobalAsFunctionResult(self):
@@ -187,15 +187,15 @@ class OutVarsTest(unittest.TestCase):
         tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
           
         refs = tracker.trackGlobalVariables(self.callGraphPrimitive)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'t1%second'}, expressions)
           
         refs = tracker.trackGlobalVariables(self.callGraphGet)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertFalse(expressions)
           
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc1)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'t1%first', 't2%first', 'g3%child%child%first', 't1%second', 't2%second', 'g3%child%child%second'}, expressions)
                           
     def testArgumentAsSubroutineOutVar(self):
@@ -204,7 +204,7 @@ class OutVarsTest(unittest.TestCase):
           
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc4)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'father%child%first', 'father%child%second'}, expressions)
                          
     def testGlobalAsSubroutineOutVar(self):
@@ -213,7 +213,7 @@ class OutVarsTest(unittest.TestCase):
          
         tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc4)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'t1%second'}, expressions)
         
     def testArgumentAsTypeBoundFunctionResultOnThis(self):
@@ -225,7 +225,7 @@ class OutVarsTest(unittest.TestCase):
           
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc5)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'m%child%first', 'm%child%second'}, expressions)
         
     def testArgumentAsTypeBoundFunctionResultOnOther(self):
@@ -234,7 +234,7 @@ class OutVarsTest(unittest.TestCase):
           
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc7)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'stepmother%child%first'}, expressions)
         
     def testGlobalAsTypeBoundFunctionResultOnOther(self):
@@ -243,7 +243,7 @@ class OutVarsTest(unittest.TestCase):
           
         tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc5)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'t1%second', 't2%second'}, expressions)
                           
     def testArgumentAsTypeBoundSubroutineOutVarOnThis(self):
@@ -252,7 +252,7 @@ class OutVarsTest(unittest.TestCase):
           
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc8)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'stepfather%child%third'}, expressions)
                           
     def testArgumentAsTypeBoundSubroutineOutVarOnOther(self):
@@ -261,7 +261,7 @@ class OutVarsTest(unittest.TestCase):
           
         tracker = VariableTracker(self.sourceFiles, [], [], self.interfaces, self.types)
         refs = tracker.trackDerivedTypeArguments(self.callGraphTestFunc6)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'f%child%first', 'f%child%third'}, expressions)
                          
     def testGlobalAsTypeBoundSubroutineOutVarOnOther(self):
@@ -270,7 +270,7 @@ class OutVarsTest(unittest.TestCase):
          
         tracker = GlobalVariableTracker(self.sourceFiles, [], [], [], self.interfaces, self.types)
         refs = tracker.trackGlobalVariables(self.callGraphTestFunc6)
-        expressions = set([ref.getExpression() for ref in refs])
+        expressions = set(ref.getExpression() for ref in refs)
         self.assertEqual({'t1%third'}, expressions)
         
 if __name__ == "__main__":
