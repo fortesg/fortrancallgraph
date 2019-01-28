@@ -31,7 +31,11 @@ def loadFortranCallGraphConfiguration(configFile, incomplete = False, baseConfig
         return None
         
     config = baseConfig
-    execfile(configFile, globals(), config)
+    
+    with open(configFile) as f:
+        code = compile(f.read(), "somefile.py", 'exec')
+        globalNamespace = globals()
+        exec(code, globalNamespace, config)
     
     configError = False
     if CFG_SOURCE_DIRS not in config and CFG_SOURCE_DIRS_LEGACY in config:
