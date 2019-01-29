@@ -255,7 +255,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
 
         if self._ignoreRegex is not None:
             moduleVariables = dict()
-            for name, var in module.getVariables().iteritems():
+            for name, var in module.getVariables().items():
                 if self._ignoreRegex.match(name) is None:
                     moduleVariables[name] = var
             return moduleVariables
