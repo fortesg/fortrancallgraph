@@ -6,7 +6,7 @@ from source import SubroutineFullName, SourceFiles
 from interfaces import InterfaceFinder
 from typefinder import TypeFinder
 from supertypes import UseTraversalPassenger
-from printout import printWarning, printDebug
+from printout import printWarning
 
 class UseTraversal(object):
     
