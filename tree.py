@@ -22,7 +22,7 @@ class TreeLikeCallGraphPrinter(CallGraphPrinter):
             else:
                 printLine(self.__getTreeLine(level, rootSubroutine))
                 callStack = callStack + (rootSubroutine,);
-                for calledSubroutine in callGraph.getCallees(rootSubroutine):
+                for calledSubroutine in callGraph.getSortedCallees(rootSubroutine):
                         self.__printCallGraphRecursive(calledSubroutine, callGraph, callStack);
 
     def __getTreeLine(self, level, subroutine):
