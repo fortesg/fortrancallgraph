@@ -127,7 +127,9 @@ class _CallGraphSubroutine(object):
     def getSortedCallees(self):
         callees = []
         for call in sorted(self.__calls):
-            callees.append(call.getCalleeName())
+            callee = call.getCalleeName()
+            if callee not in callees:
+                callees.append(call.getCalleeName())
         return callees
         
     def getCalls(self):
