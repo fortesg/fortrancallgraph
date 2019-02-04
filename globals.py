@@ -37,9 +37,8 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         GlobalVariableTracker.__routineWarnings = set()
     
     def analyzeCallgraph(self, callGraph):
-        'Analyzes the given Callgraph. Finds all references to global variables.'
-        if not isinstance(callGraph, CallGraph):
-            raise TypeError("Argument callGraph must be of type CallGraph."); 
+        '''Analyzes the given Callgraph. Finds all references to global variables.'''
+        assertType(callGraph, 'callGraph', CallGraph)
         
         variableReferences = self.trackGlobalVariables(callGraph)
         
