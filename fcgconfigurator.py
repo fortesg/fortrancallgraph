@@ -33,7 +33,7 @@ def loadFortranCallGraphConfiguration(configFile, incomplete = False, baseConfig
     config = baseConfig
     
     with open(configFile) as f:
-        code = compile(f.read(), "somefile.py", 'exec')
+        code = compile(f.read(), configFile, 'exec')
         globalNamespace = globals()
         exec(code, globalNamespace, config)
     
