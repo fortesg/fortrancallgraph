@@ -5,7 +5,6 @@ import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
 from printout import printWarning
-from sys import implementation
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
