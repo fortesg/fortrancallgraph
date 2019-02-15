@@ -122,6 +122,8 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('type2', type2.getName())
         self.assertEqual('modc', type2.getModule().getName())
         self.assertTrue(type2.isAbstract())
+        self.assertTrue(type3.isSubtypeOf(type2))
+        self.assertFalse(type2.isSubtypeOf(type3))
 
         member1 = type3.getMember('member1')
         self.assertIsNotNone(member1)
