@@ -13,25 +13,43 @@ class Type(object):
     DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(ABSTRACT)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
     END_REGEX = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE)
     
-    def __init__(self, typeName, declaredIn, extends = None):
-        assertType(typeName, 'typeName', str)
+    def __init__(self, name, declaredIn, extends = None, abstract = False):
+        assertType(name, 'name', str)
         assertType(declaredIn, 'declaredIn', [Module, Subroutine])
         assertType(extends, 'extends', Type, True)
         
-        self.__typeName = typeName.lower()
+        self.__name = name.lower()
         self.__declaredIn = declaredIn
+        self.__abstract = False
         self.__members = {}
         self.__procedures = {}
         self.__extends = None
         if extends is not None:
             self.setExtends(extends)
-        
+        self.__implementation = None 
+    
+    def __eq__(self, other):
+        if (other is None or not isinstance(other, Type)):
+            return False;
+        else:
+            return self.__name == other.__name and       \
+                   self.__declaredIn == other.__declaredIn
+                   
+    def __ne__(self, other):
+        return not self == other
+    
+    def __hash__(self):
+        return hash(self.__name) 
+    
     def __str__(self):
-        string = 'TYPE ' + self.__typeName + '\n'
+        string = 'TYPE ' + self.__name + '\n'
         for member in self.__members:
             string += '  ' + str(member) + '\n'
             
         return string.strip()
+    
+    def isAbstract(self):
+        return self.__abstract
         
     def addMember(self, member):
         assertType(member, 'member', Variable)
@@ -106,7 +124,7 @@ class Type(object):
             return self.__extends.getSubroutineAlias(name)
         
     def getName(self):
-        return self.__typeName
+        return self.__name
     
     def getExtends(self):
         return self.__extends
@@ -121,6 +139,22 @@ class Type(object):
         parent.setDeclaredIn(self)
         parent.setType(extends)
         self.addMember(parent)
+    
+    def isSubtypeOf(self, other):
+        if  other is None or not isinstance(other, Type):
+            return False
+        if self.getExtends() is None:
+            return False
+        elif self.getExtends() == other:
+            return True
+        else:
+            self.getExtends().isSubtype(other)
+    
+    def assignImplementation(self, implementation):
+        assertType(implementation, 'implementation', Type)
+        assert implementation.isSubtypeOf(self)
+        
+        self.__implementation = implementation
     
     def getDeclaredIn(self):
         return self.__declaredIn
