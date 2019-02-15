@@ -56,10 +56,12 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('TYPE(type0)', var0.getTypeName())
         self.assertTrue(var0.hasDerivedType())
         self.assertEqual('type0', var0.getDerivedTypeName())
+        
         type0 = self.types.getTypeOfVariable(var0)
         self.assertIsNotNone(type0)
         self.assertEqual('INTEGER', type0.getMember('member').getTypeName())
         self.assertEqual('moda', type0.getModule().getName())
+        self.assertFalse(type0.isAbstract())
             
     def testType1FromModB(self):
         var1 = self.module.getVariable('var1')
@@ -68,11 +70,14 @@ class TestTypes(unittest.TestCase):
         self.assertTrue(var1.hasDerivedType())
         self.assertEqual('type1', var1.getDerivedTypeName())
         self.assertFalse(var1.isTypeAvailable())
+       
         type1 = self.types.getTypeOfVariable(var1)
         self.assertIsNotNone(type1)
         self.assertEqual('type1', type1.getName())
         self.assertEqual('REAL', type1.getMember('member').getTypeName())
         self.assertEqual('modb', type1.getModule().getName())
+        self.assertFalse(type1.isAbstract())
+        
         var1.setType(type1)
         self.assertTrue(var1.isTypeAvailable())
             
@@ -83,11 +88,14 @@ class TestTypes(unittest.TestCase):
         self.assertTrue(var2.hasDerivedType())
         self.assertEqual('typeb', var2.getDerivedTypeName())
         self.assertFalse(var2.isTypeAvailable())
+        
         type2 = self.types.getTypeOfVariable(var2)
         self.assertIsNotNone(type2)
         self.assertEqual('type2', type2.getName())
         self.assertEqual('REAL', type2.getMember('member').getTypeName())
         self.assertEqual('modb', type2.getModule().getName())
+        self.assertFalse(type2.isAbstract())
+        
         var2.setType(type2)
         self.assertTrue(var2.isTypeAvailable())
             
@@ -98,11 +106,14 @@ class TestTypes(unittest.TestCase):
         self.assertTrue(var3.hasDerivedType())
         self.assertEqual('type3', var3.getDerivedTypeName())
         self.assertFalse(var3.isTypeAvailable())
+       
         type3 = self.types.getTypeOfVariable(var3)
         self.assertIsNotNone(type3)
         self.assertEqual('type3', type3.getName())
         self.assertEqual('TYPE(typeA)', type3.getMember('member1').getTypeName())
         self.assertEqual('modc', type3.getModule().getName())
+        self.assertFalse(type3.isAbstract())
+        
         var3.setType(type3)
         self.assertTrue(var3.isTypeAvailable())
 
@@ -110,17 +121,20 @@ class TestTypes(unittest.TestCase):
         self.assertIsNotNone(type2)
         self.assertEqual('type2', type2.getName())
         self.assertEqual('modc', type2.getModule().getName())
+        self.assertTrue(type2.isAbstract())
 
         member1 = type3.getMember('member1')
         self.assertIsNotNone(member1)
         self.assertEqual('TYPE(typeA)', member1.getTypeName())
         self.assertTrue(member1.hasDerivedType())
         self.assertTrue(member1.isTypeAvailable())
+        
         type1 = self.types.getTypeOfVariable(member1)
         self.assertIsNotNone(type1)
         self.assertEqual('type1', type1.getName())
         self.assertEqual('INTEGER', type1.getMember('member').getTypeName())
         self.assertEqual('moda', type1.getModule().getName())
+        self.assertFalse(type1.isAbstract())
         
 if __name__ == "__main__":
     unittest.main()
