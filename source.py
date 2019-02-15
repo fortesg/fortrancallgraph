@@ -5,6 +5,7 @@ import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
 from printout import printWarning
+from sys import implementation
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -148,13 +149,19 @@ class Type(object):
         elif self.getExtends() == other:
             return True
         else:
-            self.getExtends().isSubtype(other)
+            return self.getExtends().isSubtypeOf(other)
     
     def assignImplementation(self, implementation):
         assertType(implementation, 'implementation', Type)
         assert implementation.isSubtypeOf(self)
         
         self.__implementation = implementation
+    
+    def hasAssignedImplementation(self):
+        return self.__implementation is not None
+    
+    def getAssignedImplementation(self):
+        return self.__implementation
     
     def getDeclaredIn(self):
         return self.__declaredIn
@@ -721,7 +728,7 @@ class VariableReference(object):
                     generic = procedures
                     procedures = []
                     for alias in generic:
-                        procedures.append(typE.getProcedure(alias)) 
+                        procedures.append(typE.getProcedure(alias))
                 return procedures
             elif not typE.hasMember(varName):
                 return None
@@ -1085,6 +1092,10 @@ class SubroutineContainer(object):
         if self.__statements is None:
             self.__statements = SourceFile.linesToStatements(self.getLines())
         return self.__statements
+    
+    def hasSubroutine(self, name):
+        assertType(name, 'name', SubroutineFullName)
+        return self.getSubroutine(name) is not None
     
     def getSubroutines(self):
         if self.isInner():

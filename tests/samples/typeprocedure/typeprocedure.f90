@@ -15,6 +15,7 @@ MODULE typeprocedure
     PROCEDURE, PASS :: fourth => addInt
     PROCEDURE :: fifth => addAnother
     GENERIC :: sixth => fourth, fifth
+    PROCEDURE :: seventh
   END TYPE ttest
 
   TYPE, EXTENDS(ttest) :: child
@@ -53,6 +54,14 @@ CONTAINS
 
     addAnother = test1%second(2) + test2%second(3)
   END FUNCTION addAnother
+
+  SUBROUTINE seventh(this)
+
+    CLASS(ttest), INTENT(in) :: this
+
+    WRITE (*,*) 'SEVEN'
+
+  END SUBROUTINE seventh
 
   SUBROUTINE test(t)
 

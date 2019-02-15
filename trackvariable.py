@@ -1,25 +1,25 @@
 #coding=utf8
 
 import re
-import sys
 from assertions import assertType, assertTypeAll
-from supertypes import CallGraphAnalyzer
+from supertypes import CallGraphAnalyzer, CallGraphBuilder
 from source import SourceFiles, Variable, VariableReference, SubroutineFullName, InnerSubroutineName, SourceFile
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printError, printLine, printWarning
+from printout import printError, printLine, printWarning, printDebug
 
 class VariableTracker(CallGraphAnalyzer):
 
     __routineWarnings = set()
 
-    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None):
+    def __init__(self, sourceFiles, excludeModules = [], ignoredTypes = [], interfaces = None, types = None, callGraphBuilder = None):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
         assertType(interfaces, 'interfaces', dict, True)
         assertType(types, 'types', TypeCollection, True)
+        assertType(callGraphBuilder, 'callGraphBuilder', CallGraphBuilder, True)
 
         super(VariableTracker, self).__init__()
 
@@ -34,6 +34,7 @@ class VariableTracker(CallGraphAnalyzer):
         self.__excludeFromRecursionVariables = set()
         self.__excludeFromRecursionRoutines = set()
         self.__outAssignments = set()
+        self.__callGraphBuilder = callGraphBuilder
         
     def getOutAssignments(self):
         return self.__outAssignments
@@ -363,12 +364,24 @@ class VariableTracker(CallGraphAnalyzer):
         return (set(), set())    
     
     def __analyzeTypeBoundProcedureCallOnThis(self, originalReference, subroutine, lineNumber, originalStatement):
-        calledRoutineFullName = self.__findCalledTypeBoundProcedure(originalReference, subroutine)
-        
         subReference = originalReference.getSubReferenceBeforeFirstProcedure()
-        if calledRoutineFullName is not None:
-            subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
 
+        calledRoutineFullName = self.__findCalledTypeBoundProcedure(originalReference, subroutine)
+        if calledRoutineFullName is not None:
+            subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
+        else:
+            typE = subReference.getLevelNVariable().getType()
+            if typE.isAbstract():
+                calledRoutineFullName = self.__findDeferredProcedure(typE, originalReference.findFirstProcedureAlias())
+                if calledRoutineFullName is not None:
+                    if calledRoutineFullName in self.__callGraph:
+                        subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
+                    elif self.__callGraphBuilder is not None:
+                        subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
+                    else:
+                        calledRoutineFullName = None
+
+        if calledRoutineFullName is not None:
             calledSubroutine = self.__sourceFiles.findSubroutine(calledRoutineFullName);
             if calledSubroutine is not None:
                 variableNameInCalledSubroutine = calledSubroutine.getArgumentNames()[0]
@@ -382,6 +395,7 @@ class VariableTracker(CallGraphAnalyzer):
                         calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types);
                         calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                         variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
+#                         printDebug(str(calledRoutineFullName) + ' : ' + str(variableInCalledSubroutine) + ' : ' + str([ref.getExpression() for ref in variableReferences]))
                         for variableReference in variableReferences:
                             variableReference.setLevel0Variable(self.__variable, subReference.getMembers())
                         outAssignments = calledSubroutineAnalyzer.__outAssignments
@@ -596,9 +610,20 @@ class VariableTracker(CallGraphAnalyzer):
                 for candidate in self.__findNextCalleesFromLine(callerSubroutine, lineNumber):
                     if candidate.getSimpleName() in interface:
                         return candidate
-        
+                    
         return None
     
+    def __findDeferredProcedure(self, typE, procedureAlias):
+        if typE.hasAssignedImplementation():
+            implementation = typE.getAssignedImplementation()
+            procedure = implementation.getProcedure(procedureAlias)
+            if isinstance(procedure, str):
+                module = implementation.getModule()
+                if module is not None:
+                    subroutineFullName = SubroutineFullName.fromParts(module.getName(), procedure)
+                    if module.hasSubroutine(subroutineFullName):
+                        return subroutineFullName
+        return None
     
     def __findNextCalleesFromLine(self, callerSubroutine, lineNumber):
         lineNumber -= self.__findLineNumberOffset(callerSubroutine, lineNumber)
