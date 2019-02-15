@@ -40,12 +40,11 @@ GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
                  'result': 'only function result',
                  'globals': 'only module variables',
                  'all': 'both arguments and globals'}
-def graphAnalysis(key, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes):
+def graphAnalysis(key, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, callGraphBuilder):
     if key not in GRAPH_ANALYSIS: raise KeyError('No such CallGraphAnalyzer: ' + str(key))
-    elif key == 'globals': return GlobalVariableTracker(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
-    elif key == 'arguments': return VariableTracker(sourceFiles, excludeModules, ignoreDerivedTypes)
-    elif key == 'result': return VariableTracker(sourceFiles, excludeModules, ignoreDerivedTypes)
-    elif key == 'all': return AllVariablesCallGraphAnalysis(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
+    elif key == 'globals': return GlobalVariableTracker(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, callGraphBuilder = callGraphBuilder)
+    elif key == 'arguments' or key == 'result': return VariableTracker(sourceFiles, excludeModules, ignoreDerivedTypes, callGraphBuilder = callGraphBuilder)
+    elif key == 'all': return AllVariablesCallGraphAnalysis(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, callGraphBuilder = callGraphBuilder)
     else: raise NotImplementedError('CallGraphAnalyzer not yet implemented: ' + str(key))
 
 SUBROUTINE_DUMPER = {'lines': 'original source lines',
@@ -166,7 +165,7 @@ def main():
         printer.printCallGraph(callGraph)
     elif args.analysis is not None:
         callGraph = graphBuilder.buildCallGraph(subroutineFullName, args.clearCache)
-        analysis = graphAnalysis(args.analysis, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes)
+        analysis = graphAnalysis(args.analysis, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, graphBuilder)
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
         elif args.analysis == 'result':

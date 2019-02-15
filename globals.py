@@ -2,7 +2,7 @@
 
 import re
 from assertions import assertType, assertTypeAll
-from supertypes import CallGraphAnalyzer
+from supertypes import CallGraphAnalyzer, CallGraphBuilder
 from source import SourceFiles, VariableReference, SourceFile
 from callgraph import CallGraph
 from trackvariable import VariableTracker
@@ -15,13 +15,14 @@ class GlobalVariableTracker(CallGraphAnalyzer):
     __routineWarnings = set()
     __moduleWarnings = set()
 
-    def __init__(self, sourceFiles, excludeModules = [], ignoredModules = [], ignoredTypes = [], interfaces = None, types = None):
+    def __init__(self, sourceFiles, excludeModules = [], ignoredModules = [], ignoredTypes = [], interfaces = None, types = None, callGraphBuilder = None):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
         assertTypeAll(excludeModules, 'excludeModules', str)
         assertTypeAll(ignoredModules, 'ignoredModules', str)
         assertTypeAll(ignoredTypes, 'ignoredTypes', str)
         assertType(interfaces, 'interfaces', dict, True)
         assertType(types, 'types', TypeCollection, True)
+        assertType(callGraphBuilder, 'callGraphBuilder', CallGraphBuilder, True)
         
         super(GlobalVariableTracker, self).__init__()
         
@@ -34,6 +35,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         self.__types = types;
         self.__variableTracker = None
         self.__usedVariableLists = dict()
+        self.__callGraphBuilder = callGraphBuilder
         GlobalVariableTracker.__routineWarnings = set()
     
     def analyzeCallgraph(self, callGraph):
@@ -67,7 +69,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
             self.__interfaces = useTraversal.getInterfaces()
             self.__types = useTraversal.getTypes()
         
-        self.__variableTracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+        self.__variableTracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, self.__callGraphBuilder)
         self.__variableTracker.setIgnoreRegex(self._ignoreRegex)
         variableReferences = self.__analyzeSubroutines(callGraph.getAllSubroutineNames());
         variableReferences = VariableReference.sort(variableReferences)
@@ -130,7 +132,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         for interface in self.__interfaces.values():
             if functionName.getSimpleName() in interface:
                 variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
-        tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+        tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, self.__callGraphBuilder)
         variableReferences = set()
                             
         for callerName in self.__callGraph.getCallers(functionName):
@@ -167,7 +169,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         variableReferences = set()
         if caller is not None and callee is not None:
             for lineNumber, statement, _ in caller.getStatements():
-                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, self.__callGraphBuilder)
                 for calleeNameAlternative in calleeNameAlternatives:
                     assignmentRegEx = re.compile(r'^(?P<alias>[a-z0-9_]+)(\(.*\))?\s*\=\>?\s*.*%' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
                     assignmentRegExMatch = assignmentRegEx.match(statement)
@@ -196,7 +198,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         variableReferences = set()
         if caller is not None and callee is not None:
             for lineNumber, statement, _ in caller.getStatements():
-                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types)
+                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, self.__callGraphBuilder)
                 for calleeNameAlternative in calleeNameAlternatives:
                     procedureRegEx = re.compile(r'^.*(?P<prefix>[^a-z0-9_]+)' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
                     procedureRegExMatch = procedureRegEx.match(statement)
