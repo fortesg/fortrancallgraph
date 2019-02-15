@@ -22,6 +22,7 @@ Tests whether type-bound procedures are handled correctly
 class TypeProcedureTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
+        abstractTypes = {'atest':'ttest'}
         callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
         
@@ -166,7 +167,7 @@ class TypeProcedureTest(unittest.TestCase):
         tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
          
         expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphDeferred))
-        self.assertEqual(set(), expressions)
+        self.assertEqual({'a%ttest%second'}, expressions)
 
         
 if __name__ == "__main__":
