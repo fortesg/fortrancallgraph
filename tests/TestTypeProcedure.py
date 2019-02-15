@@ -96,6 +96,27 @@ class TypeProcedureTest(unittest.TestCase):
         self.assertEqual(0, len(self.useTraversal.getInterfaces()))
         self.assertEqual(3, len(self.useTraversal.getTypes()))
         
+    def testAtestType(self):
+        if not self.fileExist:
+            self.skipTest('Files not there')
+        
+        types = self.useTraversal.getTypes()
+        atest = types['atest']
+        self.assertIsNotNone(atest)
+        self.assertTrue(atest.isAbstract())
+        
+    def testTtestType(self):
+        if not self.fileExist:
+            self.skipTest('Files not there')
+        
+        types = self.useTraversal.getTypes()
+        ttest = types['ttest']
+        self.assertIsNotNone(ttest)
+        self.assertTrue(ttest.hasMember('atest'))
+        self.assertIsNotNone(ttest.getExtends())
+        self.assertEqual(types['atest'], ttest.getExtends())
+        self.assertTrue(ttest.isSubtypeOf(types['atest']))
+        
     def testChildType(self):
         if not self.fileExist:
             self.skipTest('Files not there')
@@ -104,7 +125,6 @@ class TypeProcedureTest(unittest.TestCase):
         child = types['child']
         self.assertIsNotNone(child)
         self.assertTrue(child.hasMember('ttest'))
-        self.assertTrue
                 
     def testTypeProcedureReference(self):
         if not self.filesExist:

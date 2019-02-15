@@ -143,7 +143,7 @@ class Type(object):
     def isSubtypeOf(self, other):
         if  other is None or not isinstance(other, Type):
             return False
-        if self.getExtends() is None:
+        elif self.getExtends() is None:
             return False
         elif self.getExtends() == other:
             return True

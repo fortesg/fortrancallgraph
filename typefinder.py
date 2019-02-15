@@ -4,6 +4,7 @@ import re
 from assertions import assertType
 from source import Type, Variable, Module
 from supertypes import UseTraversalPassenger
+from printout import printWarning
 
 class TypeFinder(UseTraversalPassenger):
 
@@ -18,7 +19,7 @@ class TypeFinder(UseTraversalPassenger):
         self.__collection = TypeCollection()
         
     def getResult(self):
-        self.__collection.finalize()
+        self.__collection.finalize(self.__abstractTypes)
         return self.__collection
 
     def parseStatement(self, i, statement, j, module):
@@ -99,9 +100,11 @@ class TypeCollection(object):
         if extendsName is not None:
             self.__extends[typE] = extendsName.lower()
         
-    def finalize(self):
+    def finalize(self, abstractTypes):
+        assertType(abstractTypes, 'abstractTypes', dict)
         self.__setMemberTypes()
         self.__setExtendedTypes()
+        self.__assignImplementations(abstractTypes)
 
     def getType(self, typeName, usingModule = None):
         assertType(typeName, 'typeName', str)
@@ -169,4 +172,20 @@ class TypeCollection(object):
             if extendsType is not None:
                 typE.setExtends(extendsType)
         self.__extends = dict()
+        
+    def __assignImplementations(self, abstractTypes):
+        for abstractName, implementationName in abstractTypes.items():
+            abstractType = self.getType(abstractName)
+            if abstractType is None:
+                printWarning('No such type: ' + abstractName, location = 'TypeCollection')
+            elif not abstractType.isAbstract():
+                printWarning('Type not abstract: ' + abstractName, location = 'TypeCollection')
+            else:
+                implementationType = self.getType(implementationName)
+                if implementationType is None:
+                    printWarning('No such type: ' + implementationName, location = 'TypeCollection')
+                elif not implementationType.isSubtypeOf(abstractType):
+                    printWarning('Type ' + implementationName + ' is not a subtyp of ' + abstractName, location = 'TypeCollection')
+                else:
+                    abstractType.assignImplementation(implementationType)
             
