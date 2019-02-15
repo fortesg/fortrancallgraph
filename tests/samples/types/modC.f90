@@ -4,7 +4,7 @@ MODULE modC
 
   IMPLICIT NONE
 
-  TYPE :: type2
+  TYPE, ABSTRACT :: type2
     LOGICAL :: member
   END TYPE type2
 
