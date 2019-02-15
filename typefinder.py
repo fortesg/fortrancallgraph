@@ -7,8 +7,10 @@ from supertypes import UseTraversalPassenger
 
 class TypeFinder(UseTraversalPassenger):
 
-    def __init__(self):
+    def __init__(self, abstractTypes = {}):
+        assertType(abstractTypes, 'abstractTypes', dict)
         self.reset()
+        self.__abstractTypes = abstractTypes
         
     def reset(self):      
         self.__currentType = None
@@ -35,7 +37,8 @@ class TypeFinder(UseTraversalPassenger):
             typeRegExMatch = typeRegEx.match(statement)
             if typeRegExMatch is not None and statement.upper() != 'CLASS DEFAULT':
                 typeName = typeRegExMatch.group('typename').lower()
-                self.__currentType = Type(typeName, module)
+                abstract = typeRegExMatch.group('abstract') is not None
+                self.__currentType = Type(typeName, module, abstract = abstract)
                 if 'extends' in typeRegExMatch.groupdict() and typeRegExMatch.group('extends') is not None:
                     self.__currentExtends = typeRegExMatch.group('extends')
         elif Variable.validVariableDeclaration(statement):

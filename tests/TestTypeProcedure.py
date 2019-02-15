@@ -12,7 +12,7 @@ FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
 from assembler import GNUx86AssemblerCallGraphBuilder
-from source import SourceFiles, SubroutineFullName, VariableReference
+from source import SourceFiles, SubroutineFullName
 from trackvariable import VariableTracker
 from usetraversal import UseTraversal
 
@@ -24,7 +24,7 @@ class TypeProcedureTest(unittest.TestCase):
         specialModuleFiles = {}
         abstractTypes = {'atest':'ttest'}
         callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
+        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
         
         self.srcFile = SOURCE_DIR + '/typeprocedure.f90'
         self.assFile = ASSEMBLER_DIR + '/typeprocedure.s'
@@ -32,7 +32,7 @@ class TypeProcedureTest(unittest.TestCase):
         
         self.test = SubroutineFullName('__typeprocedure_MOD_test')
         self.callGraphTest = callGraphBuilder.buildCallGraph(self.test)
-        self.useTraversal = UseTraversal(self.sourceFiles)
+        self.useTraversal = UseTraversal(self.sourceFiles, abstractTypes = abstractTypes)
         self.useTraversal.parseModules(self.test)
         
         self.testIndirect = SubroutineFullName('__typeprocedure_MOD_testIndirect')

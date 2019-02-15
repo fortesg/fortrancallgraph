@@ -1,7 +1,7 @@
 # coding=utf8
 
 import re
-from assertions import assertType
+from assertions import assertType, assertTypeAll
 from source import SubroutineFullName, SourceFiles
 from interfaces import InterfaceFinder
 from typefinder import TypeFinder
@@ -12,14 +12,16 @@ class UseTraversal(object):
     
     __moduleWarnings = set()
 
-    def __init__(self, sourceFiles, excludeModules = []):
+    def __init__(self, sourceFiles, excludeModules = [], abstractTypes = {}):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
+        assertTypeAll(excludeModules, 'excludeModules', str)
+        assertType(abstractTypes, 'abstractTypes', dict)
         
         self.__sourceFiles = sourceFiles;
         self.__excludeModules = [m.lower() for m in excludeModules]
         self.__visitedModules = set()
         self.__interfaceFinder = InterfaceFinder()
-        self.__typeFinder = TypeFinder()
+        self.__typeFinder = TypeFinder(abstractTypes)
         self.__passengers = [self.__interfaceFinder, self.__typeFinder]
     
     def addPassenger(self, passenger):
