@@ -10,7 +10,7 @@ IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
 class Type(object):
     
-    DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(ABSTRACT)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
+    DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(?P<abstract>ABSTRACT)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
     END_REGEX = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE)
     
     def __init__(self, name, declaredIn, extends = None, abstract = False):
@@ -20,7 +20,7 @@ class Type(object):
         
         self.__name = name.lower()
         self.__declaredIn = declaredIn
-        self.__abstract = False
+        self.__abstract = abstract
         self.__members = {}
         self.__procedures = {}
         self.__extends = None
