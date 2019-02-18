@@ -4,7 +4,7 @@ import os.path;
 import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
-from printout import printWarning
+from printout import printWarning, printDebug
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -803,9 +803,12 @@ class VariableReference(object):
                 return None
             typE = var.getType()
             varName = self.getVariableName(l)
-            if not typE.hasMember(varName):
+            if typE.hasMember(varName):
+                var = typE.getMember(varName)
+            elif typE.isAbstract() and typE.hasAssignedImplementation() and typE.getAssignedImplementation().hasMember(varName):
+                var = typE.getAssignedImplementation().getMember(varName) 
+            else: 
                 return None
-            var = typE.getMember(varName)
         
         return var
     
