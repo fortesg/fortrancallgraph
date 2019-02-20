@@ -23,7 +23,7 @@ class TypeProcedureTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         abstractTypes = {'atest':'child'}
-        callGraphBuilder = self.callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
+        self.callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
         
         self.srcFile = SOURCE_DIR + '/typeprocedure.f90'
@@ -31,32 +31,30 @@ class TypeProcedureTest(unittest.TestCase):
         self.filesExist = os.path.exists(self.srcFile) and os.path.exists(self.assFile)
         
         self.test = SubroutineFullName('__typeprocedure_MOD_test')
-        self.callGraphTest = callGraphBuilder = self.callGraphBuilder.buildCallGraph(self.test)
+        self.callGraphTest = self.callGraphBuilder.buildCallGraph(self.test)
         self.useTraversal = UseTraversal(self.sourceFiles, abstractTypes = abstractTypes)
         self.useTraversal.parseModules(self.test)
         
         self.testIndirect = SubroutineFullName('__typeprocedure_MOD_testIndirect')
-        self.callGraphIndirect = callGraphBuilder = self.callGraphBuilder.buildCallGraph(self.testIndirect)
+        self.callGraphIndirect = self.callGraphBuilder.buildCallGraph(self.testIndirect)
         
         self.testAdd = SubroutineFullName('__typeprocedure_MOD_testAdd')
-        self.callGraphAddInt = callGraphBuilder = self.callGraphBuilder.buildCallGraph(self.testAdd)
+        self.callGraphAddInt = self.callGraphBuilder.buildCallGraph(self.testAdd)
         
         self.testAnother = SubroutineFullName('__typeprocedure_MOD_testAnother')
-        self.callGraphAnother = callGraphBuilder = self.callGraphBuilder.buildCallGraph(self.testAnother)
+        self.callGraphAnother = self.callGraphBuilder.buildCallGraph(self.testAnother)
         
         self.testGeneric = SubroutineFullName('__typeprocedure_MOD_testGeneric')
-        self.callGraphGeneric = callGraphBuilder = self.callGraphBuilder.buildCallGraph(self.testGeneric)
+        self.callGraphGeneric = self.callGraphBuilder.buildCallGraph(self.testGeneric)
         
         self.testChild = SubroutineFullName('__typeprocedure_MOD_testChild')
-        self.callGraphChild = callGraphBuilder = self.callGraphBuilder.buildCallGraph(self.testChild)
+        self.callGraphChild = self.callGraphBuilder.buildCallGraph(self.testChild)
         
         
         self.testDeferred = SubroutineFullName('__typeprocedure_MOD_testDeferred')
-        self.callGraphDeferred = callGraphBuilder = self.callGraphBuilder.buildCallGraph(self.testDeferred)
+        self.callGraphDeferred = self.callGraphBuilder.buildCallGraph(self.testDeferred)
         
-        self.fileExist = os.path.exists(self.srcFile)
-        
-    def testAssemberFileExists(self):
+    def testAssemberfilesExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
         self.assertTrue(os.path.exists(self.assFile), 'Test will fail. Assembler file not found: ' + self.assFile)
                  
@@ -87,17 +85,17 @@ class TypeProcedureTest(unittest.TestCase):
         self.assertEqual({'testanother', 'addanother'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphAnother.getAllSubroutineNames()))
         self.assertEqual({'testgeneric', 'addanother'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphGeneric.getAllSubroutineNames()))
         self.assertEqual({'testchild', 'new_dump', 'addint'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphChild.getAllSubroutineNames()))
-        #self.assertEqual({'testdeferred', 'dump'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphDeferred.getAllSubroutineNames()))
+        self.assertEqual({'testdeferred'}, set(subroutineFullName.getSimpleName() for subroutineFullName in self.callGraphDeferred.getAllSubroutineNames()))
          
     def testUseTraversal(self):
-        if not self.fileExist:
+        if not self.filesExist:
             self.skipTest('Files not there')
          
         self.assertEqual(0, len(self.useTraversal.getInterfaces()))
         self.assertEqual(3, len(self.useTraversal.getTypes()))
          
     def testAtestType(self):
-        if not self.fileExist:
+        if not self.filesExist:
             self.skipTest('Files not there')
          
         types = self.useTraversal.getTypes()
@@ -108,7 +106,7 @@ class TypeProcedureTest(unittest.TestCase):
         self.assertEqual('third', atest.getProcedure('third'))
          
     def testTtestType(self):
-        if not self.fileExist:
+        if not self.filesExist:
             self.skipTest('Files not there')
          
         types = self.useTraversal.getTypes()
@@ -120,7 +118,7 @@ class TypeProcedureTest(unittest.TestCase):
         self.assertTrue(ttest.isSubtypeOf(types['atest']))
          
     def testChildType(self):
-        if not self.fileExist:
+        if not self.filesExist:
             self.skipTest('Files not there')
          
         types = self.useTraversal.getTypes()
