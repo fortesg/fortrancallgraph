@@ -5,6 +5,7 @@ import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
 from printout import printWarning, printDebug
+from macpath import basename
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -261,7 +262,7 @@ class Variable(object):
             return self.__name == other.__name and       \
                    self.__typeName == other.__typeName and        \
                    self.__parameter == other.__parameter and \
-                   self.__declaredIn == other.__declaredIn;
+                   self.__declaredIn == other.__declaredIn
         
     def __ne__(self, other):
         return not self == other
@@ -1652,6 +1653,7 @@ class SourceFile(object):
             raise IOError("Not a readable file: " + path);
         
         self.__path = path
+        self.__base = basename(path)
         self.__preprocessed = preprocessed
         self.__preprocessorLineDirectives = None
         if not isTestDummy:
@@ -1676,21 +1678,24 @@ class SourceFile(object):
     
     def __eq__(self, other):
         if (other is None or not isinstance(other, SourceFile)):
-            return False;
+            return False
         else:
-            return self.__path == other.__path
+            return self.__base == other.__base
         
     def __ne__(self, other):
         return not self == other
     
     def __hash__(self):
-        return hash(self.__path)  
+        return hash(self.__base)  
     
     def isPreprocessed(self):
         return self.__preprocessed
     
     def getPath(self):
         return self.__path
+    
+    def getFileName(self):
+        return basename(self.__path)
     
     def getLines(self):
         lines = [];
