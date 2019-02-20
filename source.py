@@ -1653,7 +1653,7 @@ class SourceFile(object):
             raise IOError("Not a readable file: " + path);
         
         self.__path = path
-        self.__base = basename(path)
+        self.__base = os.path.basename(path)
         self.__preprocessed = preprocessed
         self.__preprocessorLineDirectives = None
         if not isTestDummy:
@@ -1695,7 +1695,7 @@ class SourceFile(object):
         return self.__path
     
     def getFileName(self):
-        return basename(self.__path)
+        return self.__base
     
     def getLines(self):
         lines = [];
