@@ -262,7 +262,7 @@ class Variable(object):
             return self.__name == other.__name and       \
                    self.__typeName == other.__typeName and        \
                    self.__parameter == other.__parameter and \
-                   self.__declaredIn == other.__declaredIn
+                   ((self.__declaredIn is None and other.__declaredIn is None) or self.__declaredIn.getName() == other.__declaredIn.getName())
         
     def __ne__(self, other):
         return not self == other
@@ -1473,7 +1473,7 @@ class Module(SubroutineContainer):
         if (other is None or not isinstance(other, Module)):
             return False;
         else:
-            return self.__name == other.__name and self.__sourceFile == other.__sourceFile
+            return self.__name == other.__name and self.__sourceFile.getFileName() == other.__sourceFile.getFileName()
         
     def __ne__(self, other):
         return not self == other
@@ -1680,7 +1680,7 @@ class SourceFile(object):
         if (other is None or not isinstance(other, SourceFile)):
             return False
         else:
-            return self.__base == other.__base
+            return self.__path == other.__path
         
     def __ne__(self, other):
         return not self == other
