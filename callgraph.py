@@ -169,9 +169,16 @@ class CallGraph(object):
         self.__subroutines = dict();
         
     def __contains__(self, subroutineName):
-        assertType(subroutineName, 'subroutineName', SubroutineName)
-
-        return subroutineName in self.__subroutines
+        if isinstance(subroutineName, SubroutineName):
+            return subroutineName in self.__subroutines
+        elif isinstance(subroutineName, str): 
+            if SubroutineFullName.validFullName(subroutineName):
+                return SubroutineFullName(subroutineName) in self.__subroutines
+            else:
+                for name in self.__subroutines:
+                    if name.getSimpleName() == subroutineName:
+                        return True
+        return False
     
     def __iter__(self):
         return iter(self.__subroutines);
