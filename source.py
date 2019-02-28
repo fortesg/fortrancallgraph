@@ -455,7 +455,8 @@ class Variable(object):
             name = self.__name
         
         alias = Variable(name, self.__typeName, self.__parameter, self.__allocatable, self.__pointer, self.__target, self.__dimension, self.__intent, self.__optional)
-        alias.setDeclaredIn(self.__declaredIn)
+        if self.__declaredIn is not None:
+            alias.setDeclaredIn(self.__declaredIn)
         alias.setOriginalName(self.__name)
         if self.isTypeAvailable():
             alias.setType(self.getType())
@@ -916,6 +917,11 @@ class VariableReference(object):
             if percentPos >= 0:
                 newName += self.expression[percentPos:]
             self.expression = newName
+    
+    def getAlias(self, alias, level):
+        expression = '%'.join([alias] + self.expression.split('%')[level + 1:])
+        variable = self.getVariable(level).getAlias(alias)
+        return VariableReference(expression, self.__subroutine, self.__lineNumber, variable)
             
     def cleanCopy(self):
         return VariableReference(self.expression, self.__subroutine, self.__lineNumber, self.__level0Variable)
