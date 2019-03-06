@@ -42,6 +42,8 @@ CACHE_DIR = os.path.dirname(os.path.realpath(__file__)) + '/cache'
 
 # dict of subtypes that are chosen as the one and only implementation of an abstract type. 
 # FCG handles variables of a given abstract type as if the type were the given subtype.
-# Format 'abstract_type':'subtype'
+# Format: 'abstract_type':('subtype_module','subtype')
+# If the module with analyzed subroutine has a dependency to subtype_module anyway, you can leave it away:
+# 'abstract_type':'subtype'
 # OPTIONAL
 ABSTRACT_TYPE_IMPLEMENTATIONS = {}
