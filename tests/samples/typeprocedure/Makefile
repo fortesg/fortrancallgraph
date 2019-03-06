@@ -3,9 +3,9 @@ FFLAGS =
 
 all: modules assembler
 
-modules: typeprocedure.o
+modules: typeprocedure.o subtype.o
 
-assembler: typeprocedure.s
+assembler: typeprocedure.s subtype.s
 
 %: %.o
 	$(FF) -o $@ $<

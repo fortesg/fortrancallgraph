@@ -102,8 +102,28 @@ class TypeProcedureTest(unittest.TestCase):
         atest = types['atest']
         self.assertIsNotNone(atest)
         self.assertTrue(atest.isAbstract())
+        self.assertTrue(atest.hasAssignedImplementation())
+        self.assertEqual('child', atest.getAssignedImplementation().getName())
         self.assertTrue(atest.hasProcedure('third'))
         self.assertEqual('third', atest.getProcedure('third'))
+         
+    def testSubtypeInOtherModule(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        abstractTypes = {'atest':('subtype', 'othertest')}
+        useTraversal = UseTraversal(self.sourceFiles, abstractTypes = abstractTypes)
+        useTraversal.parseModules(self.test) 
+        types = useTraversal.getTypes()
+        atest = types['atest']
+        self.assertIsNotNone(atest)
+        self.assertTrue(atest.isAbstract())
+        self.assertTrue(atest.hasAssignedImplementation())
+        self.assertEqual('othertest', atest.getAssignedImplementation().getName())
+        
+        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), types, callGraphBuilder = self.callGraphBuilder)
+        expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphDeferred))
+        self.assertEqual({'a%abc'}, expressions)
          
     def testTtestType(self):
         if not self.filesExist:
