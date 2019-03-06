@@ -22,12 +22,12 @@ class UseTraversal(object):
         self.__additionalModules = set()
         for abstractType, subtype in abstractTypes.items():
             if isinstance(subtype, tuple) and len(subtype) == 2:
-                if self.__sourceFiles.existsModule(subtype[0]):
-                    self.__additionalModules.add(subtype[0])
-                    abstractTypes[abstractType] = subtype[1]
-                elif self.__sourceFiles.existsModule(subtype[1]):
+                if self.__sourceFiles.existsModule(subtype[1]):
                     self.__additionalModules.add(subtype[1])
                     abstractTypes[abstractType] = subtype[0]
+                else:
+                    self.__additionalModules.add(subtype[0])
+                    abstractTypes[abstractType] = subtype[1]
         self.__visitedModules = set()
         self.__interfaceFinder = InterfaceFinder()
         self.__typeFinder = TypeFinder(abstractTypes)
