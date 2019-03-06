@@ -4,6 +4,10 @@ from config.config_fortrancallgraph import ABSTRACT_TYPE_IMPLEMENTATIONS
 # Config file for FortranCallGraph
 # Can be placed in FortranCallGraph's root directory or in a subdirectory called config or at any place and picked with -cf
 
+# Directory where serialized call trees are stored for quicker analysis
+# OPTIONAL: If omitted call trees won't be cached
+CACHE_DIR = os.path.dirname(os.path.realpath(__file__)) + '/cache'
+
 # Locations of the assembler files 
 # Directories are searched in the order of this list
 # Subdirectories are included automatically 
@@ -35,10 +39,6 @@ IGNORE_GLOBALS_FROM_MODULES = EXCLUDE_MODULES + []
 # Types whose components shall not be listed when running -a ... 
 # OPTIONAL
 IGNORE_DERIVED_TYPES = []
-
-# Directory where serialized call trees are stored for quicker analysis
-# OPTIONAL: If omitted call trees won't be cached
-CACHE_DIR = os.path.dirname(os.path.realpath(__file__)) + '/cache'
 
 # dict of subtypes that are chosen as the one and only implementation of an abstract type. 
 # FCG handles variables of a given abstract type as if the type were the given subtype.
