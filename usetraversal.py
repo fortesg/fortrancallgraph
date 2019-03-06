@@ -19,6 +19,15 @@ class UseTraversal(object):
         
         self.__sourceFiles = sourceFiles;
         self.__excludeModules = [m.lower() for m in excludeModules]
+        self.__additionalModules = set()
+        for abstractType, subtype in abstractTypes.items():
+            if isinstance(subtype, tuple) and len(subtype) == 2:
+                if self.__sourceFiles.existsModule(subtype[0]):
+                    self.__additionalModules.add(subtype[0])
+                    abstractTypes[abstractType] = subtype[1]
+                elif self.__sourceFiles.existsModule(subtype[1]):
+                    self.__additionalModules.add(subtype[1])
+                    abstractTypes[abstractType] = subtype[0]
         self.__visitedModules = set()
         self.__interfaceFinder = InterfaceFinder()
         self.__typeFinder = TypeFinder(abstractTypes)
@@ -31,9 +40,11 @@ class UseTraversal(object):
 
     def parseModules(self, rootSubroutine):      
         assertType(rootSubroutine, 'rootSubroutine', SubroutineFullName)
-        
         self.__reset()
         self.__parseModulesRecursive(rootSubroutine.getModuleName())
+        for moduleName in self.__additionalModules:
+            if moduleName not in self.__visitedModules:
+                self.__parseModulesRecursive(moduleName)
         
     def __parseModulesRecursive(self, moduleName, parent = ''):
         useRegEx = re.compile(r'^USE[\s\:]+(?P<modulename>[a-z0-9_]+)\s*(\,.*)?$', re.IGNORECASE);
