@@ -1558,7 +1558,7 @@ class Module(SubroutineContainer):
             if statement.upper() == 'PUBLIC':
                 return True
 
-        return True
+        return False
     
     def getLastSpecificationLineNumber(self):
         if self.getContainsLineNumber() > 0:
