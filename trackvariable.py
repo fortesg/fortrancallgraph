@@ -373,15 +373,15 @@ class VariableTracker(CallGraphAnalyzer):
         if calledRoutineFullName is not None:
             if calledRoutineFullName in self.__callGraph:
                 subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
-            else:
-                typE = subReference.getLevelNVariable().getType()
-                if typE.isAbstract():
-                    calledRoutineFullName = self.__findDeferredProcedure(typE, originalReference.findFirstProcedureAlias())
-                    if calledRoutineFullName is not None:
-                        if calledRoutineFullName in self.__callGraph:
-                            subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
-                if subGraph is None and self.__callGraphBuilder is not None:
-                    subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
+        else:
+            typE = subReference.getLevelNVariable().getType()
+            if typE.isAbstract():
+                calledRoutineFullName = self.__findDeferredProcedure(typE, originalReference.findFirstProcedureAlias())
+                if calledRoutineFullName is not None:
+                    if calledRoutineFullName in self.__callGraph:
+                        subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
+        if subGraph is None and self.__callGraphBuilder is not None:
+            subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
 
         if calledRoutineFullName is not None and subGraph is not None:
             calledSubroutine = self.__sourceFiles.findSubroutine(calledRoutineFullName);
@@ -611,19 +611,17 @@ class VariableTracker(CallGraphAnalyzer):
 
         # Find elsewhere
         if calledSubroutineSimpleName in callerModule:
-            calledSubroutineFullName = SubroutineFullName.fromParts(callerModule.getName(), calledSubroutineSimpleName)
+            return SubroutineFullName.fromParts(callerModule.getName(), calledSubroutineSimpleName)
         else:
             for use in callerSubroutine.getModule().getUses():
                 if use[-1] == calledSubroutineSimpleName:
                     if self.__sourceFiles.existsModule(use[0]):
                         usedModule = self.__sourceFiles.findModule(use[0])
                         if calledSubroutineSimpleName in usedModule:
-                            calledSubroutineFullName = SubroutineFullName.fromParts(usedModule.getName(), calledSubroutineSimpleName)
+                            return SubroutineFullName.fromParts(usedModule.getName(), calledSubroutineSimpleName)
                         break
-        if calledSubroutineFullName is not None:
-            VariableTracker.__routineNotInCallgraphWarning(calledSubroutineSimpleName, calledSubroutineFullName, callerSubroutine.getName(), lineNumber)
-            
-        return calledSubroutineFullName   
+        
+        return None   
     
     def __findDeferredProcedure(self, typE, procedureAlias):
         if typE.hasAssignedImplementation():
@@ -672,19 +670,6 @@ class VariableTracker(CallGraphAnalyzer):
         else:
             warning = 'Routine not found'
         warning += ': ' + str(subroutineName)
-        if callerName is not None and callerName.getModuleName():
-            warning += ' (' + str(callerName.getModuleName())
-            if lineNumber:
-                warning += ':' + str(lineNumber)
-            warning += ')'
-            
-        if warning not in VariableTracker.__routineWarnings:
-            VariableTracker.__routineWarnings.add(warning)
-            printWarning(warning, 'Variable Tracker')
-        
-    @staticmethod
-    def __routineNotInCallgraphWarning(subroutineName, chosenSubroutineFullName, callerName = None, lineNumber = 0):
-        warning = 'Routine not in Callgraph: ' + str(subroutineName) + ', picking ' + str(chosenSubroutineFullName)
         if callerName is not None and callerName.getModuleName():
             warning += ' (' + str(callerName.getModuleName())
             if lineNumber:
