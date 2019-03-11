@@ -1103,7 +1103,7 @@ class SubroutineContainer(object):
         return self.__statements
     
     def hasSubroutine(self, name):
-        assertType(name, 'name', SubroutineFullName)
+        assertType(name, 'name', [SubroutineName, str])
         return self.getSubroutine(name) is not None
     
     def getSubroutines(self):
@@ -1302,11 +1302,14 @@ class Subroutine(SubroutineContainer):
         return self.getModule().getSourceFile()
   
     def getSubroutine(self, name):
-        assertType(name, 'name', InnerSubroutineName)
+        assertType(name, 'name', [InnerSubroutineName, str])
+        
+        if isinstance(name, InnerSubroutineName):
+            name = name.getSimpleName()
         
         subroutines = self.getSubroutines()
-        if name.getSimpleName() in subroutines:
-            return subroutines[name.getSimpleName()]
+        if name in subroutines:
+            return subroutines[name]
 
         return None
     
@@ -1520,10 +1523,13 @@ class Module(SubroutineContainer):
         return None
     
     def getSubroutine(self, name):
-        assertType(name, 'name', SubroutineName)
+        assertType(name, 'name', [SubroutineName, str])
         
         subroutines = self.getSubroutines()
-        if isinstance(name, InnerSubroutineName):
+        if isinstance(name, str):
+            if name in subroutines:
+                return subroutines[name]
+        elif isinstance(name, InnerSubroutineName):
             host = self.getSubroutine(name.getHostName())
             if host is not None:
                 return host.getSubroutine(name)
