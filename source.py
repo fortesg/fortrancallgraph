@@ -266,8 +266,23 @@ class Variable(object):
     def __ne__(self, other):
         return not self == other
     
+    def __lt__(self, other):
+        return self.__name < other.__name
+        
+    def __le__(self, other):
+        return self.__name <= other.__name
+        
+    def __gt__(self, other):
+        return self.__name > other.__name
+        
+    def __ge__(self, other):
+        return self.__name >= other.__name
+    
+    def __cmp__(self, other):
+        return cmp(self.__name, other.__name)
+
     def __hash__(self):
-        return hash(self.__name)    
+        return hash(self.__name) 
         
     def __str__(self):
         string = self.getTypeName()
@@ -1481,33 +1496,28 @@ class Module(SubroutineContainer):
         if (other is None or not isinstance(other, Module)):
             return False;
         else:
-            return self.__name == other.__name and self.__sourceFile.getFileName() == other.__sourceFile.getFileName()
+            return self.__name == other.__name and self.__sourceFile.getFileName() == other.__sourceFile.getFileName() and self.__index == other.__index
         
     def __ne__(self, other):
         return not self == other
     
     def __lt__(self, other):
-        if self == other:
-            return False
-        return ((self.__sourceFile.getPath(), self.__index) < (other.__sourceFile.getPath(), other.__index))
-
+        return (self.__name, self.__index) < (other.__name, other.__index)
+        
     def __le__(self, other):
-        if self == other:
-            return True
-        return ((self.__sourceFile.getPath(), self.__index) < (other.__sourceFile.getPath(), other.__index))
-    
+        return (self.__name, self.__index) <= (other.__name, other.__index)
+        
     def __gt__(self, other):
-        if self == other:
-            return False
-        return ((self.__sourceFile.getPath(), self.__index) > (other.__sourceFile.getPath(), other.__index))
-
+        return (self.__name, self.__index) > (other.__name, other.__index)
+        
     def __ge__(self, other):
-        if self == other:
-            return True
-        return ((self.__sourceFile.getPath(), self.__index) > (other.__sourceFile.getPath(), other.__index))
+        return (self.__name, self.__index) >= (other.__name, other.__index)
+    
+    def __cmp__(self, other):
+        return cmp((self.__name, self.__index), (self.__name, other.__index))
 
     def __hash__(self):
-        return hash(self.__name) * hash(self.__sourceFile)
+        return hash((self.__name, self.__index))
         
     def getName(self):
         return self.__name;
