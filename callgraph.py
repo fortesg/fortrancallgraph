@@ -40,6 +40,9 @@ class _CallGraphCall(object):
             return self.__discriminator - other.__discriminator
         else:
             return self.__lineNumber - other.__lineNumber
+
+    def __hash__(self):
+        return self.__lineNumber * 100000 + self.__discriminator  
         
     def serialize(self):
         ser = dict()
