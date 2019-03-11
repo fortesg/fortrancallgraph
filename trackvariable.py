@@ -7,7 +7,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printError, printLine, printWarning
+from printout import printError, printLine, printWarning, printDebug
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -369,21 +369,21 @@ class VariableTracker(CallGraphAnalyzer):
         subReference = originalReference.getSubReferenceBeforeFirstProcedure()
 
         calledRoutineFullName = self.__findCalledTypeBoundProcedure(originalReference, subroutine)
+        subGraph = None
         if calledRoutineFullName is not None:
-            subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
-        else:
-            typE = subReference.getLevelNVariable().getType()
-            if typE.isAbstract():
-                calledRoutineFullName = self.__findDeferredProcedure(typE, originalReference.findFirstProcedureAlias())
-                if calledRoutineFullName is not None:
-                    if calledRoutineFullName in self.__callGraph:
-                        subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
-                    elif self.__callGraphBuilder is not None:
-                        subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
-                    else:
-                        calledRoutineFullName = None
+            if calledRoutineFullName in self.__callGraph:
+                subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
+            else:
+                typE = subReference.getLevelNVariable().getType()
+                if typE.isAbstract():
+                    calledRoutineFullName = self.__findDeferredProcedure(typE, originalReference.findFirstProcedureAlias())
+                    if calledRoutineFullName is not None:
+                        if calledRoutineFullName in self.__callGraph:
+                            subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
+                if subGraph is None and self.__callGraphBuilder is not None:
+                    subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
 
-        if calledRoutineFullName is not None:
+        if calledRoutineFullName is not None and subGraph is not None:
             calledSubroutine = self.__sourceFiles.findSubroutine(calledRoutineFullName);
             if calledSubroutine is not None:
                 variableNameInCalledSubroutine = calledSubroutine.getArgumentNames()[0]
@@ -397,7 +397,6 @@ class VariableTracker(CallGraphAnalyzer):
                         calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
                         calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                         variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
-#                         printDebug(str(calledRoutineFullName) + ' : ' + str(variableInCalledSubroutine) + ' : ' + str([ref.getExpression() for ref in variableReferences]))
                         for variableReference in variableReferences:
                             variableReference.setLevel0Variable(self.__variable, subReference.getMembers())
                         outAssignments = calledSubroutineAnalyzer.__outAssignments
@@ -525,7 +524,10 @@ class VariableTracker(CallGraphAnalyzer):
             calledRoutineFullName = self.__findCalledSubroutineFullName(calledRoutineName, subroutine, lineNumber)
             
         if calledRoutineFullName is not None and calledRoutineFullName.getModuleName().lower() not in self.__excludeModules:
-            subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName);
+            if calledRoutineFullName in self.__callGraph:
+                subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
+            elif self.__callGraphBuilder is not None:
+                subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
             
             before = SourceFile.removeUnimportantParentheses(before)
             arguments = SourceFile.removeUnimportantParentheses(arguments)
@@ -583,7 +585,8 @@ class VariableTracker(CallGraphAnalyzer):
         lineNumber = variableReference.getLineNumber()
         procedures = variableReference.findFirstProcedure()
         if isinstance(procedures, str):
-            return self.__findCalledSubroutineFullName(procedures, subroutine, lineNumber)
+            proc = self.__findCalledSubroutineFullName(procedures, subroutine, lineNumber)
+            return proc
         else:
             for candidate in self.__findNextCalleesFromLine(subroutine, lineNumber):
                 if candidate.getSimpleName() in procedures:
@@ -595,25 +598,33 @@ class VariableTracker(CallGraphAnalyzer):
     def __findCalledSubroutineFullName(self, calledSubroutineSimpleName, callerSubroutine, lineNumber):
         
         callerSubroutineName = callerSubroutine.getName()
+        callerModule = callerSubroutine.getModule()
+        
+        # Get from CallGraph
         calledSubroutineFullName = self.__callGraph.findCalleeBySimpleName(calledSubroutineSimpleName, callerSubroutineName)
         if calledSubroutineFullName is not None:
             return calledSubroutineFullName
+        elif calledSubroutineSimpleName in self.__interfaces:
+            interface = self.__interfaces[calledSubroutineSimpleName]
+            for candidate in self.__findNextCalleesFromLine(callerSubroutine, lineNumber):
+                if candidate.getSimpleName() in interface:
+                    return candidate
+
+        # Find elsewhere
+        if calledSubroutineSimpleName in callerModule:
+            calledSubroutineFullName = SubroutineFullName.fromParts(callerModule.getName(), calledSubroutineSimpleName)
         else:
-            aliases = callerSubroutine.getModule().getUseAliases()
-            if calledSubroutineSimpleName in aliases:
-                alias = aliases[calledSubroutineSimpleName]
-                if SubroutineFullName.validParts(*alias):
-                    calledSubroutineFullName = SubroutineFullName.fromParts(*alias)
-                    if calledSubroutineFullName in self.__callGraph:
-                        return calledSubroutineFullName
-             
-            if calledSubroutineSimpleName in self.__interfaces:
-                interface = self.__interfaces[calledSubroutineSimpleName]
-                for candidate in self.__findNextCalleesFromLine(callerSubroutine, lineNumber):
-                    if candidate.getSimpleName() in interface:
-                        return candidate
-                    
-        return None
+            for use in callerSubroutine.getModule().getUses():
+                if use[-1] == calledSubroutineSimpleName:
+                    if self.__sourceFiles.existsModule(use[0]):
+                        usedModule = self.__sourceFiles.findModule(use[0])
+                        if calledSubroutineSimpleName in usedModule:
+                            calledSubroutineFullName = SubroutineFullName.fromParts(usedModule.getName(), calledSubroutineSimpleName)
+                        break
+        if calledSubroutineFullName is not None:
+            VariableTracker.__routineNotInCallgraphWarning(calledSubroutineSimpleName, calledSubroutineFullName, callerSubroutine.getName(), lineNumber)
+            
+        return calledSubroutineFullName   
     
     def __findDeferredProcedure(self, typE, procedureAlias):
         if typE.hasAssignedImplementation():
@@ -657,19 +668,30 @@ class VariableTracker(CallGraphAnalyzer):
         
     @staticmethod
     def __routineNotFoundWarning(subroutineName, callerName = None, lineNumber = 0, text = ''):
-        if subroutineName not in VariableTracker.__routineWarnings:
+        if text:
+            warning = text
+        else:
+            warning = 'Routine not found'
+        warning += ': ' + str(subroutineName)
+        if callerName is not None and callerName.getModuleName():
+            warning += ' (' + str(callerName.getModuleName())
+            if lineNumber:
+                warning += ':' + str(lineNumber)
+            warning += ')'
+            
+        if warning not in VariableTracker.__routineWarnings:
+            VariableTracker.__routineWarnings.add(warning)
+            printWarning(warning, 'Variable Tracker')
         
-            VariableTracker.__routineWarnings.add(subroutineName)
+    @staticmethod
+    def __routineNotInCallgraphWarning(subroutineName, chosenSubroutineFullName, callerName = None, lineNumber = 0):
+        warning = 'Routine not in Callgraph: ' + str(subroutineName) + ', picking ' + str(chosenSubroutineFullName)
+        if callerName is not None and callerName.getModuleName():
+            warning += ' (' + str(callerName.getModuleName())
+            if lineNumber:
+                warning += ':' + str(lineNumber)
+            warning += ')'
             
-            if text:
-                warning = text
-            else:
-                warning = 'Routine not found'
-            warning += ': ' + str(subroutineName)
-            if callerName is not None and callerName.getModuleName():
-                warning += ' (' + str(callerName.getModuleName())
-                if lineNumber:
-                    warning += ':' + str(lineNumber)
-                warning += ')'
-            
+        if warning not in VariableTracker.__routineWarnings:
+            VariableTracker.__routineWarnings.add(warning)
             printWarning(warning, 'Variable Tracker')
