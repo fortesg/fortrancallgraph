@@ -16,12 +16,6 @@ class _CallGraphCall(object):
         
     def __str__(self):
         return 'call ' + str(self.__calleeName) + ' ' + str(self.__lineNumber) + ' ' + str(self.__discriminator) 
-    
-    def __cmp__(self, other):
-        if other.__lineNumber == self.__lineNumber:
-            return self.__discriminator - other.__discriminator
-        else:
-            return self.__lineNumber - other.__lineNumber
         
     def __eq__(self, other):
         return self.__cmp__(other) == 0
@@ -40,6 +34,12 @@ class _CallGraphCall(object):
         
     def __ge__(self, other):
         return self.__cmp__(other) >= 0
+    
+    def __cmp__(self, other):
+        if other.__lineNumber == self.__lineNumber:
+            return self.__discriminator - other.__discriminator
+        else:
+            return self.__lineNumber - other.__lineNumber
         
     def serialize(self):
         ser = dict()
