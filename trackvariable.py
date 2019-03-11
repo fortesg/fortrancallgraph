@@ -585,8 +585,7 @@ class VariableTracker(CallGraphAnalyzer):
         lineNumber = variableReference.getLineNumber()
         procedures = variableReference.findFirstProcedure()
         if isinstance(procedures, str):
-            proc = self.__findCalledSubroutineFullName(procedures, subroutine, lineNumber)
-            return proc
+            return self.__findCalledSubroutineFullName(procedures, subroutine, lineNumber)
         else:
             for candidate in self.__findNextCalleesFromLine(subroutine, lineNumber):
                 if candidate.getSimpleName() in procedures:
