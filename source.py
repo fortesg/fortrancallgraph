@@ -1520,7 +1520,7 @@ class Module(SubroutineContainer):
         return hash((self.__name, self.__index))
         
     def getName(self):
-        return self.__name;
+        return self.__name
     
     def getModule(self):
         return self
@@ -1550,6 +1550,9 @@ class Module(SubroutineContainer):
 
     def getSourceFile(self):
         return self.__sourceFile
+    
+    def getIndex(self):
+        return self.__index
         
     def isPublic(self):
         for _, statement, _ in self.getStatementsBeforeContains():
