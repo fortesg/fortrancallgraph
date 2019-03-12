@@ -38,6 +38,21 @@ class Type(object):
     def __ne__(self, other):
         return not self == other
     
+    def __lt__(self, other):
+        return self.__name < other.__name
+        
+    def __le__(self, other):
+        return self.__name <= other.__name
+        
+    def __gt__(self, other):
+        return self.__name > other.__name
+        
+    def __ge__(self, other):
+        return self.__name >= other.__name
+    
+    def __cmp__(self, other):
+        return cmp(self.__name, other.__name)
+    
     def __hash__(self):
         return hash(self.__name) 
     
@@ -1619,6 +1634,7 @@ class Module(SubroutineContainer):
     
     def __findPublicElements(self):
         publicRegEx = re.compile(r'^PUBLIC\s*((\:\:)|\s)\s*(?P<elementList>[a-z0-9_,\s]+)$', re.IGNORECASE);
+        # TODO What if whole module is public?
         
         elements = []
         for _, statement, _ in self.getStatementsBeforeContains():
