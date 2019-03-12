@@ -950,7 +950,7 @@ class VariableReference(object):
             percentPos = self.expression.find('%')
             if percentPos >= 0:
                 newName += self.expression[percentPos:]
-            self.expression = newName
+            self.expression = newName.lower()
     
     def getAlias(self, alias, level):
         expression = '%'.join([alias] + self.expression.split('%')[level + 1:])
