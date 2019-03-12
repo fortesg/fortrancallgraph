@@ -405,6 +405,11 @@ class Variable(object):
     
     def isRequiredArgument(self):
         return self.isArgument() and not self.__optional
+
+    def setOptional(self, optional):
+        assertType(optional, 'optional', bool)
+        assert not optional or self.isArgument()
+        self.__optional = optional
     
     def setIsFunctionResult(self, isFunctionResult):
         assertType(isFunctionResult, 'isFunctionResult', bool)
