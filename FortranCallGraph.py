@@ -175,6 +175,7 @@ def main():
         trackerSettings.fullTypes = alwaysFullTypes 
         trackerSettings.abstractTypes = abstractTypes
         trackerSettings.ignoreSubroutinesRegex = ignoreRegex 
+        trackerSettings.minimalOutput = bool(args.quiet) 
         analysis = graphAnalysis(args.analysis, sourceFiles, trackerSettings, graphBuilder)
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
@@ -185,8 +186,6 @@ def main():
             analysis.setVariableName(function.getResultVariable().getName())
         if args.pointersOnly:
             analysis.setPointersOnly(True)
-        if args.quiet:
-            analysis.setMinimalOutput(True)
         analysis.analyzeCallgraph(callGraph)
     elif args.dump is not None:
         dumper = subroutineDumper(args.dump, sourceFiles)
