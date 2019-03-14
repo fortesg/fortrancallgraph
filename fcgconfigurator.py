@@ -14,6 +14,7 @@ CFG_EXCLUDE_MODULES = 'EXCLUDE_MODULES'
 CFG_IGNORE_GLOBALS_FROM_MODULES = 'IGNORE_GLOBALS_FROM_MODULES'
 CFG_IGNORE_DERIVED_TYPES = 'IGNORE_DERIVED_TYPES'
 CFG_ABSTRACT_TYPES = 'ABSTRACT_TYPE_IMPLEMENTATIONS'
+CFG_ALWAYS_FULL_TYPES = 'ALWAYS_FULL_TYPES'
         
 def loadFortranCallGraphConfiguration(configFile, incomplete = False, baseConfig = {}):
     assertType(configFile, 'configFile', str, True)
@@ -74,6 +75,9 @@ def loadFortranCallGraphConfiguration(configFile, incomplete = False, baseConfig
 
     if CFG_IGNORE_DERIVED_TYPES not in config or not config[CFG_IGNORE_DERIVED_TYPES]:
         config[CFG_IGNORE_DERIVED_TYPES] = []
+
+    if CFG_ALWAYS_FULL_TYPES not in config or not config[CFG_ALWAYS_FULL_TYPES]:
+        config[CFG_ALWAYS_FULL_TYPES] = []
 
     if CFG_ABSTRACT_TYPES not in config or not config[CFG_ABSTRACT_TYPES]:
         config[CFG_ABSTRACT_TYPES] = {}

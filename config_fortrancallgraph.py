@@ -40,6 +40,10 @@ IGNORE_GLOBALS_FROM_MODULES = EXCLUDE_MODULES + []
 # OPTIONAL
 IGNORE_DERIVED_TYPES = []
 
+# List of types of which all components are considered to be used as soon as a variable of that type appears
+# OPTIONAL
+ALWAYS_FULL_TYPES = {}
+
 # dict of subtypes that are chosen as the one and only implementation of an abstract type. 
 # FCG handles variables of a given abstract type as if the type were the given subtype.
 # Format: 'abstract_type':('subtype_module','subtype')
