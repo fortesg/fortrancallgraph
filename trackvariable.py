@@ -404,20 +404,19 @@ class VariableTracker(CallGraphAnalyzer):
     def __analyzeTypeBoundProcedureCallOnThis(self, originalReference, subroutine, lineNumber, originalStatement):
         subReference = originalReference.getSubReferenceBeforeFirstProcedure()
 
-        calledRoutineFullName = self.__findCalledTypeBoundProcedure(originalReference, subroutine)
+        calledRoutineFullName = None
+        typE = subReference.getLevelNVariable().getType()
+        if typE.isAbstract():
+            calledRoutineFullName = self.__findDeferredProcedure(typE, originalReference.findFirstProcedureAlias())
+        if calledRoutineFullName is None:
+            calledRoutineFullName = self.__findCalledTypeBoundProcedure(originalReference, subroutine)
+        
         subGraph = None
         if calledRoutineFullName is not None:
             if calledRoutineFullName in self.__callGraph:
                 subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
-        else:
-            typE = subReference.getLevelNVariable().getType()
-            if typE.isAbstract():
-                calledRoutineFullName = self.__findDeferredProcedure(typE, originalReference.findFirstProcedureAlias())
-                if calledRoutineFullName is not None:
-                    if calledRoutineFullName in self.__callGraph:
-                        subGraph = self.__callGraph.extractSubgraph(calledRoutineFullName)
-        if subGraph is None and self.__callGraphBuilder is not None:
-            subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
+            else:
+                subGraph = self.__callGraphBuilder.buildCallGraph(calledRoutineFullName)
 
         if calledRoutineFullName is not None and subGraph is not None:
             calledSubroutine = self.__sourceFiles.findSubroutine(calledRoutineFullName);
