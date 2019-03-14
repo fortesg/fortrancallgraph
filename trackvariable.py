@@ -25,6 +25,7 @@ class VariableTracker(CallGraphAnalyzer):
         assertType(settings.abstractTypes, 'settings.abstractTypes', dict)
         assertType(settings.ignoreSubroutinesRegex, 'settings.ignoreSubroutinesRegex', REGEX_TYPE, True)
         assertType(settings.minimalOutput, 'settings.minimalOutput', bool)
+        assertType(settings.pointersOnly, 'settings.pointersOnly', bool)
 
         super(VariableTracker, self).__init__()
 
@@ -88,18 +89,18 @@ class VariableTracker(CallGraphAnalyzer):
                 primitiveTypeVariables.append(variable)
             
         for variable in primitiveTypeVariables:
-            if not self._pointersOnly or variable.isPointer():
+            if not self.__settings.pointersOnly or variable.isPointer():
                 printLine(variable.getName())
         
         variableReferences = self.trackVariables(derivedTypeVariables, callGraph)
         if not quiet:
             if not self.__settings.minimalOutput:
                 for variableReference in variableReferences:
-                    if not self._pointersOnly or variableReference.isLevelNPointer():
+                    if not self.__settings.pointersOnly or variableReference.isLevelNPointer():
                         printLine(variableReference)
             else:
                 for variableReference in variableReferences:
-                    if not self._pointersOnly or variableReference.isLevelNPointer():
+                    if not self.__settings.pointersOnly or variableReference.isLevelNPointer():
                         printLine(variableReference.getExpression())
     
     def __findTypeVariable(self, variableName, subroutine):
@@ -722,6 +723,7 @@ class VariableTrackerSettings(object):
         self.abstractTypes = {}
         self.ignoreSubroutinesRegex = '' 
         self.minimalOutput = False 
+        self.pointersOnly = False 
         #TODO Add more settings
 
     def __setattr__(self, name, value):

@@ -31,7 +31,6 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
         types = useTraversal.getTypes()        
         
         argumentTracker = VariableTracker(self.__sourceFiles, self.__settings, interfaces, types, callGraphBuilder = self.__callGraphBuilder)
-        argumentTracker.setPointersOnly(self._pointersOnly)
         argumentTracker.analyzeCallgraph(callGraph)
         
         function = self.__sourceFiles.findSubroutine(callGraph.getRoot())
@@ -40,5 +39,4 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
             argumentTracker.analyzeCallgraph(callGraph)
         
         globalTracker = GlobalVariableTracker(self.__sourceFiles, self.__settings, interfaces, types, callGraphBuilder = self.__callGraphBuilder)
-        globalTracker.setPointersOnly(self._pointersOnly)
         globalTracker.analyzeCallgraph(callGraph)

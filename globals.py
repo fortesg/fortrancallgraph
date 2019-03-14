@@ -28,6 +28,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         assertType(settings.abstractTypes, 'settings.abstractTypes', dict) 
         assertType(settings.ignoreSubroutinesRegex, 'settings.ignoreSubroutinesRegex', REGEX_TYPE, True)  
         assertType(settings.minimalOutput, 'settings.minimalOutput', bool) 
+        assertType(settings.pointersOnly, 'settings.pointersOnly', bool) 
         
         super(GlobalVariableTracker, self).__init__()
         
@@ -49,11 +50,11 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         
         if not self.__settings.minimalOutput:
             for variableReference in variableReferences:
-                if not self._pointersOnly or variableReference.isPointer():
+                if not self.__settings.pointersOnly or variableReference.isPointer():
                     printLine(variableReference)
         else:
             for variableReference in variableReferences:
-                if not self._pointersOnly or variableReference.isPointer():
+                if not self.__settings.pointersOnly or variableReference.isPointer():
                     if variableReference.getDeclaredIn() is not None:
                         declaredIn = ' {' + variableReference.getDeclaredIn().getName() + '}'
                     else:

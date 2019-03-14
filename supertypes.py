@@ -43,18 +43,6 @@ class CallGraphPrinter(object):
     
     
 class CallGraphAnalyzer(object):
-    
-    def __init__(self):
-        self._minimalOutput = False;
-        self._pointersOnly = False;
-
-    def setMinimalOutput(self, enabled):   
-        assertType(enabled, 'enabled', bool)
-        self._minimalOutput = enabled; 
-    
-    def setPointersOnly(self, enabled):   
-        assertType(enabled, 'enabled', bool)
-        self._pointersOnly = enabled; 
 
     def analyzeCallgraph(self, callGraph):
         'Analyzes the given Callgraph. The kind of analysis is defined by subclasses.'
