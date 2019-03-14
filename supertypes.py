@@ -45,18 +45,9 @@ class CallGraphPrinter(object):
 class CallGraphAnalyzer(object):
     
     def __init__(self):
-        self._ignoreRegex = None;
         self._minimalOutput = False;
         self._pointersOnly = False;
 
-    def setIgnoreRegex(self, regex):
-        'Sets the regular expression for ignored routines and/or global variables'
-        assertType(regex, 'regex', [str, REGEX_TYPE], True) 
-        if isinstance(regex, str):
-            self._ignoreRegex = re.compile(regex)
-        else:
-            self._ignoreRegex = regex
-    
     def setMinimalOutput(self, enabled):   
         assertType(enabled, 'enabled', bool)
         self._minimalOutput = enabled; 

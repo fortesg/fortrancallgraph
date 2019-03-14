@@ -173,7 +173,8 @@ def main():
         trackerSettings.ignoreGlobalsFromModules = ignoreGlobalsFromModules 
         trackerSettings.ignoredTypes = ignoreDerivedTypes 
         trackerSettings.fullTypes = alwaysFullTypes 
-        trackerSettings.abstractTypes = abstractTypes 
+        trackerSettings.abstractTypes = abstractTypes
+        trackerSettings.ignoreSubroutinesRegex = ignoreRegex 
         analysis = graphAnalysis(args.analysis, sourceFiles, trackerSettings, graphBuilder)
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
@@ -186,7 +187,6 @@ def main():
             analysis.setPointersOnly(True)
         if args.quiet:
             analysis.setMinimalOutput(True)
-        analysis.setIgnoreRegex(ignoreRegex)
         analysis.analyzeCallgraph(callGraph)
     elif args.dump is not None:
         dumper = subroutineDumper(args.dump, sourceFiles)

@@ -1,9 +1,9 @@
 #coding=utf8
 
 import re
-from assertions import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll, REGEX_TYPE
 from supertypes import CallGraphAnalyzer, CallGraphBuilder
-from source import SourceFiles, Variable, VariableReference, SubroutineFullName, InnerSubroutineName, SourceFile
+from source import SourceFiles, Variable, VariableReference, SubroutineFullName, InnerSubroutineName, SourceFile, SubroutineName
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
@@ -22,7 +22,8 @@ class VariableTracker(CallGraphAnalyzer):
         assertType(settings, 'settings', VariableTrackerSettings)
         assertTypeAll(settings.excludeModules, 'settings.excludeModules', str)
         assertTypeAll(settings.ignoredTypes, 'settings.ignoredTypes', str)        
-        assertType(settings.abstractTypes, 'settings.abstractTypes', dict)        
+        assertType(settings.abstractTypes, 'settings.abstractTypes', dict)
+        assertType(settings.ignoreSubroutinesRegex, 'settings.ignoreSubroutinesRegex', REGEX_TYPE, True)
 
         super(VariableTracker, self).__init__()
 
@@ -216,7 +217,7 @@ class VariableTracker(CallGraphAnalyzer):
         return variableReferences;    
                 
     def __analyzeSubroutine(self, subroutineName, startAtLine = 0):
-        if (self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None) or (subroutineName.getModuleName().lower() in self.__settings.excludeModules):
+        if self.__settings.matchIgnoreSubroutineRegex(subroutineName) or (subroutineName.getModuleName().lower() in self.__settings.excludeModules):
             return set()
         
         variableReferences = set()
@@ -345,7 +346,6 @@ class VariableTracker(CallGraphAnalyzer):
                 variable = self.__findLevelNVariable(originalReference)
                 if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
                     newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
-                    newSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                     variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
@@ -429,7 +429,6 @@ class VariableTracker(CallGraphAnalyzer):
                         if typE is not None:
                             variableInCalledSubroutine.setType(typE)
                         calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
-                        calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                         variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
                         for variableReference in variableReferences:
                             variableReference.setLevel0Variable(self.__variable, subReference.getMembers())
@@ -540,7 +539,7 @@ class VariableTracker(CallGraphAnalyzer):
         return self.__analyzeCall(calledRoutineName, originalReference, before, arguments, subroutine, lineNumber, False) # Warum steht hier False? Weil es sonst zu viele Fehlermeldungen gaebe, wegen den eingebauten Funktionen und den Arrayzugriffen, die syntakisch gleich aussehen 
     
     def __analyzeCall(self, calledRoutineName, originalReference, before, arguments, subroutine, lineNumber, warnIfNotFound = True):
-        if self._ignoreRegex is not None and self._ignoreRegex.match(calledRoutineName):
+        if self.__settings.matchIgnoreSubroutineRegex(calledRoutineName):
             return (set(), set())
         
         subroutineName = subroutine.getName()
@@ -582,7 +581,6 @@ class VariableTracker(CallGraphAnalyzer):
                         if typE is not None:
                             variableInCalledSubroutine.setType(typE)
                         calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
-                        calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
                         variableReferences = calledSubroutineAnalyzer.__trackVariable(variableInCalledSubroutine, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines);
                         for variableReference in variableReferences:
                             variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
@@ -681,7 +679,7 @@ class VariableTracker(CallGraphAnalyzer):
     
     def __analyzeInnerSubroutineCall(self, regExMatch, subroutine, lineNumber):
         calledSubroutineSimpleName = regExMatch.group('routine').strip().lower()
-        if self._ignoreRegex is not None and self._ignoreRegex.match(calledSubroutineSimpleName):
+        if self.__settings.matchIgnoreSubroutineRegex(calledSubroutineSimpleName):
             return set()
         
         calledInnerSubroutineName = self.__callGraph.findCalleeBySimpleName(calledSubroutineSimpleName, subroutine.getName())
@@ -689,14 +687,13 @@ class VariableTracker(CallGraphAnalyzer):
             if calledInnerSubroutineName in subroutine and (calledInnerSubroutineName, self.__variable) not in self.__excludeFromRecursionRoutines:
                 subGraph = self.__callGraph.extractSubgraph(calledInnerSubroutineName);
                 calledSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
-                calledSubroutineAnalyzer.setIgnoreRegex(self._ignoreRegex)
             
                 return calledSubroutineAnalyzer.__trackVariable(self.__variable, subGraph, excludeFromRecursionRoutines = self.__excludeFromRecursionRoutines)
             else:
                 VariableTracker.__routineNotFoundWarning(calledInnerSubroutineName, subroutine.getName(), lineNumber, text = 'Inner Subroutine not found')
                 
         return set();    
-        
+    
     @staticmethod
     def __routineNotFoundWarning(subroutineName, callerName = None, lineNumber = 0, text = ''):
         if text:
@@ -721,10 +718,23 @@ class VariableTrackerSettings(object):
         self.ignoreGlobalsFromModules = []
         self.ignoredTypes   = []
         self.fullTypes = []
-        self.abstractTypes  = {}
+        self.abstractTypes = {}
+        self.ignoreSubroutinesRegex = '' 
         #TODO Add more settings
 
     def __setattr__(self, name, value):
-        if isinstance(value, list):
+        if name == 'ignoreSubroutinesRegex':
+            if not value:
+                value = None
+            elif isinstance(value, str):
+                value = re.compile(value)
+        elif isinstance(value, list):
             value = [e.lower() for e in value]
         super(VariableTrackerSettings, self).__setattr__(name, value)
+        
+    def matchIgnoreSubroutineRegex(self, subroutineName):
+        if self.ignoreSubroutinesRegex is None:
+            return False
+        if isinstance(subroutineName, SubroutineName):
+            subroutineName = subroutineName.getSimpleName()
+        return self.ignoreSubroutinesRegex.match(subroutineName) is not None

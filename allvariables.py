@@ -31,7 +31,6 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
         types = useTraversal.getTypes()        
         
         argumentTracker = VariableTracker(self.__sourceFiles, self.__settings, interfaces, types, callGraphBuilder = self.__callGraphBuilder)
-        argumentTracker.setIgnoreRegex(self._ignoreRegex)
         argumentTracker.setMinimalOutput(self._minimalOutput)
         argumentTracker.setPointersOnly(self._pointersOnly)
         argumentTracker.analyzeCallgraph(callGraph)
@@ -42,7 +41,6 @@ class AllVariablesCallGraphAnalysis(CallGraphAnalyzer):
             argumentTracker.analyzeCallgraph(callGraph)
         
         globalTracker = GlobalVariableTracker(self.__sourceFiles, self.__settings, interfaces, types, callGraphBuilder = self.__callGraphBuilder)
-        globalTracker.setIgnoreRegex(self._ignoreRegex)
         globalTracker.setMinimalOutput(self._minimalOutput)
         globalTracker.setPointersOnly(self._pointersOnly)
         globalTracker.analyzeCallgraph(callGraph)

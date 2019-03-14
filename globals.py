@@ -1,14 +1,14 @@
 #coding=utf8
 
 import re
-from assertions import assertType, assertTypeAll
+from assertions import assertType, assertTypeAll, REGEX_TYPE
 from supertypes import CallGraphAnalyzer, CallGraphBuilder
 from source import SourceFiles, VariableReference, SourceFile
 from callgraph import CallGraph
 from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printLine, printWarning, printDebug
+from printout import printLine, printWarning
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
@@ -25,7 +25,8 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         assertTypeAll(settings.excludeModules, 'settings.excludeModules', str)
         assertTypeAll(settings.ignoreGlobalsFromModules, 'settings.ignoreGlobalsFromModules', str)
         assertTypeAll(settings.ignoredTypes, 'settings.ignoredTypes', str)        
-        assertType(settings.abstractTypes, 'settings.abstractTypes', dict)    
+        assertType(settings.abstractTypes, 'settings.abstractTypes', dict) 
+        assertType(settings.ignoreSubroutinesRegex, 'settings.ignoreSubroutinesRegex', REGEX_TYPE, True)   
         
         super(GlobalVariableTracker, self).__init__()
         
@@ -71,7 +72,6 @@ class GlobalVariableTracker(CallGraphAnalyzer):
             self.__types = useTraversal.getTypes()
         
         self.__variableTracker = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, self.__callGraphBuilder)
-        self.__variableTracker.setIgnoreRegex(self._ignoreRegex)
         variableReferences = self.__analyzeSubroutines(callGraph.getAllSubroutineNames());
         variableReferences = VariableReference.sort(variableReferences)
         self.__variableTracker = None
@@ -87,7 +87,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         return variableReferences;
 
     def __analyzeSubroutine(self, subroutineName):
-        if (self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None) or (subroutineName.getModuleName().lower in self.__settings.excludeModules):
+        if self.__settings.matchIgnoreSubroutineRegex(subroutineName) or (subroutineName.getModuleName().lower in self.__settings.excludeModules):
             return set()
         
         moduleName = subroutineName.getModuleName()
@@ -255,10 +255,10 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         if module is None:
             return dict()
 
-        if self._ignoreRegex is not None:
+        if self.__settings.ignoreSubroutinesRegex is not None:
             moduleVariables = dict()
             for name, var in module.getVariables().items():
-                if self._ignoreRegex.match(name) is None:
+                if not self.__settings.matchIgnoreSubroutineRegex(name):
                     moduleVariables[name] = var
             return moduleVariables
         else:
