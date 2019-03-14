@@ -14,7 +14,7 @@ sys.path.append(FCG_DIR)
 from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from usetraversal import UseTraversal
-from trackvariable import VariableTracker
+from trackvariable import VariableTracker, VariableTrackerSettings
 from globals import GlobalVariableTracker
 
 ''' 
@@ -24,7 +24,9 @@ class OpenMPTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
+        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
+        self.trackerSettings = VariableTrackerSettings()
+        self.trackerSettings.excludeModules = ['omp_lib']
         
         self.srcFile = SOURCE_DIR + '/openmp.f90'
         self.assFile = ASSEMBLER_DIR + '/openmp.s'
@@ -79,7 +81,7 @@ class OpenMPTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
            
-        tracker = VariableTracker(self.sourceFiles, ['omp_lib'], [], self.interfaces, self.types)
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, self.interfaces, self.types)
            
         refs = tracker.trackDerivedTypeArguments(self.callGraph)
         expressions = set([ref.getExpression() for ref in refs])
@@ -89,7 +91,7 @@ class OpenMPTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
            
-        tracker = GlobalVariableTracker(self.sourceFiles, ['omp_lib'], [], [], self.interfaces, self.types)
+        tracker = GlobalVariableTracker(self.sourceFiles, self.trackerSettings, self.interfaces, self.types)
            
         refs = tracker.trackGlobalVariables(self.callGraph)
         expressions = set([ref.getExpression() for ref in refs])

@@ -12,8 +12,8 @@ FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
 from assembler import GNUx86AssemblerCallGraphBuilder
-from source import SourceFiles, SubroutineFullName, VariableReference
-from trackvariable import VariableTracker
+from source import SourceFiles, SubroutineFullName
+from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
 
 ''' 
@@ -78,7 +78,7 @@ class TypeProcedureTest(unittest.TestCase):
         if not self.filesExist:
             self.skipTest('Files not there')
         
-        tracker = VariableTracker(self.sourceFiles, [], [], self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, VariableTrackerSettings(), self.useTraversal.getInterfaces(), self.useTraversal.getTypes())
         
         expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraph))
         self.assertEqual({'t0%i0', 't1%i1', 't2%i2'}, expressions)

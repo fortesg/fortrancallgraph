@@ -14,13 +14,15 @@ sys.path.append(FCG_DIR)
 from tree import TreeLikeCallGraphPrinter
 from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, InnerSubroutineName
+from trackvariable import VariableTrackerSettings
 from globals import GlobalVariableTracker
 
 class TestInner(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
+        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
+        self.trackerSettings = VariableTrackerSettings()
         
         self.srcFile = SOURCE_DIR + '/inner.f90'
         self.assFile = ASSEMBLER_DIR + '/inner.s'
@@ -46,7 +48,7 @@ class TestInner(unittest.TestCase):
         self.ib = InnerSubroutineName('ib.3514', self.sb)
         
         self.printer = TreeLikeCallGraphPrinter()
-        self.globalsTracker = GlobalVariableTracker(self.sourceFiles)
+        self.globalsTracker = GlobalVariableTracker(self.sourceFiles, VariableTrackerSettings())
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)

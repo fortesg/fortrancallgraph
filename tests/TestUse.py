@@ -14,6 +14,7 @@ sys.path.append(FCG_DIR)
 from tree import TreeLikeCallGraphPrinter
 from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
+from trackvariable import VariableTrackerSettings
 from globals import GlobalVariableTracker
 from usetraversal import UseTraversal
 from useprinter import UseCollector
@@ -34,7 +35,7 @@ class SampleTest(unittest.TestCase):
         self.callGraph = callGraphBuilder.buildCallGraph(self.root)
         
         self.printer = TreeLikeCallGraphPrinter()
-        self.globalsTracker = GlobalVariableTracker(self.sourceFiles)
+        self.globalsTracker = GlobalVariableTracker(self.sourceFiles, VariableTrackerSettings())
         self.useTraversal = UseTraversal(self.sourceFiles)
         
     def testAssemberFileExists(self):

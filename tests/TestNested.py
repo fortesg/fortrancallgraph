@@ -14,7 +14,7 @@ from tree import TreeLikeCallGraphPrinter
 from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from globals import GlobalVariableTracker
-from trackvariable import VariableTracker
+from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
 
 
@@ -22,7 +22,8 @@ class TestNested(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
+        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
+        self.trackerSettings = VariableTrackerSettings()
         
         self.srcFile = SOURCE_DIR + '/nested.f90'
         self.assFile = ASSEMBLER_DIR + '/nested.s'
@@ -32,11 +33,11 @@ class TestNested(unittest.TestCase):
         self.callGraph = callGraphBuilder.buildCallGraph(self.root)
         
         self.printer = TreeLikeCallGraphPrinter()
-        self.globalsTracker = GlobalVariableTracker(self.sourceFiles)
+        self.globalsTracker = GlobalVariableTracker(self.sourceFiles, self.trackerSettings)
         
         self.usetraversal = UseTraversal(self.sourceFiles)
         
-        #self.tracker = VariableTracker(self.sourceFiles, [], [], interfaces, types)
+        #self.tracker = VariableTracker(self.sourceFiles, self.trackerSettings, interfaces, types)
         
     def testAssemberFileExists(self):
         self.assertTrue(os.path.exists(self.srcFile), 'Test will fail. Source file not found: ' + self.srcFile)
@@ -85,7 +86,7 @@ class TestNested(unittest.TestCase):
             
         self.usetraversal.parseModules(self.root)
         
-        tracker = VariableTracker(self.sourceFiles, [], [], self.usetraversal.getInterfaces(), self.usetraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, self.usetraversal.getInterfaces(), self.usetraversal.getTypes())
         expressions = set()
         for varRef in tracker.trackDerivedTypeArguments(self.callGraph):
             expressions.add(varRef.getExpression())

@@ -13,7 +13,7 @@ sys.path.append(FCG_DIR)
 
 from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName, VariableReference
-from trackvariable import VariableTracker
+from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
 
 ''' 
@@ -23,7 +23,8 @@ class AssignmentTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
+        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
+        self.trackerSettings = VariableTrackerSettings()
         
         self.srcFile = SOURCE_DIR + '/assignment.f90'
         self.assFile = ASSEMBLER_DIR + '/assignment.s'
@@ -78,7 +79,7 @@ class AssignmentTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.direct)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
         
         members = set()
         for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect):
@@ -91,7 +92,7 @@ class AssignmentTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.indirect)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
         
         members = set()
         for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect):
@@ -104,7 +105,7 @@ class AssignmentTest(unittest.TestCase):
          
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.operator)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
          
         expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphOperator))
         self.assertNotIn('tt1%second', expressions)
@@ -120,7 +121,7 @@ class AssignmentTest(unittest.TestCase):
 #         
 #         useTraversal = UseTraversal(self.sourceFiles, [])
 #         useTraversal.parseModules(self.member)
-#         tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+#         tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
 #         
 #         members = set()
 #         for ref in tracker.trackDerivedTypeArguments(self.callGraphMember):

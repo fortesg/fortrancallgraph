@@ -12,8 +12,8 @@ FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
 from assembler import GNUx86AssemblerCallGraphBuilder
-from source import SourceFiles, SubroutineFullName, VariableReference
-from trackvariable import VariableTracker
+from source import SourceFiles, SubroutineFullName
+from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
 
 ''' 
@@ -23,7 +23,8 @@ class RecursionTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
         callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles);
+        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
+        self.trackerSettings = VariableTrackerSettings()
         
         self.srcFile = SOURCE_DIR + '/recursion.f90'
         self.assFile = ASSEMBLER_DIR + '/recursion.s'
@@ -83,7 +84,7 @@ class RecursionTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.direct)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
         
         self.assertEqual({'var%first'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphDirect)))
                 
@@ -93,7 +94,7 @@ class RecursionTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.indirect)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
         
         self.assertEqual({'var%first', 'var%second'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphIndirect)))
         
@@ -104,7 +105,7 @@ class RecursionTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.func)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
         
         self.assertEqual({'var%first'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphFunc)))
 
@@ -119,7 +120,7 @@ class RecursionTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.position)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
         
         self.assertEqual({'var1%first', 'var1%second', 'var2%first', 'var2%second'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphPosition)))
         
@@ -134,7 +135,7 @@ class RecursionTest(unittest.TestCase):
         
         useTraversal = UseTraversal(self.sourceFiles, [])
         useTraversal.parseModules(self.position)
-        tracker = VariableTracker(self.sourceFiles, [], [], useTraversal.getInterfaces(), useTraversal.getTypes())
+        tracker = VariableTracker(self.sourceFiles, self.trackerSettings, useTraversal.getInterfaces(), useTraversal.getTypes())
         
         self.assertEqual({'r%second'}, set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphRecdata)))
         

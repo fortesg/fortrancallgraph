@@ -15,6 +15,7 @@ from tree import TreeLikeCallGraphPrinter
 from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from globals import GlobalVariableTracker
+from trackvariable import VariableTrackerSettings
 
 ''' 
 Tests wether TestNested.pysubroutine names are correctly handled when module names end on "_mod" 
@@ -33,7 +34,7 @@ class SampleTest(unittest.TestCase):
         self.callGraph = callGraphBuilder.buildCallGraph(self.func)
         
         self.printer = TreeLikeCallGraphPrinter()
-        self.globalsTracker = GlobalVariableTracker(self.sourceFiles)
+        self.globalsTracker = GlobalVariableTracker(self.sourceFiles, VariableTrackerSettings())
 
     def testModuleName(self):
         self.assertEqual('rhs_mod', self.func.getModuleName())

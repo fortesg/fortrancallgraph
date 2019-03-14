@@ -5,36 +5,35 @@ from assertions import assertType, assertTypeAll
 from supertypes import CallGraphAnalyzer, CallGraphBuilder
 from source import SourceFiles, VariableReference, SourceFile
 from callgraph import CallGraph
-from trackvariable import VariableTracker
+from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printLine, printWarning
+from printout import printLine, printWarning, printDebug
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
     __routineWarnings = set()
     __moduleWarnings = set()
 
-    def __init__(self, sourceFiles, excludeModules = [], ignoredModules = [], ignoredTypes = [], interfaces = None, types = None, abstractTypes = {}, callGraphBuilder = None):
+    def __init__(self, sourceFiles, settings, interfaces = None, types = None, callGraphBuilder = None):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
-        assertTypeAll(excludeModules, 'excludeModules', str)
-        assertTypeAll(ignoredModules, 'ignoredModules', str)
-        assertTypeAll(ignoredTypes, 'ignoredTypes', str)
         assertType(interfaces, 'interfaces', dict, True)
         assertType(types, 'types', TypeCollection, True)
-        assertType(abstractTypes, 'abstractTypes', dict)
         assertType(callGraphBuilder, 'callGraphBuilder', CallGraphBuilder, True)
+        
+        assertType(settings, 'settings', VariableTrackerSettings)
+        assertTypeAll(settings.excludeModules, 'settings.excludeModules', str)
+        assertTypeAll(settings.ignoreGlobalsFromModules, 'settings.ignoreGlobalsFromModules', str)
+        assertTypeAll(settings.ignoredTypes, 'settings.ignoredTypes', str)        
+        assertType(settings.abstractTypes, 'settings.abstractTypes', dict)    
         
         super(GlobalVariableTracker, self).__init__()
         
-        self.__sourceFiles = sourceFiles;
+        self.__sourceFiles = sourceFiles
+        self.__settings = settings
         self.__callGraph = None
-        self.__excludeModules = [m.lower() for m in excludeModules]
-        self.__ignoredModules = [m.lower() for m in ignoredModules]
-        self.__ignoredTypes = [t.lower() for t in ignoredTypes]
         self.__interfaces = interfaces
         self.__types = types
-        self.__abstractTypes = abstractTypes
         self.__variableTracker = None
         self.__usedVariableLists = dict()
         self.__callGraphBuilder = callGraphBuilder
@@ -66,12 +65,12 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         self.__callGraph = callGraph
         
         if self.__interfaces is None or self.__types is None:
-            useTraversal = UseTraversal(self.__sourceFiles, self.__excludeModules, self.__abstractTypes)
+            useTraversal = UseTraversal(self.__sourceFiles, self.__settings.excludeModules, self.__settings.abstractTypes)
             useTraversal.parseModules(callGraph.getRoot())
             self.__interfaces = useTraversal.getInterfaces()
             self.__types = useTraversal.getTypes()
         
-        self.__variableTracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
+        self.__variableTracker = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, self.__callGraphBuilder)
         self.__variableTracker.setIgnoreRegex(self._ignoreRegex)
         variableReferences = self.__analyzeSubroutines(callGraph.getAllSubroutineNames());
         variableReferences = VariableReference.sort(variableReferences)
@@ -88,7 +87,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         return variableReferences;
 
     def __analyzeSubroutine(self, subroutineName):
-        if (self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None) or (subroutineName.getModuleName().lower in self.__excludeModules):
+        if (self._ignoreRegex is not None and self._ignoreRegex.match(subroutineName.getSimpleName()) is not None) or (subroutineName.getModuleName().lower in self.__settings.excludeModules):
             return set()
         
         moduleName = subroutineName.getModuleName()
@@ -134,7 +133,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         for interface in self.__interfaces.values():
             if functionName.getSimpleName() in interface:
                 variables.append(originalReferences[0].getLevelNVariable().getAlias(interface.getName()))
-        tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
+        tracker = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, self.__callGraphBuilder)
         variableReferences = set()
                             
         for callerName in self.__callGraph.getCallers(functionName):
@@ -171,7 +170,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         variableReferences = set()
         if caller is not None and callee is not None:
             for lineNumber, statement, _ in caller.getStatements():
-                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
+                tracker = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, self.__callGraphBuilder)
                 for calleeNameAlternative in calleeNameAlternatives:
                     assignmentRegEx = re.compile(r'^(?P<alias>[a-z0-9_]+)(\(.*\))?\s*\=\>?\s*.*%' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
                     assignmentRegExMatch = assignmentRegEx.match(statement)
@@ -200,7 +199,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         variableReferences = set()
         if caller is not None and callee is not None:
             for lineNumber, statement, _ in caller.getStatements():
-                tracker = VariableTracker(self.__sourceFiles, self.__excludeModules, self.__ignoredTypes, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
+                tracker = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, self.__callGraphBuilder)
                 for calleeNameAlternative in calleeNameAlternatives:
                     procedureRegEx = re.compile(r'^.*(?P<prefix>[^a-z0-9_]+)' + calleeNameAlternative + '\s*\((?P<arguments>.*)\).*$', re.IGNORECASE);
                     procedureRegExMatch = procedureRegEx.match(statement)
@@ -249,7 +248,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
     
     def __getModuleVariables(self, moduleName):
         moduleName = moduleName.lower()
-        if moduleName in self.__ignoredModules or moduleName.lower() in self.__excludeModules:
+        if moduleName in self.__settings.ignoreGlobalsFromModules or moduleName.lower() in self.__settings.excludeModules:
             return dict()
 
         module = self.__findModule(moduleName)
@@ -294,7 +293,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
             useOnlyRegExMatch = useOnlyRegEx.match(statement) 
             if useOnlyRegExMatch is not None:
                 moduleName = useOnlyRegExMatch.group('modulename')
-                if moduleName not in self.__ignoredModules:
+                if moduleName not in self.__settings.ignoreGlobalsFromModules:
                     moduleVariables = self.__getModuleVariables(moduleName)
                     importList = useOnlyRegExMatch.group('importlist').split(',')
                     importList = [i.strip() for i in importList]
@@ -313,7 +312,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                 useAllRegExMatch = useAllRegEx.match(statement)
                 if useAllRegExMatch is not None:
                     moduleName = useAllRegExMatch.group('modulename')
-                    if moduleName not in self.__ignoredModules:
+                    if moduleName not in self.__settings.ignoreGlobalsFromModules:
                         usedVariables = self.__getModuleVariables(moduleName)
 
         return usedVariables

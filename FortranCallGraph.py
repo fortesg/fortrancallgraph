@@ -12,7 +12,7 @@ from tree import TreeLikeCallGraphPrinter;
 from dot import DotFormatCallGraphPrinter;
 from lister import SubroutineListingCallGraphPrinter, ModuleListingCallGraphPrinter;
 from globals import GlobalVariableTracker
-from trackvariable import VariableTracker
+from trackvariable import VariableTracker, VariableTrackerSettings
 from allvariables import AllVariablesCallGraphAnalysis
 from dumper import SourceLineDumper, SourceStatementDumper
 from linenumbers import DeclarationLineNumberFinder, EndStatementLineNumberFinder, FirstDocumentationLineFinder, LastSpecificationLineFinder, AllLineFinder,\
@@ -23,7 +23,7 @@ from treecache import CachedAssemblerCallGraphBuilder
 from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_SOURCE_DIRS, CFG_ASSEMBLER_DIRS, CFG_SPECIAL_MODULE_FILES,\
     CFG_CACHE_DIR, CFG_SOURCE_FILES_PREPROCESSED, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES,\
     CFG_ABSTRACT_TYPES
-from printout import printErrorAndExit
+from printout import printErrorAndExit, printDebug
 
 GRAPH_PRINTERS = {'tree': 'in a tree-like form',
                   'dot': 'in DOT format for Graphviz',
@@ -41,11 +41,11 @@ GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
                  'result': 'only function result',
                  'globals': 'only module variables',
                  'all': 'both arguments and globals'}
-def graphAnalysis(key, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, abstractTypes, callGraphBuilder):
+def graphAnalysis(key, sourceFiles, settings, callGraphBuilder):
     if key not in GRAPH_ANALYSIS: raise KeyError('No such CallGraphAnalyzer: ' + str(key))
-    elif key == 'globals': return GlobalVariableTracker(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, abstractTypes = abstractTypes, callGraphBuilder = callGraphBuilder)
-    elif key == 'arguments' or key == 'result': return VariableTracker(sourceFiles, excludeModules, ignoreDerivedTypes, abstractTypes = abstractTypes, callGraphBuilder = callGraphBuilder)
-    elif key == 'all': return AllVariablesCallGraphAnalysis(sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, abstractTypes = abstractTypes, callGraphBuilder = callGraphBuilder)
+    elif key == 'globals': return GlobalVariableTracker(sourceFiles, settings, callGraphBuilder = callGraphBuilder)
+    elif key == 'arguments' or key == 'result': return VariableTracker(sourceFiles, settings, callGraphBuilder = callGraphBuilder)
+    elif key == 'all': return AllVariablesCallGraphAnalysis(sourceFiles, settings, callGraphBuilder = callGraphBuilder)
     else: raise NotImplementedError('CallGraphAnalyzer not yet implemented: ' + str(key))
 
 SUBROUTINE_DUMPER = {'lines': 'original source lines',
@@ -167,7 +167,12 @@ def main():
         printer.printCallGraph(callGraph)
     elif args.analysis is not None:
         callGraph = graphBuilder.buildCallGraph(subroutineFullName, args.clearCache)
-        analysis = graphAnalysis(args.analysis, sourceFiles, excludeModules, ignoreGlobalsFromModules, ignoreDerivedTypes, abstractTypes, graphBuilder)
+        trackerSettings = VariableTrackerSettings()
+        trackerSettings.excludeModules = excludeModules 
+        trackerSettings.ignoreGlobalsFromModules = ignoreGlobalsFromModules 
+        trackerSettings.ignoreDerivedTypes = ignoreDerivedTypes 
+        trackerSettings.abstractTypes = abstractTypes 
+        analysis = graphAnalysis(args.analysis, sourceFiles, trackerSettings, graphBuilder)
         if args.analysis == 'arguments' and args.variable is not None:
             analysis.setVariableName(args.variable)
         elif args.analysis == 'result':
