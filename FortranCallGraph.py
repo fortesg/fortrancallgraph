@@ -22,7 +22,7 @@ from assembler import GNUx86AssemblerCallGraphBuilder
 from treecache import CachedAssemblerCallGraphBuilder
 from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_SOURCE_DIRS, CFG_ASSEMBLER_DIRS, CFG_SPECIAL_MODULE_FILES,\
     CFG_CACHE_DIR, CFG_SOURCE_FILES_PREPROCESSED, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES,\
-    CFG_ABSTRACT_TYPES
+    CFG_ABSTRACT_TYPES, CFG_ALWAYS_FULL_TYPES
 from printout import printErrorAndExit, printDebug
 
 GRAPH_PRINTERS = {'tree': 'in a tree-like form',
@@ -118,6 +118,7 @@ def main():
     excludeModules = config[CFG_EXCLUDE_MODULES]
     ignoreGlobalsFromModules = config[CFG_IGNORE_GLOBALS_FROM_MODULES]
     ignoreDerivedTypes = config[CFG_IGNORE_DERIVED_TYPES]
+    alwaysFullTypes = config[CFG_ALWAYS_FULL_TYPES]
     abstractTypes = config[CFG_ABSTRACT_TYPES]
     
     moduleName = args.module
@@ -170,7 +171,8 @@ def main():
         trackerSettings = VariableTrackerSettings()
         trackerSettings.excludeModules = excludeModules 
         trackerSettings.ignoreGlobalsFromModules = ignoreGlobalsFromModules 
-        trackerSettings.ignoreDerivedTypes = ignoreDerivedTypes 
+        trackerSettings.ignoredTypes = ignoreDerivedTypes 
+        trackerSettings.fullTypes = alwaysFullTypes 
         trackerSettings.abstractTypes = abstractTypes 
         analysis = graphAnalysis(args.analysis, sourceFiles, trackerSettings, graphBuilder)
         if args.analysis == 'arguments' and args.variable is not None:

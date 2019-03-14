@@ -687,6 +687,7 @@ class VariableTrackerSettings(object):
         self.excludeModules = []
         self.ignoreGlobalsFromModules = []
         self.ignoredTypes   = []
+        self.fullTypes = []
         self.abstractTypes  = {}
         #TODO Add more settings
 
