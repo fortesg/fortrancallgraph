@@ -10,7 +10,7 @@ class SubroutineListingCallGraphPrinter(CallGraphPrinter):
         
         subroutinesNames = [];
         for subroutine in callGraph.getAllSubroutineNames():
-            if self._ignoreRegex is None or not self._ignoreRegex.match(callGraph.getRoot().getName()):
+            if self._ignoreRegex is None or not self._ignoreRegex.match(callGraph.getRoot().getSimpleName()):
                 subroutinesNames.append(str(subroutine));
             
         for subroutineName in sorted(subroutinesNames):
