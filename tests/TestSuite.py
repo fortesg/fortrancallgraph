@@ -14,6 +14,7 @@ import TestBrackets
 import TestRecursion
 import TestVariableReference
 import TestTypeProcedure
+import TestAlwaysFull
 import TestOutVars
 import TestPreprocessed
 import TestOpenMP
@@ -37,6 +38,7 @@ suite.addTests(loader.loadTestsFromModule(TestBrackets))
 suite.addTests(loader.loadTestsFromModule(TestRecursion))
 suite.addTests(loader.loadTestsFromModule(TestVariableReference))
 suite.addTests(loader.loadTestsFromModule(TestTypeProcedure))
+suite.addTests(loader.loadTestsFromModule(TestAlwaysFull))
 suite.addTests(loader.loadTestsFromModule(TestOutVars))
 suite.addTests(loader.loadTestsFromModule(TestPreprocessed))
 suite.addTests(loader.loadTestsFromModule(TestOpenMP))
