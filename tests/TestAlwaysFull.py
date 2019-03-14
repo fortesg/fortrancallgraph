@@ -26,7 +26,7 @@ class TypeAlwaysFull(unittest.TestCase):
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
         self.trackerSettings = VariableTrackerSettings()
         self.trackerSettings.fullTypes = ['b']
-        self.ignoreRegex = 'ignore'
+        self.trackerSettings.ignoreSubroutinesRegex = 'ignore'
         
         self.srcFile = SOURCE_DIR + '/alwaysfull.f90'
         self.assFile = ASSEMBLER_DIR + '/alwaysfull.s'
@@ -76,7 +76,6 @@ class TypeAlwaysFull(unittest.TestCase):
             self.skipTest('Files not there')
           
         tracker = VariableTracker(self.sourceFiles, self.trackerSettings, self.useTraversal.getInterfaces(), self.useTraversal.getTypes(), callGraphBuilder = self.callGraphBuilder)
-        tracker.setIgnoreRegex(self.ignoreRegex)
           
         expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphTest))
         self.assertEqual({'argb%a%one', 'argb%a%two', 'argb%three', 'argd%b%a%one', 'argd%b%a%two', 'argd%b%three'}, expressions)
