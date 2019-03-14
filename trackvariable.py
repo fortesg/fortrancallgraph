@@ -189,11 +189,21 @@ class VariableTracker(CallGraphAnalyzer):
     
     def __trackVariable(self, variable, callGraph, excludeFromRecursionVariables = set(), excludeFromRecursionRoutines = set(), startAtLine = 0):
         self.__variable = variable;
-        if self.__variable.hasDerivedType and self.__variable.getDerivedTypeName() in self.__settings.ignoredTypes:
-            return []
-        
         self.__callGraph = callGraph;
         subroutineFullName = callGraph.getRoot();
+        
+        if self.__variable.hasDerivedType:
+            if self.__variable.getDerivedTypeName() in self.__settings.ignoredTypes:
+                return []
+            elif variable.getDerivedTypeName() in self.__settings.fullTypes and variable.isTypeAvailable():
+                lineNumber = startAtLine
+                if lineNumber == 0:
+                    subroutine = self.__sourceFiles.findSubroutine(subroutineFullName)
+                    if subroutine is not None:
+                        lineNumber = subroutine.getDeclarationLineNumber()
+                originalReference = VariableReference(variable.getName(), subroutineFullName, lineNumber, variable)
+                variableReferences = self.__createReferencesForFullTypeVariable(originalReference, subroutineFullName, lineNumber)
+                return VariableReference.sort(variableReferences)
         
         self.__excludeFromRecursionVariables = set(excludeFromRecursionVariables) # Copy set, otherwise empty optional will not work (https://stackoverflow.com/questions/25204126/python-function-optional-argument-evaluated-once) 
         self.__excludeFromRecursionVariables.add(variable)
@@ -360,7 +370,7 @@ class VariableTracker(CallGraphAnalyzer):
                 if variable is None or not variable.hasDerivedType():
                     return ({variableReference}, set())
                 elif variable.getDerivedTypeName() in self.__settings.fullTypes:
-                    return self.__createReferencesForFullTypeVariable(variableReference, subroutine, lineNumber)
+                    return (self.__createReferencesForFullTypeVariable(variableReference, subroutine.getName(), lineNumber), set())
             else:
                 return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber, originalStatement)
         else:
@@ -368,12 +378,12 @@ class VariableTracker(CallGraphAnalyzer):
         
         return (set(), set())   
     
-    def __createReferencesForFullTypeVariable(self, originalReference, subroutine, lineNumber):
+    def __createReferencesForFullTypeVariable(self, originalReference, subroutineName, lineNumber):
         variable = self.__findLevelNVariable(originalReference)
         if not variable.hasDerivedType() or not variable.getDerivedTypeName() in self.__settings.fullTypes or not variable.isTypeAvailable():
-            return (set(), set())
+            return set()
         
-        return (self.__createReferencesForFullTypeRecursive(originalReference, variable.getType(), subroutine.getName(), lineNumber, []), set())
+        return self.__createReferencesForFullTypeRecursive(originalReference, variable.getType(), subroutineName, lineNumber, [])
     
     def __createReferencesForFullTypeRecursive(self, originalReference, typE, subroutineName, lineNumber, typeHierarchy):
         
