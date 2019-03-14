@@ -7,7 +7,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printError, printLine, printWarning, printDebug
+from printout import printError, printLine, printWarning
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -359,13 +359,36 @@ class VariableTracker(CallGraphAnalyzer):
                 variable = self.__findLevelNVariable(variableReference)
                 if variable is None or not variable.hasDerivedType():
                     return ({variableReference}, set())
+                elif variable.getDerivedTypeName() in self.__settings.fullTypes:
+                    return self.__createReferencesForFullTypeVariable(variableReference, subroutine, lineNumber)
             else:
                 return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber, originalStatement)
         else:
             printWarning('Ignored access to recursive data structure: ' + str(variableReference), 'VariableTracker')
         
-        return (set(), set())    
+        return (set(), set())   
     
+    def __createReferencesForFullTypeVariable(self, originalReference, subroutine, lineNumber):
+        variable = self.__findLevelNVariable(originalReference)
+        if not variable.hasDerivedType() or not variable.getDerivedTypeName() in self.__settings.fullTypes or not variable.isTypeAvailable():
+            return (set(), set())
+        
+        return (self.__createReferencesForFullTypeRecursive(originalReference, variable.getType(), subroutine.getName(), lineNumber, []), set())
+    
+    def __createReferencesForFullTypeRecursive(self, originalReference, typE, subroutineName, lineNumber, typeHierarchy):
+        
+        typeHierarchy.append(typE)
+        variableReferences = set()
+        for member in typE.getMembers():
+            memberExpression = originalReference.getExpression() + '%' + member.getName()
+            memberReference = VariableReference(memberExpression, subroutineName, lineNumber, originalReference.getLevel0Variable())
+            if member.hasBuiltInType():
+                variableReferences.add(memberReference)
+            elif member.isTypeAvailable() and member.getType() not in typeHierarchy:
+                variableReferences.update(self.__createReferencesForFullTypeRecursive(memberReference, member.getType(), subroutineName, lineNumber, typeHierarchy))
+        return variableReferences
+            
+        
     def __analyzeTypeBoundProcedureCallOnThis(self, originalReference, subroutine, lineNumber, originalStatement):
         subReference = originalReference.getSubReferenceBeforeFirstProcedure()
 
