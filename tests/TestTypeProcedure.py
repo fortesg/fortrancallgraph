@@ -22,10 +22,10 @@ Tests whether type-bound procedures are handled correctly
 class TypeProcedureTest(unittest.TestCase):
     def setUp(self):
         specialModuleFiles = {}
-        abstractTypes = {'atest':'child'}
         self.callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
         self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
         self.trackerSettings = VariableTrackerSettings()
+        self.trackerSettings.abstractTypes = {'atest':'child'}
         
         self.srcFile = SOURCE_DIR + '/typeprocedure.f90'
         self.assFile = ASSEMBLER_DIR + '/typeprocedure.s'
@@ -33,7 +33,7 @@ class TypeProcedureTest(unittest.TestCase):
         
         self.test = SubroutineFullName('__typeprocedure_MOD_test')
         self.callGraphTest = self.callGraphBuilder.buildCallGraph(self.test)
-        self.useTraversal = UseTraversal(self.sourceFiles, abstractTypes = abstractTypes)
+        self.useTraversal = UseTraversal(self.sourceFiles, abstractTypes = self.trackerSettings.abstractTypes)
         self.useTraversal.parseModules(self.test)
         
         self.testIndirect = SubroutineFullName('__typeprocedure_MOD_testIndirect')
