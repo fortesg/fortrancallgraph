@@ -23,7 +23,7 @@ from treecache import CachedAssemblerCallGraphBuilder
 from fcgconfigurator import loadFortranCallGraphConfiguration, CFG_SOURCE_DIRS, CFG_ASSEMBLER_DIRS, CFG_SPECIAL_MODULE_FILES,\
     CFG_CACHE_DIR, CFG_SOURCE_FILES_PREPROCESSED, CFG_EXCLUDE_MODULES, CFG_IGNORE_GLOBALS_FROM_MODULES, CFG_IGNORE_DERIVED_TYPES,\
     CFG_ABSTRACT_TYPES, CFG_ALWAYS_FULL_TYPES
-from printout import printErrorAndExit, printDebug
+from printout import printErrorAndExit
 
 GRAPH_PRINTERS = {'tree': 'in a tree-like form',
                   'dot': 'in DOT format for Graphviz',
