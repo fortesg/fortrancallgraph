@@ -15,6 +15,7 @@ from assembler import GNUx86AssemblerCallGraphBuilder
 from source import SourceFiles, SubroutineFullName
 from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
+from globals import GlobalVariableTracker
 
 ''' 
 Tests whether always full types are handled correctly
@@ -79,6 +80,15 @@ class TypeAlwaysFull(unittest.TestCase):
           
         expressions = set(ref.getExpression() for ref in tracker.trackDerivedTypeArguments(self.callGraphTest))
         self.assertEqual({'argb%a%one', 'argb%a%two', 'argb%three', 'argd%b%a%one', 'argd%b%a%two', 'argd%b%three'}, expressions)
+         
+    def testGlobals(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+          
+        tracker = GlobalVariableTracker(self.sourceFiles, self.trackerSettings, self.useTraversal.getInterfaces(), self.useTraversal.getTypes(), callGraphBuilder = self.callGraphBuilder)
+          
+        expressions = set(ref.getExpression() for ref in tracker.trackGlobalVariables(self.callGraphTest))
+        self.assertEqual({'globalb1%a%one', 'globalb1%a%two', 'globalb1%three'}, expressions)
         
 if __name__ == "__main__":
     unittest.main()

@@ -101,7 +101,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         typeVariables = set()
         for variable in variables.values():
             if not variable.isParameter():
-                if variable.hasDerivedType():
+                if variable.hasDerivedType() and variable.getDerivedTypeName() not in self.__settings.fullTypes:
                     typeVariables.add(variable)
                 else:
                     normalVariables.add(variable)
@@ -238,15 +238,21 @@ class GlobalVariableTracker(CallGraphAnalyzer):
     def __trackVariable(self, variable, subroutineName):
         variableName = variable.getName()
         accessRegEx = re.compile(r'^(.*[^a-z0-9_])?' + variableName + r'([^a-z0-9_].*)?', re.IGNORECASE);
+        tracker = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, self.__callGraphBuilder)
         
         variableReferences = [];
         subroutine = self.__findSubroutine(subroutineName);
         if subroutine is not None:
             for lineNumber, statement, _ in subroutine.getStatements():
                 if accessRegEx.match(statement) is not None:
-                    variableReferences.append(VariableReference(variableName, subroutineName, lineNumber, variable))
+                    variableReference = VariableReference(variableName, subroutineName, lineNumber, variable)
+                    if variable.hasDerivedType() and variable.getDerivedTypeName() in self.__settings.fullTypes:
+                        variableReferences += list(tracker.createReferencesForFullTypeVariable(variableReference, subroutineName, lineNumber))
+                    else:
+                        variableReferences.append(variableReference)
+                        
                 
-        return variableReferences;  
+        return variableReferences
     
     def __getModuleVariables(self, moduleName):
         moduleName = moduleName.lower()

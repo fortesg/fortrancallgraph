@@ -21,6 +21,8 @@ MODULE alwaysfull
     TYPE(b) :: b
   END TYPE d
 
+  TYPE(b) :: globalb1, globalb2
+
 CONTAINS
 
   SUBROUTINE test(argA, argB, argC, argD)
@@ -30,6 +32,7 @@ CONTAINS
     TYPE(c), INTENT(in) :: argC
     TYPE(d), INTENT(in) :: argD
 
+    globalb1 = argB
     CALL ignore(argA, argB, argC)
     CALL ignore(argA, argD%b, argC)
 
