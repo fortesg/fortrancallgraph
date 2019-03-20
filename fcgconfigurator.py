@@ -1,5 +1,4 @@
 import os
-import sys
 from assertions import assertType
 from printout import printError
 

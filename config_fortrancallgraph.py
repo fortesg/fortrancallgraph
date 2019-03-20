@@ -1,5 +1,4 @@
 import os
-from config.config_fortrancallgraph import ABSTRACT_TYPE_IMPLEMENTATIONS
 
 # Config file for FortranCallGraph
 # Can be placed in FortranCallGraph's root directory or in a subdirectory called config or at any place and picked with -cf
