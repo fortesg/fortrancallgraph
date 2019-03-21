@@ -321,7 +321,7 @@ class GlobalVariableTracker(CallGraphAnalyzer):
                 if useAllRegExMatch is not None:
                     moduleName = useAllRegExMatch.group('modulename')
                     if moduleName not in self.__settings.ignoreGlobalsFromModules:
-                        usedVariables = self.__getModuleVariables(moduleName)
+                        usedVariables.update(self.__getModuleVariables(moduleName))
 
         return usedVariables
 
