@@ -224,7 +224,7 @@ class Interface(object):
 
 class Variable(object):
 
-    __types = '((LOGICAL)|(INTEGER)|(DOUBLE PRECISION)|(REAL)|(COMPLEX)|(CHARACTER\*?)|(TYPE)|(CLASS))\s*(\*\s*\d+)?'
+    __types = '((LOGICAL)|(INTEGER)|(DOUBLE PRECISION)|(REAL)|(COMPLEX)|(CHARACTER(\*\d*)?)|(TYPE)|(CLASS))\s*(\*\s*\d+)?'
     __typesEasyParsing = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/]+\s*\))?'
     __typesAll = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/\(\)]+\s*\))?'
     __declarationReg = re.compile(r'^(?P<typespecifier>' + __typesEasyParsing + '\s*(.*\:\:)?)(?P<varlist>.+)$', re.IGNORECASE)
@@ -1154,7 +1154,7 @@ class SubroutineContainer(object):
     
     def __findSubroutines(self):
         subroutineRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE))\s+)*SUBROUTINE\s+(?P<name>[a-z0-9_]{1,63})', re.IGNORECASE);
-        functionRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE)|(INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))\s*(\(.*\))?\s+)*FUNCTION\s+(?P<name>[a-z0-9_]{1,63})\s*\([a-z0-9_,]*\)\s*(RESULT\s*\((?P<result>[a-z0-9_]{1,63})\))?', re.IGNORECASE);
+        functionRegEx = re.compile(r'\s*(((ELEMENTAL)|(PURE)|(RECURSIVE)|(INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER(\*\d*)?)|(TYPE)|(CLASS))\s*(\(.*\))?\s+)*FUNCTION\s+(?P<name>[a-z0-9_]{1,63})\s*\([a-z0-9_,]*\)\s*(RESULT\s*\((?P<result>[a-z0-9_]{1,63})\))?', re.IGNORECASE);
         endRegEx = re.compile(r'\s*END\s*((SUBROUTINE)|(FUNCTION))', re.IGNORECASE);
         
         lines = self.getLines()
@@ -1425,7 +1425,7 @@ class Subroutine(SubroutineContainer):
                     variable.setIsFunctionResult(True)
                     return variable
                 
-            resultTypeRegEx = re.compile(r'(.+\s+)?(?P<type>((INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER)|(TYPE)|(CLASS))(\s*\(.*\))?).*\s+FUNCTION\s+.*', re.IGNORECASE);
+            resultTypeRegEx = re.compile(r'(.+\s+)?(?P<type>((INTEGER)|(LOGICAL)|(DOUBLE(\s+PRECISION)?)|(REAL)|(CHARACTER(\*\d*)?)|(TYPE)|(CLASS))(\s*\(.*\))?).*\s+FUNCTION\s+.*', re.IGNORECASE);
             resultTypeRegExMatch = resultTypeRegEx.match(self.getDeclaration())
             if resultTypeRegExMatch is not None:
                 typeName = resultTypeRegExMatch.group('type').strip()
