@@ -22,15 +22,15 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
             if not os.path.isdir(baseDir):
                 raise IOError("Not a directory: " + baseDir);
         
-        self.__baseDirs = baseDirs;
-        self.setSpecialModuleFiles(specialModuleFiles);
+        self.__baseDirs = baseDirs
+        self.setSpecialModuleFiles(specialModuleFiles)
         
     def setSpecialModuleFiles(self, specialModuleFiles):
         assertType(specialModuleFiles, 'specialModuleFiles', dict)
         
         self.__specialModuleFiles = dict()
         for module, filE in specialModuleFiles.items():
-            self.__specialModuleFiles[module.lower()] = filE;
+            self.__specialModuleFiles[module.lower()] = filE
         
     def buildCallGraph(self, rootSubroutine, clear = False):  # @UnusedVariable
         assertType(rootSubroutine, 'rootSubroutine', SubroutineFullName)     
@@ -80,21 +80,27 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
     
     def getModuleFilePath(self, moduleName):
         assertType(moduleName, 'moduleName', str)
-            
-        if moduleName in self.__specialModuleFiles:
-            fileName = self.__specialModuleFiles[moduleName]
-            fileName = fileName[:fileName.rfind('.')] + GNUx86AssemblerCallGraphBuilder.FILE_SUFFIX
-        else:
-            fileName = moduleName + GNUx86AssemblerCallGraphBuilder.FILE_SUFFIX;
-        
-        fileName = fileName.lower()
+
+        fileNameCandidates = self.__getModuleFileNameCandidates(moduleName)            
         for baseDir in self.__baseDirs:
             for root, _, files in os.walk(baseDir):
                 for name in files:
-                    if name.lower() == fileName:
+                    if name.lower() in fileNameCandidates:
                         return os.path.join(root, name)
             
         return None
+    
+    def __getModuleFileNameCandidates(self, moduleName):
+        moduleName = moduleName.lower()
+        candidates = []
+        if moduleName in self.__specialModuleFiles:
+            fileName = self.__specialModuleFiles[moduleName]
+            fileName = fileName[:fileName.rfind('.')] + GNUx86AssemblerCallGraphBuilder.FILE_SUFFIX
+            candidates.append(fileName)
+        candidates.append(moduleName + '.s')                                              
+        candidates.append(moduleName + '_mod.s')                                                   
+        candidates.append(moduleName.replace('_mod', '') + '.s')                                                   
+        return candidates    
     
     def __findCalledSubroutines(self, subroutine, filePath):
         openFile = open(filePath);
