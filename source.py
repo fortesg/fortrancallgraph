@@ -4,7 +4,7 @@ import os.path;
 import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
-from printout import printWarning
+from printout import printWarning, printDebug
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -2003,8 +2003,10 @@ class SourceFiles(object):
         assertType(moduleName, 'moduleName', str)
         
         if moduleName not in self.__filesByModules:
-            fileName = self.__getModuleFileName(moduleName)
-            sourceFile = self.findSourceFile(fileName)
+            for fileName in self.__getModuleFileNameCandidates(moduleName):
+                sourceFile = self.findSourceFile(fileName)
+                if sourceFile is not None:
+                    break
             self.__filesByModules[moduleName] = sourceFile
             
         return self.__filesByModules[moduleName]
@@ -2036,11 +2038,17 @@ class SourceFiles(object):
                 return path[len(baseDir):].lstrip('/')
         return path
         
-    def __getModuleFileName(self, moduleName):
+    def __getModuleFileNameCandidates(self, moduleName):
+        candidates = []
         if moduleName.lower() in self.__specialModuleFiles:
-            return self.__specialModuleFiles[moduleName.lower()]
-        else:
-            return moduleName + '.f90'
+            candidates.append(self.__specialModuleFiles[moduleName.lower()])
+        candidates.append(moduleName + '.f90')                                              
+        candidates.append(moduleName + '.F90')                                                    
+        candidates.append(moduleName + '_mod.f90')                                                   
+        candidates.append(moduleName + '_mod.F90')                                                    
+        candidates.append(moduleName.replace('_mod', '') + '.f90')                                                   
+        candidates.append(moduleName.replace('_mod', '') + '.F90')                                                   
+        return candidates
         
     def __findFile(self, fileName):
         fileName = fileName.lower()
