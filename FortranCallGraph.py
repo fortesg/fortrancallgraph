@@ -134,13 +134,13 @@ def main():
                 if args.dump is not None and moduleName.lower().endswith('.f90'):
                     sourceFileName = moduleName
                 else:
-                    printErrorAndExit(3, 'Invalid Module name!')
+                    printErrorAndExit(3, 'Invalid Module name: ' + moduleName)
         else: 
             printErrorAndExit(4, 'Missing Subroutine name!')
     elif SubroutineFullName.validParts(moduleName, subroutineName):
         subroutineFullName = SubroutineFullName.fromParts(moduleName, subroutineName)
     else:
-        printErrorAndExit(5, 'Invalid Module and/or Subroutine name!')
+        printErrorAndExit(5, 'Invalid Module and/or Subroutine name: ' + moduleName + ', ' + subroutineName)
         
     if subroutineFullName is not None and not sourceFiles.existsSubroutine(subroutineFullName):
         printErrorAndExit(6, 'Subroutine ' + str(subroutineFullName) + ' not found!')
