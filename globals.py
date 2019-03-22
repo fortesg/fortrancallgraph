@@ -8,7 +8,7 @@ from callgraph import CallGraph
 from trackvariable import VariableTracker, VariableTrackerSettings
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printLine, printWarning, printDebug
+from printout import printLine, printWarning
 
 class GlobalVariableTracker(CallGraphAnalyzer):
 
@@ -153,7 +153,6 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         return variableReferences
     
     def __trackOutVariables(self, calleeName, assignments):
-        printDebug(str(calleeName) + ' : ' + str(assignments), location='__trackOutVariables')
         variableReferences = set()
         if assignments:
             for callerName in self.__callGraph.getCallers(calleeName):
@@ -188,7 +187,6 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         return variableReferences
     
     def __analyzeCallingSubroutineForOutVars(self, callerName, calleeName, assignments):
-        printDebug(callerName, location='__analyzeCallingSubroutineForOutVars')
         calleeNameAlternatives = [calleeName.getSimpleName().lower()]
         for interface in self.__interfaces.values():
             if calleeName.getSimpleName() in interface:
