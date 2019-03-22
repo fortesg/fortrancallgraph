@@ -348,6 +348,7 @@ class VariableTracker(CallGraphAnalyzer):
                 variable = self.__findLevelNVariable(originalReference)
                 if variable is not None and variable.hasDerivedType() and aliasVar not in self.__excludeFromRecursionVariables:
                     newSubroutineAnalyzer = VariableTracker(self.__sourceFiles, self.__settings, self.__interfaces, self.__types, callGraphBuilder = self.__callGraphBuilder)
+                    # TODO Support several statements in the same line
                     variableReferences = newSubroutineAnalyzer.__trackVariable(aliasVar, self.__callGraph, self.__excludeFromRecursionVariables, self.__excludeFromRecursionRoutines, lineNumber + 1)
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())

@@ -1861,7 +1861,8 @@ class SourceFile(object):
                     statement = SourceFile.__removeUnnecessaryBlanksFromStatement(statement)
                     statement = SourceFile.__removeMultipleBlanksFromStatement(statement)
                     statement = SourceFile.__removeStringsFromStatement(statement)
-                    statements.append((j, statement.strip(), i));
+                    for substatement in statement.split(';'):
+                        statements.append((j, substatement.strip(), i));
                     statement = '';
                     j = i + 1;
             else: 
