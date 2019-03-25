@@ -5,6 +5,7 @@ import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
 from printout import printWarning, printDebug
+from os.path import basename
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -1516,7 +1517,7 @@ class Module(SubroutineContainer):
         if (other is None or not isinstance(other, Module)):
             return False;
         else:
-            return self.__name == other.__name and self.__sourceFile.getFileName() == other.__sourceFile.getFileName() and self.__index == other.__index
+            return self.__name == other.__name and self.__sourceFile.getFileNameWithoutPrefix() == other.__sourceFile.getFileNameWithoutPrefix() and self.__index == other.__index
         
     def __ne__(self, other):
         return not self == other
@@ -1741,6 +1742,9 @@ class SourceFile(object):
     
     def getFileName(self):
         return self.__base
+    
+    def getFileNameWithoutPrefix(self):
+        return os.path.splitext(self.__base)[0]
     
     def getLines(self):
         lines = [];
