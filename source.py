@@ -4,7 +4,7 @@ import os.path;
 import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
-from printout import printWarning
+from printout import printWarning, printDebug
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -245,13 +245,14 @@ class Type(object):
             extendsMatch = Type.EXTENDS_REGEX.match(specifier)
             if extendsMatch is not None:
                 extends = extendsMatch.group('extends').strip().lower()
-            specifierUpper = specifier.upper()
-            if specifierUpper == 'ABSTRACT':
-                abstract = True
-            elif specifierUpper == 'PUBLIC':
-                public = True
-            elif specifierUpper == 'PRIVATE':
-                private = True
+            else:
+                specifierUpper = specifier.upper()
+                if specifierUpper == 'ABSTRACT':
+                    abstract = True
+                elif specifierUpper == 'PUBLIC':
+                    public = True
+                elif specifierUpper == 'PRIVATE':
+                    private = True
         
         if debug and not SourceFile.validIdentifier(typeName):
                 msg = 'Parse Error: Found invalid type indentifier: "' + typeName + '" in statement: ' + declarationStatement + " (" + debugModuleName + ":"
