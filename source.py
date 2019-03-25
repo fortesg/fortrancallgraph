@@ -226,7 +226,7 @@ class Variable(object):
 
     __types = '((LOGICAL)|(INTEGER)|(DOUBLE PRECISION)|(REAL)|(COMPLEX)|(CHARACTER(\*\d*)?)|(TYPE)|(CLASS))\s*(\*\s*\d+)?'
     __typesEasyParsing = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/]+\s*\))?'
-    __typesAll = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/\(\)]+\s*\))?'
+    __typesAll = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/\(\)%]+\s*\))?'
     __declarationReg = re.compile(r'^(?P<typespecifier>' + __typesEasyParsing + '\s*(.*\:\:)?)(?P<varlist>.+)$', re.IGNORECASE)
     __typeRegEx = re.compile(r'^' + __typesAll + '\s*$', re.IGNORECASE)
     __dimensionRegEx = re.compile(r'^DIMENSION\s*\((?P<dimension>.*)\)\s*$', re.IGNORECASE)
