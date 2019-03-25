@@ -11,7 +11,7 @@ from printout import printError, printLine, printWarning
 
 class VariableTracker(CallGraphAnalyzer):
 
-    __routineWarnings = set()
+    __warnings = set()
 
     def __init__(self, sourceFiles, settings, interfaces = None, types = None, callGraphBuilder = None):
         assertType(sourceFiles, 'sourceFiles', SourceFiles)
@@ -353,13 +353,14 @@ class VariableTracker(CallGraphAnalyzer):
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                     for asgmtAlias, asgmtReference in newSubroutineAnalyzer.__outAssignments:
-                        self.__outAssignments.add((asgmtAlias, asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())))
+                        asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())
+                        self.__outAssignments.add((asgmtAlias, asgmtReference))
                     if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
                         self.__outAssignments.add((aliasVar, originalReference))                    
                         
                     return variableReferences
             else:
-                printWarning('Ignored assignment to recursive data structure: ' + str(originalReference), 'VariableTracker')
+                VariableTracker.__printWarningOnce('Ignored assignment to recursive data structure: ' + str(originalReference))
                 
         return set();
                 
@@ -377,7 +378,7 @@ class VariableTracker(CallGraphAnalyzer):
             else:
                 return self.__analyzeTypeBoundProcedureCallOnThis(variableReference, subroutine, lineNumber, originalStatement)
         else:
-            printWarning('Ignored access to recursive data structure: ' + str(variableReference), 'VariableTracker')
+            VariableTracker.__printWarningOnce('Ignored access to recursive data structure: ' + str(variableReference))
         
         return (set(), set())   
     
@@ -456,7 +457,7 @@ class VariableTracker(CallGraphAnalyzer):
         
                         return (variableReferences, outAssignments)
                 else:
-                    printWarning('No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutine.getName().getModuleName() + ':' + str(lineNumber), 'VariableTracker')
+                    VariableTracker.__printWarningOnce('No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine, subroutine.getName().getModuleName(), lineNumber)
             else:
                 VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         else:
@@ -557,7 +558,7 @@ class VariableTracker(CallGraphAnalyzer):
             return (set(), set())
         
         if originalReference.isRecursive():
-            printWarning('Ignored argument with recursive data structure: ' + str(originalReference), 'VariableTracker')
+            VariableTracker.__printWarningOnce('Ignored argument with recursive data structure: ' + str(originalReference))
             return (set(), set())
 
         if isinstance(calledRoutineName, SubroutineFullName):
@@ -600,7 +601,7 @@ class VariableTracker(CallGraphAnalyzer):
         
                         return (variableReferences, outAssignments)
                 else:
-                    printWarning('No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine + ' (' + subroutineName.getModuleName() + ':' + str(lineNumber), 'VariableTracker')
+                    VariableTracker.__printWarningOnce('No type argument ' + self.__variable.getName() + ' => ' + variableNameInCalledSubroutine, subroutineName.getModuleName(), lineNumber)
             else:
                 VariableTracker.__routineNotFoundWarning(calledRoutineFullName, subroutine.getName(), lineNumber)
         elif warnIfNotFound:
@@ -710,14 +711,23 @@ class VariableTracker(CallGraphAnalyzer):
         else:
             warning = 'Routine not found'
         warning += ': ' + str(subroutineName)
-        if callerName is not None and callerName.getModuleName():
-            warning += ' (' + str(callerName.getModuleName())
+        if callerName is not None:
+            moduleName = callerName.getModuleName()
+        else:
+            moduleName = ''
+
+        VariableTracker.__printWarningOnce(warning, moduleName, lineNumber)
+            
+    @staticmethod
+    def __printWarningOnce(warning, moduleName = '', lineNumber = 0):
+        if moduleName:
+            warning += ' (' + moduleName
             if lineNumber:
                 warning += ':' + str(lineNumber)
             warning += ')'
-            
-        if warning not in VariableTracker.__routineWarnings:
-            VariableTracker.__routineWarnings.add(warning)
+        
+        if warning not in VariableTracker.__warnings:
+            VariableTracker.__warnings.add(warning)
             printWarning(warning, 'Variable Tracker')
 
 class VariableTrackerSettings(object):
