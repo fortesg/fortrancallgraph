@@ -29,19 +29,14 @@ class TypeFinder(UseTraversalPassenger):
         assertType(module, 'module', Module)
         
         moduleName = module.getName()
-        typeRegEx = Type.DECLARATION_REGEX
         endTypeRegEx = Type.END_REGEX
         procedureRegEx = re.compile(r'^PROCEDURE\s*(\(.*\))?\s*(\,.*)?\:\:\s*(?P<alias>[a-z0-9_]+)\s*(\=\>\s*(?P<procedure>[a-z0-9_]+))?$', re.IGNORECASE)
         genericRegEx = re.compile(r'^GENERIC\s*\:\:\s*(?P<alias>[a-z0-9_]+)\s*\=\>\s*(?P<procedures>[a-z0-9_]+(\,[a-z0-9_]+)*)$', re.IGNORECASE)
         
         if self.__currentType is None:
-            typeRegExMatch = typeRegEx.match(statement)
-            if typeRegExMatch is not None and statement.upper() != 'CLASS DEFAULT':
-                typeName = typeRegExMatch.group('typename').lower()
-                abstract = typeRegExMatch.group('abstract') is not None
-                self.__currentType = Type(typeName, module, abstract = abstract)
-                if 'extends' in typeRegExMatch.groupdict() and typeRegExMatch.group('extends') is not None:
-                    self.__currentExtends = typeRegExMatch.group('extends')
+            if Type.validTypeDeclaration(statement):
+                self.__currentType = Type.fromDeclarationStatement(statement, moduleName, i)
+                self.__currentType.setDeclaredIn(module)
         elif Variable.validVariableDeclaration(statement):
             members = Variable.fromDeclarationStatement(statement, moduleName, i)
             self.__currentType.addMembers(members)
@@ -63,16 +58,14 @@ class TypeFinder(UseTraversalPassenger):
                 else:
                     endTypeRegExMatch = endTypeRegEx.match(statement)
                     if endTypeRegExMatch is not None:
-                        self.__collection.addType(self.__currentType, self.__currentExtends)
+                        self.__collection.addType(self.__currentType)
                         self.__currentType = None
-                        self.__currentExtends = None
 
 class TypeCollection(object):
 
     def __init__(self):
         self.__typeDict = dict()
         self.__typeSet = set()
-        self.__extends = dict()
         
     def __contains__(self, name):
         return name in self.__typeDict and len(self.__typeDict[name]) > 0
@@ -86,9 +79,8 @@ class TypeCollection(object):
     def __getitem__(self, key):
         return self.getType(key)
         
-    def addType(self, typE, extendsName = None):
+    def addType(self, typE):
         assertType(typE, 'typE', Type)
-        assertType(extendsName, 'extendsName', str, True)
         
         name = typE.getName().lower()
         if name not in self:
@@ -96,9 +88,6 @@ class TypeCollection(object):
         else:
             self.__typeDict[name].append(typE)
         self.__typeSet.add(typE)
-        
-        if extendsName is not None:
-            self.__extends[typE] = extendsName.lower()
         
     def finalize(self, abstractTypes):
         assertType(abstractTypes, 'abstractTypes', dict)
@@ -167,10 +156,12 @@ class TypeCollection(object):
                         member.setType(memberType)
                     
     def __setExtendedTypes(self):
-        for typE, extends in self.__extends.items():
-            extendsType = self.getType(extends, typE.getModule())
-            if extendsType is not None:
-                typE.setExtends(extendsType)
+        for typE in self.__typeSet:
+            extendsName = typE.getExtendsName()
+            if extendsName:
+                extendsType = self.getType(extendsName, typE.getModule())
+                if extendsType is not None:
+                    typE.setExtends(extendsType)
         self.__extends = dict()
         
     def __assignImplementations(self, abstractTypes):

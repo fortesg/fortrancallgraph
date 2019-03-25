@@ -4,30 +4,37 @@ import os.path;
 import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
-from printout import printWarning, printDebug
-from os.path import basename
+from printout import printWarning
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
 class Type(object):
     
-    DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(?P<abstract>ABSTRACT)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
+#     DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(,\s*((PUBLIC)|(PRIVATE)|(?P<abstract>ABSTRACT)|(BIND\(.+\)))\s*)*(,\s*EXTENDS\((?P<extends>[a-z0-9_]+)\)\s*)?(,\s*((PUBLIC)|(PRIVATE)|(BIND\(.+\)))\s*)*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
+    DECLARATION_REGEX = re.compile(r'^((TYPE)|(CLASS))\s*(?P<specifiers>(\,[a-z0-9_\(\)]+)*)\s*((\:\:)|\s)\s*(?P<typename>[a-z0-9_]+)$', re.IGNORECASE)
+    EXTENDS_REGEX = re.compile(r'^EXTENDS\((?P<extends>[a-z0-9_]+)\)$', re.IGNORECASE)
     END_REGEX = re.compile(r'^END\s*((TYPE)|(CLASS))(\s+[a-z0-9_]+)?$', re.IGNORECASE)
     
-    def __init__(self, name, declaredIn, extends = None, abstract = False):
+    def __init__(self, name, extendsName = '', abstract = False, public=False, private=False):
         assertType(name, 'name', str)
-        assertType(declaredIn, 'declaredIn', [Module, Subroutine])
-        assertType(extends, 'extends', Type, True)
+        assertType(extendsName, 'extendsName', str)
+        assertType(public, 'public', bool)
+        assertType(private, 'private', bool)
         
         self.__name = name.lower()
-        self.__declaredIn = declaredIn
+        self.__declaredIn = None
         self.__abstract = abstract
         self.__members = {}
         self.__procedures = {}
+        self.__extendsName = extendsName.lower()
         self.__extends = None
-        if extends is not None:
-            self.setExtends(extends)
+        if extendsName:
+            parent = Variable(self.__extendsName, 'TYPE(' + self.__extendsName + ')')
+            parent.setDeclaredIn(self)
+            self.addMember(parent)
         self.__implementation = None 
+        self.__public = public
+        self.__private = private
     
     def __eq__(self, other):
         if (other is None or not isinstance(other, Type)):
@@ -142,24 +149,30 @@ class Type(object):
     def getName(self):
         return self.__name
     
+    def getExtendsName(self):
+        return self.__extendsName
+    
+    def isExtendsAvailable(self):
+        return self.__extends is not None
+    
     def getExtends(self):
         return self.__extends
     
     def setExtends(self, extends):
         assertType(extends, 'extends', Type, True)
-        if self.__extends is not None:
-            del self.__members[self.__extends.getName()]
+        
+        if extends is not None and not self.getExtendsName():
+            error = "You are only allowed to set EXTENDS to type " + self.getName() + " from " + self.getDeclaredInName() + "!"
+            raise ValueError(error)
+        
         self.__extends = extends
-        name = extends.getName()
-        parent = Variable(name, 'TYPE(' + name + ')')
-        parent.setDeclaredIn(self)
-        parent.setType(extends)
-        self.addMember(parent)
+        if extends is not None:
+            self.getMember(self.getExtendsName()).setType(extends)
     
     def isSubtypeOf(self, other):
         if  other is None or not isinstance(other, Type):
             return False
-        elif self.getExtends() is None:
+        elif not self.isExtendsAvailable():
             return False
         elif self.getExtends() == other:
             return True
@@ -178,6 +191,16 @@ class Type(object):
     def getAssignedImplementation(self):
         return self.__implementation
     
+    def isPublic(self):
+        return self.__public
+    
+    def isPrivate(self):
+        return self.__private
+    
+    def setDeclaredIn(self, declaredIn):
+        assertType(declaredIn, 'declaredIn', [Module, Subroutine])
+        self.__declaredIn = declaredIn
+    
     def getDeclaredIn(self):
         return self.__declaredIn
     
@@ -192,7 +215,52 @@ class Type(object):
         return self.__declaredIn.getModule()
     
     def getMembers(self):
-        return self.__members.values()    
+        return self.__members.values() 
+    
+    @staticmethod
+    def validTypeDeclaration(declarationStatementWannabe):
+        return isinstance(declarationStatementWannabe, str) and \
+           Type.DECLARATION_REGEX.match(declarationStatementWannabe) is not None and \
+           declarationStatementWannabe.upper() != 'CLASS DEFAULT'
+    
+    @staticmethod
+    def fromDeclarationStatement(declarationStatement, debugModuleName = '', debugLineNumber = 0):
+        if not Type.validTypeDeclaration(declarationStatement):
+            raise ValueError("declarationStatement is not a valid type declaration statement.");
+        assertType(debugModuleName, 'debugModuleName', str)    
+        assertType(debugLineNumber, 'debugLineNumber', int)    
+        
+        debug = debugModuleName != '' or debugLineNumber > 0
+        
+        typeRegExMatch = Type.DECLARATION_REGEX.match(declarationStatement)
+        specifierPart = typeRegExMatch.group('specifiers')
+        specifiers = SourceFile.extractListedElements(specifierPart)
+        typeName = typeRegExMatch.group('typename')
+            
+        extends = ''
+        abstract = False
+        public = False
+        private = False
+        for specifier in specifiers:
+            extendsMatch = Type.EXTENDS_REGEX.match(specifier)
+            if extendsMatch is not None:
+                extends = extendsMatch.group('extends').strip().lower()
+            specifierUpper = specifier.upper()
+            if specifierUpper == 'ABSTRACT':
+                abstract = True
+            elif specifierUpper == 'PUBLIC':
+                public = True
+            elif specifierUpper == 'PRIVATE':
+                private = True
+        
+        if debug and not SourceFile.validIdentifier(typeName):
+                msg = 'Parse Error: Found invalid type indentifier: "' + typeName + '" in statement: ' + declarationStatement + " (" + debugModuleName + ":"
+                if debugLineNumber > 0:
+                    msg += str(debugLineNumber)
+                msg += ")"
+                raise Exception(msg)
+        
+        return Type(typeName, extends, abstract, public, private)
 
 class Interface(object):
     
@@ -226,7 +294,7 @@ class Interface(object):
 class Variable(object):
 
     __types = '((LOGICAL)|(INTEGER)|(DOUBLE PRECISION)|(REAL)|(COMPLEX)|(CHARACTER(\*\d*)?)|(TYPE)|(CLASS))\s*(\*\s*\d+)?'
-    __typesEasyParsing = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/]+\s*\))?'
+    __typesEasyParsing = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/%]+\s*\))?'
     __typesAll = __types + '\s*(\(\s*[a-z0-9_=\,\*\: \+\-\/\(\)%]+\s*\))?'
     __declarationReg = re.compile(r'^(?P<typespecifier>' + __typesEasyParsing + '\s*(.*\:\:)?)(?P<varlist>.+)$', re.IGNORECASE)
     __typeRegEx = re.compile(r'^' + __typesAll + '\s*$', re.IGNORECASE)
@@ -236,7 +304,7 @@ class Variable(object):
     
     def __init__(self, variableName, typeName, parameter=False, allocatable=False, pointer=False, target=False, dimension=0, intent='', optional=False, public=False, private=False):
         assertType(variableName, 'variableName', str)
-        if not Variable.validIdentifier(variableName):
+        if not SourceFile.validIdentifier(variableName):
             raise ValueError("variableName is not a valid identifier: " + variableName);
         assertType(typeName, 'typeName', str)
         if not Variable.validType(typeName):
@@ -348,10 +416,19 @@ class Variable(object):
             return None 
         return self.__typeName[self.__typeName.find('(') + 1:-1].lower()
     
-    def setType(self, typE):
+    def setType(self, typE, debugModuleName = '', debugLineNumber = 0):
         assertType(typE, 'typE', Type)
+        assertType(debugModuleName, 'debugModuleName', str)    
+        assertType(debugLineNumber, 'debugLineNumber', int)  
+        
         if not self.hasDerivedType():
-            raise ValueError("You are only allowed to set derived types.")
+            error = "You are only allowed to set derived types."
+            if debugModuleName:
+                error += " (" + debugModuleName
+                if debugLineNumber > 0:
+                    error += ":" + str(debugLineNumber)
+                error += ")"
+            raise ValueError(error)
         
         self.__type = typE
     
@@ -510,10 +587,6 @@ class Variable(object):
         return original
     
     @staticmethod
-    def validIdentifier(identifierWannabe):
-        return isinstance(identifierWannabe, str) and IDENTIFIER_REG_EX.match(identifierWannabe) is not None
-    
-    @staticmethod
     def validType(typeWannabe):
         return isinstance(typeWannabe, str) and Variable.__typeRegEx.match(typeWannabe) is not None
     
@@ -555,8 +628,8 @@ class Variable(object):
                         break
                 variablePart = foundVariablePart[pos:]
             
-        typeSpecifiers = Variable.__extractListedElements(typeSpecifierPart)
-        variables = Variable.__extractListedElements(variablePart)
+        typeSpecifiers = SourceFile.extractListedElements(typeSpecifierPart)
+        variables = SourceFile.extractListedElements(variablePart)
             
         parameter = False
         allocatable = False
@@ -602,7 +675,7 @@ class Variable(object):
             if bracketPos >= 0:
                 varDimension = Variable.__extractDimension(varName[bracketPos + 1:-1])
                 varName = varName[:bracketPos].strip()
-            if debug and not Variable.validIdentifier(varName):
+            if debug and not SourceFile.validIdentifier(varName):
                 msg = 'Parse Error: Found invalid variable indentifier: "' + varName + '" in statement: ' + declarationStatement + " (" + debugModuleName + ":"
                 if debugLineNumber > 0:
                     msg += str(debugLineNumber)
@@ -611,28 +684,6 @@ class Variable(object):
             result.append(Variable(varName, typeSpecifiers[0], parameter, allocatable, pointer, target, varDimension, intent, optional, public, private))
             
         return result
-    
-    @staticmethod
-    def __extractListedElements(spec):
-        spec = spec.strip(' :')
-        elements = []
-        roundBracketCount = 0
-        squareBracketCount = 0
-        element = ''
-        for part in spec.split(','):
-            for c in part:
-                if c == '(': roundBracketCount += 1
-                elif c == ')': roundBracketCount -= 1
-                elif c == '[': squareBracketCount += 1
-                elif c == ']': squareBracketCount -= 1
-            element += ',' + part
-            if roundBracketCount == 0 and squareBracketCount == 0:
-                element = element.strip(' ,')
-                if element != '':
-                    elements.append(element)
-                    element = ''
-            
-        return elements
     
     @staticmethod
     def __extractDimension(dimSpec):
@@ -992,11 +1043,6 @@ class SubroutineName(object):
     
     def getModuleName(self):
         raise NotImplementedError()      
-    
-    @staticmethod
-    def validIdentifier(identifierWannabe):
-        return isinstance(identifierWannabe, str) and IDENTIFIER_REG_EX.match(identifierWannabe) is not None
-    
 
 class SubroutineFullName(SubroutineName):
     
@@ -1025,7 +1071,7 @@ class SubroutineFullName(SubroutineName):
 
     @staticmethod
     def validParts(moduleName, simpleName):
-        return SubroutineName.validIdentifier(moduleName) and SubroutineName.validIdentifier(simpleName)
+        return SourceFile.validIdentifier(moduleName) and SourceFile.validIdentifier(simpleName)
     
     @staticmethod
     def fromParts(moduleName, simpleName):
@@ -1040,7 +1086,7 @@ class InnerSubroutineName(SubroutineName):
     __innerNameRegEx = re.compile('^[a-z0-9_]{1,63}\.\d+$', re.IGNORECASE)
     
     def __init__(self, name, hostName):
-        if not InnerSubroutineName.validInnerSubroutineName(name) and not SubroutineName.validIdentifier(name):
+        if not InnerSubroutineName.validInnerSubroutineName(name) and not SourceFile.validIdentifier(name):
             raise ValueError("Not a valid InnerSubroutineName: " + name + " (type: " + str(type(name)) + ")");
         assertType(hostName, 'hostName', SubroutineFullName)
         
@@ -1384,7 +1430,7 @@ class Subroutine(SubroutineContainer):
     
     def findArgument(self, name):
         assertType(name, 'name', str)
-        if not Variable.validIdentifier(name):
+        if not SourceFile.validIdentifier(name):
             raise ValueError("Not a valid identifier: " + name);
 
         name = name.lower()
@@ -1395,7 +1441,7 @@ class Subroutine(SubroutineContainer):
     
     def getArgumentPosition(self, name):
         assertType(name, 'name', [str, Variable])
-        if isinstance(name, str) and not Variable.validIdentifier(name):
+        if isinstance(name, str) and not SourceFile.validIdentifier(name):
             raise ValueError("Not a valid identifier: " + name)
         elif isinstance(name, Variable):
             name = name.getName()
@@ -1636,6 +1682,7 @@ class Module(SubroutineContainer):
     def __findPublicElements(self):
         publicRegEx = re.compile(r'^PUBLIC\s*((\:\:)|\s)\s*(?P<elementList>[a-z0-9_,\s]+)$', re.IGNORECASE);
         # TODO What if whole module is public?
+        # What about public specifiers at the element?
         
         elements = []
         for _, statement, _ in self.getStatementsBeforeContains():
@@ -1898,21 +1945,47 @@ class SourceFile(object):
         return clean
     
     @staticmethod
+    def extractListedElements(spec):
+        spec = spec.strip(' :')
+        elements = []
+        roundBracketCount = 0
+        squareBracketCount = 0
+        element = ''
+        for part in spec.split(','):
+            for c in part:
+                if c == '(': roundBracketCount += 1
+                elif c == ')': roundBracketCount -= 1
+                elif c == '[': squareBracketCount += 1
+                elif c == ']': squareBracketCount -= 1
+            element += ',' + part
+            if roundBracketCount == 0 and squareBracketCount == 0:
+                element = element.strip(' ,')
+                if element != '':
+                    elements.append(element)
+                    element = ''
+            
+        return elements
+    
+    @staticmethod
     def __removeCommentFromLine(line):
         'TODO Testen!!!'
-        cleanLine = '';
-        quotation = '';
+        cleanLine = ''
+        quotation = ''
         for index, char in enumerate(line):
             if not quotation:
                 if char == '!':
                     return cleanLine;
                 elif char == '"' or char == "'":
-                    quotation = char; 
+                    quotation = char 
             elif char == quotation and index != '\\':
-                quotation = '';
-            cleanLine += char;
+                quotation = ''
+            cleanLine += char
         
-        return cleanLine;
+        return cleanLine
+    
+    @staticmethod
+    def validIdentifier(identifierWannabe):
+        return isinstance(identifierWannabe, str) and IDENTIFIER_REG_EX.match(identifierWannabe) is not None
     
     @staticmethod
     def __removeUnnecessaryBlanksFromStatement(statement):

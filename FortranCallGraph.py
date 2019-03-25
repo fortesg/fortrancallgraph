@@ -7,7 +7,7 @@
 import argparse;
 import re
 
-from source import SubroutineFullName, SourceFiles
+from source import SubroutineFullName, SourceFiles, SourceFile
 from tree import TreeLikeCallGraphPrinter;
 from dot import DotFormatCallGraphPrinter;
 from lister import SubroutineListingCallGraphPrinter, ModuleListingCallGraphPrinter;
@@ -130,7 +130,7 @@ def main():
         if SubroutineFullName.validFullName(moduleName):
             subroutineFullName = SubroutineFullName(moduleName)
         elif args.dump is not None or args.line is not None:
-            if not SubroutineFullName.validIdentifier(moduleName):
+            if not SourceFile.validIdentifier(moduleName):
                 if args.dump is not None and moduleName.lower().endswith('.f90'):
                     sourceFileName = moduleName
                 else:

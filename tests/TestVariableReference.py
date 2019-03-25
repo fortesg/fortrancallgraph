@@ -17,9 +17,10 @@ Tests whether assignment are tracked correctly
 class VariableReferenceTest(unittest.TestCase):
     
     def setUp(self):
-        file = SourceFile('test', isTestDummy = True)
-        module = Module('test', [], file, 0)
-        ttest = Type('ttest', module, None)
+        filE = SourceFile('test', isTestDummy = True)
+        module = Module('test', [], filE, 0)
+        ttest = Type('ttest')
+        ttest.setDeclaredIn(module)
         subroutineName = SubroutineFullName('__test_MOD_sub')
         
         self.var1 = Variable('first', 'INTEGER')
