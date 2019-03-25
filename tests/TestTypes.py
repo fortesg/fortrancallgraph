@@ -62,6 +62,8 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('INTEGER', type0.getMember('member').getTypeName())
         self.assertEqual('moda', type0.getModule().getName())
         self.assertFalse(type0.isAbstract())
+        self.assertTrue(type0.isPublic())
+        self.assertFalse(type0.isPrivate())
             
     def testType1FromModB(self):
         var1 = self.module.getVariable('var1')
@@ -77,6 +79,8 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('REAL', type1.getMember('member').getTypeName())
         self.assertEqual('modb', type1.getModule().getName())
         self.assertFalse(type1.isAbstract())
+        self.assertFalse(type1.isPublic())
+        self.assertTrue(type1.isPrivate())
         
         var1.setType(type1)
         self.assertTrue(var1.isTypeAvailable())
@@ -95,6 +99,8 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('REAL', type2.getMember('member').getTypeName())
         self.assertEqual('modb', type2.getModule().getName())
         self.assertFalse(type2.isAbstract())
+        self.assertFalse(type2.isPublic())
+        self.assertFalse(type2.isPrivate())
         
         var2.setType(type2)
         self.assertTrue(var2.isTypeAvailable())
@@ -113,6 +119,8 @@ class TestTypes(unittest.TestCase):
         self.assertEqual('TYPE(typeA)', type3.getMember('member1').getTypeName())
         self.assertEqual('modc', type3.getModule().getName())
         self.assertFalse(type3.isAbstract())
+        self.assertFalse(type3.isPublic())
+        self.assertFalse(type3.isPrivate())
         
         var3.setType(type3)
         self.assertTrue(var3.isTypeAvailable())

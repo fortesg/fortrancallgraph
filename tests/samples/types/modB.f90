@@ -6,7 +6,7 @@ MODULE modB
     REAL :: member
   END TYPE type0
 
-  TYPE :: type1
+  TYPE, PRIVATE :: type1
     REAL :: member
   END TYPE type1
 

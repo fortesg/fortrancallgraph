@@ -2,7 +2,7 @@ MODULE modA
 
   IMPLICIT NONE
 
-  TYPE :: type0
+  TYPE, PUBLIC :: type0
     INTEGER :: member
   END TYPE type0
 
