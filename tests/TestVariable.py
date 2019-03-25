@@ -73,5 +73,28 @@ class VariableTest(unittest.TestCase):
         self.assertEqual('grb2_grid_info_lc', grb2_grid_info_lc.getName())
         self.assertEqual('CHARACTER(LEN=LEN(grb2_grid_info))', grb2_grid_info_lc.getTypeName())
 
+    def testDimensionConstant(self):
+        decl1 = "integer(LONG_KIND)::addrs_s(MAX_DOMAIN_FIELDS)"
+        self.assertTrue(Variable.validVariableDeclaration(decl1))
+        variables = Variable.fromDeclarationStatement(decl1, 'VariableTest')
+        self.assertTrue(variables)
+        addrs_s = variables[0]
+        self.assertIsNotNone(addrs_s)
+        self.assertEqual('addrs_s', addrs_s.getName())
+        self.assertEqual('integer(LONG_KIND)', addrs_s.getTypeName())
+        self.assertTrue(addrs_s.isArray())
+        self.assertEqual(1, addrs_s.getDimension())
+
+        decl2 = "integer,dimension(MAX_REQUEST)::buffer_pos_recv"
+        self.assertTrue(Variable.validVariableDeclaration(decl2))
+        variables = Variable.fromDeclarationStatement(decl2, 'VariableTest')
+        self.assertTrue(variables)
+        buffer_pos_recv = variables[0]
+        self.assertIsNotNone(buffer_pos_recv)
+        self.assertEqual('buffer_pos_recv', buffer_pos_recv.getName())
+        self.assertEqual('integer', buffer_pos_recv.getTypeName())
+        self.assertTrue(buffer_pos_recv.isArray())
+        self.assertEqual(1, buffer_pos_recv.getDimension())
+
 if __name__ == "__main__":
     unittest.main()
