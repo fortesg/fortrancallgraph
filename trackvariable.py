@@ -7,7 +7,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printError, printLine, printWarning
+from printout import printError, printLine, printWarning, printDebug
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -353,7 +353,7 @@ class VariableTracker(CallGraphAnalyzer):
                     for variableReference in variableReferences:
                         variableReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                     for asgmtAlias, asgmtReference in newSubroutineAnalyzer.__outAssignments:
-                        asgmtReference.setLevel0Variable(self.__variable, asgmtReference.getMembers())
+                        asgmtReference.setLevel0Variable(self.__variable, originalReference.getMembers())
                         self.__outAssignments.add((asgmtAlias, asgmtReference))
                     if aliasVar.isOutArgument() or aliasVar.isFunctionResult():
                         self.__outAssignments.add((aliasVar, originalReference))                    
