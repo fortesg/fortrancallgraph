@@ -235,7 +235,7 @@ class Type(object):
         typeRegExMatch = Type.DECLARATION_REGEX.match(declarationStatement)
         specifierPart = typeRegExMatch.group('specifiers')
         specifiers = SourceFile.extractListedElements(specifierPart)
-        typeName = typeRegExMatch.group('typename')
+        typeName = typeRegExMatch.group('typename').lower()
             
         extends = ''
         abstract = False
