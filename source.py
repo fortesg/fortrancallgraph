@@ -385,6 +385,10 @@ class Variable(object):
             string += ', INTENT(' + self.getIntent() + ')'
         if self.isOptionalArgument():
             string += ', OPTIONAL'
+        if self.isPublic():
+            string += ', PUBLIC'
+        if self.isPrivate():
+            string += ', PRIVATE'
         string += ' :: ' + self.getName()
         
         return string
@@ -567,7 +571,7 @@ class Variable(object):
         if name is None:
             name = self.__name
         
-        alias = Variable(name, self.__typeName, self.__parameter, self.__allocatable, self.__pointer, self.__target, self.__dimension, self.__intent, self.__optional)
+        alias = Variable(name, self.__typeName, self.__parameter, self.__allocatable, self.__pointer, self.__target, self.__dimension, self.__intent, self.__optional, self.__public, self.__private)
         if self.__declaredIn is not None:
             alias.setDeclaredIn(self.__declaredIn)
         alias.setOriginalName(self.__name)
