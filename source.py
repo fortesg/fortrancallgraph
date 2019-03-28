@@ -584,7 +584,7 @@ class Variable(object):
         return self.__originalName != self.__name
     
     def getOriginal(self):
-        original = Variable(self.__originalName, self.__typeName, self.__parameter, self.__allocatable, self.__pointer, self.__target, self.__dimension, self.__intent, self.__optional)
+        original = Variable(self.__originalName, self.__typeName, self.__parameter, self.__allocatable, self.__pointer, self.__target, self.__dimension, self.__intent, self.__optional, self.__public, self.__private)
         original.setDeclaredIn(self.__declaredIn)
         if self.isTypeAvailable():
             original.setType(self.getType())
