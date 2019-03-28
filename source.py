@@ -1412,6 +1412,8 @@ class Subroutine(SubroutineContainer):
     
     def getArgumentNames(self):
         declaration = self.getDeclaration()
+        if declaration.find('(') < 0:
+            return []
         name = self.getSimpleName().lower()
         nameEnd = declaration.lower().find(' ' + name + '(') + len(name) + 2
         declaration = declaration[nameEnd:]
