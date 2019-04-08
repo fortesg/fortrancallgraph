@@ -20,10 +20,11 @@ class TestLineNumbers(unittest.TestCase):
         self.srcFile = SOURCE_DIR + '/dyn_comp.f90'
         self.filesExist = os.path.exists(self.srcFile)
         
-        self.dynRun = SubroutineFullName('__dyn_comp_MOD_dyn_run')
         self.dynReadNl = SubroutineFullName('__dyn_comp_MOD_dyn_readnl')
         self.initNsplit = InnerSubroutineName('init_nsplit', self.dynReadNl)
         self.dynRegister = SubroutineFullName('__dyn_comp_MOD_dyn_register')
+        self.dynInit = SubroutineFullName('__dyn_comp_MOD_dyn_init')
+        self.dynRun = SubroutineFullName('__dyn_comp_MOD_dyn_run')
         
     def testSourceFiles(self):
         if not self.filesExist:
@@ -45,6 +46,8 @@ class TestLineNumbers(unittest.TestCase):
         self.assertIsNotNone(initNsplit)
         dynRegister = sourceFile.getSubroutine(self.dynRegister)
         self.assertIsNotNone(dynRegister)
+        dynInit = sourceFile.getSubroutine(self.dynInit)
+        self.assertIsNotNone(dynInit)
         dynRun = sourceFile.getSubroutine(self.dynRun)
         self.assertIsNotNone(dynRun)
         
@@ -79,6 +82,14 @@ class TestLineNumbers(unittest.TestCase):
         self.assertEqual(-1, dynRegister.getContainsLineNumber())
         self.assertEqual(424, dynRegister.getLastSpecificationLineNumber())
         self.assertEqual(441, dynRegister.getLastLineNumber())
+        
+    def testDynInitLineNumbers(self):
+        dynInit = self.sourceFiles.findSubroutine(self.dynInit)
+        self.assertEqual(445, dynInit.getDeclarationLineNumber())
+        self.assertEqual(460, dynInit.getLastUseLineNumber())
+        self.assertEqual(-1, dynInit.getContainsLineNumber())
+        self.assertEqual(482, dynInit.getLastSpecificationLineNumber())
+        self.assertEqual(672, dynInit.getLastLineNumber())
         
     def testDynRunLineNumbers(self):
         dynRun = self.sourceFiles.findSubroutine(self.dynRun)
