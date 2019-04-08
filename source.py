@@ -1417,13 +1417,13 @@ class Subroutine(SubroutineContainer):
                 re.compile(r'^((CONTIGUOUS)|(DIMENSION)|(EXTERNAL))(\:\:)?\s*([a-z0-9_\,]+).*$', re.IGNORECASE),
                 re.compile(r'^PARAMETER\(.*\)$', re.IGNORECASE),
                 re.compile(r'^DATA((\s+[a-z0-9_]+)|(\(.*\)))\/.*$', re.IGNORECASE),
-                re.compile(r'^((COMMON)|(SAVE))\/.*$', re.IGNORECASE)
+                re.compile(r'^((COMMON)|(SAVE)|(NAMELIST))\/.*$', re.IGNORECASE)
             ] 
 
         lastUseIndex = self._getLastUseStatementIndex()
         lastSpecIndex = lastUseIndex
         for i, (_, statement, _) in enumerate(self.getStatementsAfterUse()):
-            if Variable.validVariableDeclaration(statement) or any((regex.match(statement) for regex in alsoAllowedInSpecificationPart)):
+            if Variable.validVariableDeclaration(statement) or statement.upper() == 'IMPLICIT NONE' or any((regex.match(statement) for regex in alsoAllowedInSpecificationPart)):
                 lastSpecIndex = i + lastUseIndex + 1
             else:
                 break
