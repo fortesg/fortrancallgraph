@@ -4,7 +4,7 @@ import os.path;
 import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
-from printout import printWarning, printDebug
+from printout import printWarning
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -1265,33 +1265,33 @@ class SubroutineContainer(object):
     
     def getStatementsBeforeContains(self):
         '''NOT including CONTAINS statement'''
-        return self.getStatements()[:self.__getContainsStatementIndex()]
+        return self.getStatements()[:self._getContainsStatementIndex()]
         
     def getStatementsAfterContains(self):
         '''NOT including CONTAINS statement'''
-        if self.__getContainsStatementIndex() < 0:
+        if self._getContainsStatementIndex() < 0:
             return []
         
-        return self.getStatements()[self.__getContainsStatementIndex() + 1:]
+        return self.getStatements()[self._getContainsStatementIndex() + 1:]
         
     def getContainsLineNumber(self):
-        if self.__getContainsStatementIndex() < 0:
+        if self._getContainsStatementIndex() < 0:
             return -1
         
-        return self.getStatements()[self.__getContainsStatementIndex()][0]
+        return self.getStatements()[self._getContainsStatementIndex()][0]
     
-    def __getContainsStatementIndex(self):
+    def _getContainsStatementIndex(self):
         if self.__containsStatementIndex is None:
-            self.__containsStatementIndex = self.__findContainsStatementIndex()
+            self.__containsStatementIndex = self._findContainsStatementIndex()
             
         return self.__containsStatementIndex
     
-    def __findContainsStatementIndex(self):
+    def _findContainsStatementIndex(self):
         typeRegEx = Type.DECLARATION_REGEX
         endTypeRegEx = Type.END_REGEX
-        lastUseIndex = self.__getLastUseStatementIndex()
+        lastUseIndex = self._getLastUseStatementIndex()
         inType = False
-        for i, (_, statement, _) in enumerate(self.getStatements()[lastUseIndex + 1:]):
+        for i, (_, statement, _) in enumerate(self.getStatementsAfterUse()):
             if typeRegEx.match(statement) is not None:
                 inType = True
             elif endTypeRegEx.match(statement) is not None:
@@ -1303,22 +1303,22 @@ class SubroutineContainer(object):
 
     def getUseStatements(self):
         '''Including last USE statement'''
-        return self.getStatements()[1:self.__getLastUseStatementIndex() + 1]
+        return self.getStatements()[1:self._getLastUseStatementIndex() + 1]
 
     def getStatementsAfterUse(self):
         '''NOT including last USE statement'''
-        return self.getStatements()[self.__getLastUseStatementIndex() + 1:]
+        return self.getStatements()[self._getLastUseStatementIndex() + 1:]
     
     def getLastUseLineNumber(self):
-        return self.getStatements()[self.__getLastUseStatementIndex()][2]
+        return self.getStatements()[self._getLastUseStatementIndex()][2]
     
-    def __getLastUseStatementIndex(self):
+    def _getLastUseStatementIndex(self):
         if self.__lastUseStatementIndex is None:
-            self.__lastUseStatementIndex = self.__findLastUseStatementIndex()
+            self.__lastUseStatementIndex = self._findLastUseStatementIndex()
             
         return self.__lastUseStatementIndex
         
-    def __findLastUseStatementIndex(self):
+    def _findLastUseStatementIndex(self):
         useRegEx = re.compile(r'^USE[\,\s\:].*$', re.IGNORECASE); 
         index = 0
         for _, statement, _ in self.getStatements()[1:]:
@@ -1345,6 +1345,7 @@ class Subroutine(SubroutineContainer):
         self.__resultVar = None
         self.__container = container
         self.__variables = None
+        self.__lastSpecificationIndex = None
         
     def __eq__(self, other):
         if (other is None or not isinstance(other, Subroutine)):
@@ -1399,26 +1400,36 @@ class Subroutine(SubroutineContainer):
 
         return None
     
+    def getSpecificationStatements(self):
+        return self.getStatements()[self._getLastUseStatementIndex() + 1:self.__getLastSpecificationIndex() + 1]
+    
     def getLastSpecificationLineNumber(self):
+        return self.getStatements()[self.__getLastSpecificationIndex()][2]
+     
+    def __getLastSpecificationIndex(self):
+        if self.__lastSpecificationIndex is None:
+            self.__lastSpecificationIndex = self.__findLastSpecificationIndex()
+             
+        return self.__lastSpecificationIndex
+         
+    def __findLastSpecificationIndex(self):
         alsoAllowedInSpecificationPart = [
                 re.compile(r'^((CONTIGUOUS)|(DIMENSION)|(EXTERNAL))(\:\:)?\s*([a-z0-9_\,]+).*$', re.IGNORECASE),
                 re.compile(r'^PARAMETER\(.*\)$', re.IGNORECASE),
+                re.compile(r'^DATA((\s+[a-z0-9_]+)|(\(.*\)))\/.*$', re.IGNORECASE),
                 re.compile(r'^((COMMON)|(SAVE))\/.*$', re.IGNORECASE)
             ] 
-        statements = self.getStatementsAfterUse()
-        lastLine = self.getLastUseLineNumber()
-        i = 2
-        while i < len(statements):
-            statement = statements[i - 1][1]
+
+        lastUseIndex = self._getLastUseStatementIndex()
+        lastSpecIndex = lastUseIndex
+        for i, (_, statement, _) in enumerate(self.getStatementsAfterUse()):
             if Variable.validVariableDeclaration(statement) or any((regex.match(statement) for regex in alsoAllowedInSpecificationPart)):
-                lastLine = statements[i - 1][2]
+                lastSpecIndex = i + lastUseIndex + 1
             else:
-                printDebug(statement)
-                break;
-            i = i + 1
+                break
         
-        return lastLine
-    
+        return lastSpecIndex
+
     def getArgumentNames(self):
         declaration = self.getDeclaration()
         if declaration.find('(') < 0:
@@ -1540,15 +1551,11 @@ class Subroutine(SubroutineContainer):
     def __findVariables(self):
         #TODO Support PARAMETER(...) syntax
         argumentNames = self.getArgumentNames()
-        foundOne = False
         variables = []
-        for i, statement, _ in self.getStatements():
+        for i, statement, _ in self.getSpecificationStatements():
             if Variable.validVariableDeclaration(statement):
                 for variable in Variable.fromDeclarationStatement(statement, self.getModuleName(), i):
                     variables.append(variable)
-                foundOne = True
-            elif foundOne == True:
-                break;
                 
         for variable in variables:
             variable.setDeclaredIn(self, self.getModuleName(), i)
