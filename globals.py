@@ -92,9 +92,13 @@ class GlobalVariableTracker(CallGraphAnalyzer):
         if self.__settings.matchIgnoreSubroutineRegex(subroutineName) or (subroutineName.getModuleName().lower in self.__settings.excludeModules):
             return set()
         
+        subroutine = self.__findSubroutine(subroutineName)
         moduleName = subroutineName.getModuleName()
         variables = self.__getModuleVariables(moduleName)
         variables.update(self.__getAllUsedVariables(subroutineName))
+        for variableName in list(variables.keys()): #list() needed for Python3
+            if subroutine.hasVariable(variableName):
+                del variables[variableName]
         
         callGraph = self.__callGraph.extractSubgraph(subroutineName) 
         normalVariables = set()
