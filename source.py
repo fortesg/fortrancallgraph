@@ -4,7 +4,7 @@ import os.path;
 import re
 from assertions import assertType, assertTypeAll
 from operator import attrgetter
-from printout import printWarning
+from printout import printWarning, printDebug
 
 IDENTIFIER_REG_EX = re.compile('^[a-z0-9_]{1,63}$', re.IGNORECASE)
 
@@ -1400,15 +1400,20 @@ class Subroutine(SubroutineContainer):
         return None
     
     def getLastSpecificationLineNumber(self):
-        additionalRegEx = re.compile(r'^((CONTIGUOUS)|(DIMENSION))\s*\:\:\s*([a-z0-9_]+).*$', re.IGNORECASE); 
+        alsoAllowedInSpecificationPart = [
+                re.compile(r'^((CONTIGUOUS)|(DIMENSION)|(EXTERNAL))(\:\:)?\s*([a-z0-9_\,]+).*$', re.IGNORECASE),
+                re.compile(r'^PARAMETER\(.*\)$', re.IGNORECASE),
+                re.compile(r'^((COMMON)|(SAVE))\/.*$', re.IGNORECASE)
+            ] 
         statements = self.getStatementsAfterUse()
         lastLine = self.getLastUseLineNumber()
         i = 2
         while i < len(statements):
             statement = statements[i - 1][1]
-            if Variable.validVariableDeclaration(statement) or additionalRegEx.match(statement) is not None:
+            if Variable.validVariableDeclaration(statement) or any((regex.match(statement) for regex in alsoAllowedInSpecificationPart)):
                 lastLine = statements[i - 1][2]
             else:
+                printDebug(statement)
                 break;
             i = i + 1
         
@@ -1533,6 +1538,7 @@ class Subroutine(SubroutineContainer):
         return self.__variables
         
     def __findVariables(self):
+        #TODO Support PARAMETER(...) syntax
         argumentNames = self.getArgumentNames()
         foundOne = False
         variables = []
@@ -1657,6 +1663,7 @@ class Module(SubroutineContainer):
         return self.__variables
      
     def __findVariables(self):
+        #TODO Support PARAMETER(...) syntax
         typeRegEx = Type.DECLARATION_REGEX
         endTypeRegEx = Type.END_REGEX
         interfaceRegEx = re.compile(r'^(ABSTRACT\s+)?INTERFACE(\s+([a-z0-9_]+))?$', re.IGNORECASE);
