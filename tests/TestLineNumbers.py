@@ -11,7 +11,7 @@ ASSEMBLER_DIR = SOURCE_DIR
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
 
-from source import SourceFiles, SubroutineFullName
+from source import SourceFiles, SubroutineFullName, InnerSubroutineName
 
 class TestLineNumbers(unittest.TestCase):
     def setUp(self):
@@ -22,6 +22,8 @@ class TestLineNumbers(unittest.TestCase):
         
         self.dynRun = SubroutineFullName('__dyn_comp_MOD_dyn_run')
         self.dynReadNl = SubroutineFullName('__dyn_comp_MOD_dyn_readnl')
+        self.initNsplit = InnerSubroutineName('init_nsplit', self.dynReadNl)
+        self.dynRegister = SubroutineFullName('__dyn_comp_MOD_dyn_register')
         
     def testSourceFiles(self):
         if not self.filesExist:
@@ -37,11 +39,14 @@ class TestLineNumbers(unittest.TestCase):
         module = sourceFile.getModule('dyn_comp')
         self.assertIsNotNone(module)
          
-        dynRun = sourceFile.getSubroutine(self.dynRun)
-        self.assertIsNotNone(dynRun)
-         
         dynReadNl = sourceFile.getSubroutine(self.dynReadNl)
         self.assertIsNotNone(dynReadNl)
+        initNsplit = dynReadNl.getSubroutine(self.initNsplit)
+        self.assertIsNotNone(initNsplit)
+        dynRegister = sourceFile.getSubroutine(self.dynRegister)
+        self.assertIsNotNone(dynRegister)
+        dynRun = sourceFile.getSubroutine(self.dynRun)
+        self.assertIsNotNone(dynRun)
         
     def testModuleLineNumbers(self):
         module = self.sourceFiles.findModule('dyn_comp')
@@ -51,14 +56,6 @@ class TestLineNumbers(unittest.TestCase):
         self.assertEqual(148, module.getLastSpecificationLineNumber())
         self.assertEqual(3671, module.getLastLineNumber())
         
-    def testDynRunLineNumbers(self):
-        dynRun = self.sourceFiles.findSubroutine(self.dynRun)
-        self.assertEqual(676, dynRun.getDeclarationLineNumber())
-        self.assertEqual(806, dynRun.getLastUseLineNumber())
-        self.assertEqual(-1, dynRun.getContainsLineNumber())
-        self.assertEqual(1642, dynRun.getLastSpecificationLineNumber())
-        self.assertEqual(3225, dynRun.getLastLineNumber())
-        
     def testDynReadNlLineNumbers(self):
         dynReadNl = self.sourceFiles.findSubroutine(self.dynReadNl)
         self.assertEqual(154, dynReadNl.getDeclarationLineNumber())
@@ -66,6 +63,30 @@ class TestLineNumbers(unittest.TestCase):
         self.assertEqual(370, dynReadNl.getContainsLineNumber())
         self.assertEqual(204, dynReadNl.getLastSpecificationLineNumber())
         self.assertEqual(415, dynReadNl.getLastLineNumber())
+        
+    def testInitSplitLineNumbers(self):
+        initNsplit = self.sourceFiles.findSubroutine(self.initNsplit)
+        self.assertEqual(373, initNsplit.getDeclarationLineNumber())
+        self.assertEqual(373, initNsplit.getLastUseLineNumber())
+        self.assertEqual(-1, initNsplit.getContainsLineNumber())
+        self.assertEqual(402, initNsplit.getLastSpecificationLineNumber())
+        self.assertEqual(412, initNsplit.getLastLineNumber())
+        
+    def testDynRegisterLineNumbers(self):
+        dynRegister = self.sourceFiles.findSubroutine(self.dynRegister)
+        self.assertEqual(419, dynRegister.getDeclarationLineNumber())
+        self.assertEqual(424, dynRegister.getLastUseLineNumber())
+        self.assertEqual(-1, dynRegister.getContainsLineNumber())
+        self.assertEqual(424, dynRegister.getLastSpecificationLineNumber())
+        self.assertEqual(441, dynRegister.getLastLineNumber())
+        
+    def testDynRunLineNumbers(self):
+        dynRun = self.sourceFiles.findSubroutine(self.dynRun)
+        self.assertEqual(676, dynRun.getDeclarationLineNumber())
+        self.assertEqual(806, dynRun.getLastUseLineNumber())
+        self.assertEqual(-1, dynRun.getContainsLineNumber())
+        self.assertEqual(1642, dynRun.getLastSpecificationLineNumber())
+        self.assertEqual(3225, dynRun.getLastLineNumber())
         
 
         
