@@ -8,9 +8,9 @@ import argparse;
 import re
 
 from source import SubroutineFullName, SourceFiles, SourceFile
-from tree import TreeLikeCallGraphPrinter;
-from dot import DotFormatCallGraphPrinter;
-from lister import SubroutineListingCallGraphPrinter, ModuleListingCallGraphPrinter;
+from tree import TreeLikeCallGraphPrinter
+from dot import DotFormatCallGraphPrinter
+from lister import SubroutineListingCallGraphPrinter, ModuleListingCallGraphPrinter, FileListingCallGraphPrinter
 from globals import GlobalVariableTracker
 from trackvariable import VariableTracker, VariableTrackerSettings
 from allvariables import AllVariablesCallGraphAnalysis
@@ -28,13 +28,15 @@ from printout import printErrorAndExit
 GRAPH_PRINTERS = {'tree': 'in a tree-like form',
                   'dot': 'in DOT format for Graphviz',
                   'list-subroutines': 'only list subroutines',
-                  'list-modules': 'only list modules containing subroutines from the call graph'}
-def graphPrinter(key):
+                  'list-modules': 'only list modules containing subroutines from the call graph',
+                  'list-files': 'only list files containing subroutines from the call graph'}
+def graphPrinter(key, sourceFiles):
     if key not in GRAPH_PRINTERS: raise KeyError('No such CallGraphPrinter: ' + str(key))
     elif key == 'tree': return TreeLikeCallGraphPrinter()
     elif key == 'dot':  return DotFormatCallGraphPrinter()
     elif key == 'list-subroutines': return SubroutineListingCallGraphPrinter()
     elif key == 'list-modules': return ModuleListingCallGraphPrinter()
+    elif key == 'list-files': return FileListingCallGraphPrinter(sourceFiles)
     else: raise NotImplementedError('CallGraphPrinter not yet implemented: ' + str(key))
 
 GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
@@ -162,7 +164,7 @@ def main():
     
     if args.printer is not None:
         callGraph = graphBuilder.buildCallGraph(subroutineFullName, args.clearCache)
-        printer = graphPrinter(args.printer)
+        printer = graphPrinter(args.printer, sourceFiles)
         printer.setIgnoreRegex(ignoreRegex)
         printer.setMaxLevel(maxLevel)
         printer.printCallGraph(callGraph)
