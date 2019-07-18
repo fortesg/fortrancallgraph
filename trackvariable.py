@@ -7,7 +7,7 @@ from source import SourceFiles, Variable, VariableReference, SubroutineFullName,
 from callgraph import CallGraph
 from usetraversal import UseTraversal
 from typefinder import TypeCollection
-from printout import printError, printLine, printWarning
+from printout import printError, printLine, printWarning, printDebug
 
 class VariableTracker(CallGraphAnalyzer):
 
@@ -655,14 +655,20 @@ class VariableTracker(CallGraphAnalyzer):
         if calledSubroutineSimpleName in callerModule:
             return SubroutineFullName.fromParts(callerModule.getName(), calledSubroutineSimpleName)
         else:
-            for use in callerSubroutine.getModule().getUses():
+            uses = callerSubroutine.getModule().getUses()
+            for use in uses:
                 if use[-1] == calledSubroutineSimpleName:
                     if self.__sourceFiles.existsModule(use[0]):
                         usedModule = self.__sourceFiles.findModule(use[0])
                         if calledSubroutineSimpleName in usedModule:
                             return SubroutineFullName.fromParts(usedModule.getName(), calledSubroutineSimpleName)
                         break
-        
+            for moduleName in set(use[0] for use in uses):
+                if self.__sourceFiles.existsModule(moduleName):
+                    usedModule = self.__sourceFiles.findModule(moduleName)
+                    if calledSubroutineSimpleName in usedModule:
+                        return SubroutineFullName.fromParts(usedModule.getName(), calledSubroutineSimpleName)
+                
         return None   
     
     def __findDeferredProcedure(self, typE, procedureAlias):
