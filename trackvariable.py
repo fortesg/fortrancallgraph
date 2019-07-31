@@ -70,13 +70,13 @@ class VariableTracker(CallGraphAnalyzer):
         
         if self.__variable is not None:
             self.__variableName = self.__variable.getName()
-            variables = {self.__variable}
+            variables = [self.__variable]
         elif self.__variableName is not None:
             self.__variable = rootSubroutine.getVariable(self.__variableName)
             if self.__variable is None:
                 printError('No variable with name: ' + self.__variableName, 'VariableTracker')
                 return None;
-            variables = {self.__variable}
+            variables = [self.__variable]
         else:
             variables = rootSubroutine.getArguments()
 
@@ -180,8 +180,8 @@ class VariableTracker(CallGraphAnalyzer):
         
         self.__callGraph = callGraph;
         subroutineFullName = callGraph.getRoot()
-        self.__excludeFromRecursionVariables = {self.__variable} 
-        self.__excludeFromRecursionRoutines = {(subroutineFullName, self.__variable)} 
+        self.__excludeFromRecursionVariables = [self.__variable] 
+        self.__excludeFromRecursionRoutines = [(subroutineFullName, self.__variable)] 
         
         subroutine = self.__sourceFiles.findSubroutine(subroutineFullName)
         if subroutine is not None:
@@ -372,7 +372,7 @@ class VariableTracker(CallGraphAnalyzer):
             if not variableReference.containsProcedure():
                 variable = self.__findLevelNVariable(variableReference)
                 if variable is None or not variable.hasDerivedType():
-                    return ({variableReference}, set())
+                    return ([variableReference], set())
                 elif variable.getDerivedTypeName() in self.__settings.fullTypes:
                     return (self.createReferencesForFullTypeVariable(variableReference, subroutine.getName(), lineNumber), set())
             else:
