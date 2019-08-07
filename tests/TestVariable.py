@@ -73,6 +73,16 @@ class VariableTest(unittest.TestCase):
         self.assertEqual('grb2_grid_info_lc', grb2_grid_info_lc.getName())
         self.assertEqual('CHARACTER(LEN=LEN(grb2_grid_info))', grb2_grid_info_lc.getTypeName())
 
+    def testIflag(self):
+        decl = "logical::iflag=.true."
+        self.assertTrue(Variable.validVariableDeclaration(decl))
+        variables = Variable.fromDeclarationStatement(decl, 'VariableTest')
+        self.assertTrue(variables)
+        iflag = variables[0]
+        self.assertIsNotNone(iflag)
+        self.assertEqual('iflag', iflag.getName())
+        self.assertEqual('logical', iflag.getTypeName())
+
     def testDimensionConstant(self):
         decl1 = "integer(LONG_KIND)::addrs_s(MAX_DOMAIN_FIELDS)"
         self.assertTrue(Variable.validVariableDeclaration(decl1))
