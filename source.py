@@ -1330,6 +1330,10 @@ class SubroutineContainer(object):
         return index   
     
 class Subroutine(SubroutineContainer):
+    
+    INTERFACE_REG_EX = re.compile(r'^(ABSTRACT\s+)?INTERFACE(\s+([a-z0-9_]+))?$', re.IGNORECASE)
+    END_INTERFACE_REG_EX = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE)
+    
     def __init__(self, name, isFunction, lines, container):
         assertType(name, 'name', SubroutineName)
         assertType(isFunction, 'isFunction', bool)
@@ -1422,11 +1426,20 @@ class Subroutine(SubroutineContainer):
 
         lastUseIndex = self._getLastUseStatementIndex()
         lastSpecIndex = lastUseIndex
+        inInterface = False
         for i, (_, statement, _) in enumerate(self.getStatementsAfterUse()):
-            if Variable.validVariableDeclaration(statement) or statement.upper() == 'IMPLICIT NONE' or any((regex.match(statement) for regex in alsoAllowedInSpecificationPart)):
+            if not inInterface:
+                if Subroutine.INTERFACE_REG_EX.match(statement):
+                    inInterface = True
+                    lastSpecIndex = i + lastUseIndex + 1
+                else:
+                    if Variable.validVariableDeclaration(statement) or statement.upper() == 'IMPLICIT NONE' or any((regex.match(statement) for regex in alsoAllowedInSpecificationPart)):
+                        lastSpecIndex = i + lastUseIndex + 1
+                    else:
+                        break
+            elif Subroutine.END_INTERFACE_REG_EX.match(statement):
+                inInterface = False
                 lastSpecIndex = i + lastUseIndex + 1
-            else:
-                break
         
         return lastSpecIndex
 
@@ -1552,10 +1565,17 @@ class Subroutine(SubroutineContainer):
         #TODO Support PARAMETER(...) syntax
         argumentNames = self.getArgumentNames()
         variables = []
+        inInterface = False
         for i, statement, _ in self.getSpecificationStatements():
-            if Variable.validVariableDeclaration(statement):
-                for variable in Variable.fromDeclarationStatement(statement, self.getModuleName(), i):
-                    variables.append(variable)
+            if not inInterface:
+                if Subroutine.INTERFACE_REG_EX.match(statement):
+                    inInterface = True
+                else:
+                    if Variable.validVariableDeclaration(statement):
+                        for variable in Variable.fromDeclarationStatement(statement, self.getModuleName(), i):
+                            variables.append(variable)
+            elif Subroutine.END_INTERFACE_REG_EX.match(statement):
+                inInterface = False
                 
         for variable in variables:
             variable.setDeclaredIn(self, self.getModuleName(), i)
@@ -1673,8 +1693,8 @@ class Module(SubroutineContainer):
         #TODO Support PARAMETER(...) syntax
         typeRegEx = Type.DECLARATION_REGEX
         endTypeRegEx = Type.END_REGEX
-        interfaceRegEx = re.compile(r'^(ABSTRACT\s+)?INTERFACE(\s+([a-z0-9_]+))?$', re.IGNORECASE);
-        endInterfaceRegEx = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE);
+        interfaceRegEx = re.compile(r'^(ABSTRACT\s+)?INTERFACE(\s+([a-z0-9_]+))?$', re.IGNORECASE)
+        endInterfaceRegEx = re.compile(r'^END\s*INTERFACE(\s+[a-z0-9_]+)?$', re.IGNORECASE)
          
         moduleVariables = dict()        
         inType = False
