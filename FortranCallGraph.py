@@ -42,7 +42,7 @@ def graphPrinter(key, sourceFiles):
 GRAPH_ANALYSIS = {'arguments': 'only subroutine arguments',
                  'result': 'only function result',
                  'globals': 'only module variables',
-                 'all': 'both arguments and globals'}
+                 'all': 'all together'}
 def graphAnalysis(key, sourceFiles, settings, callGraphBuilder):
     if key not in GRAPH_ANALYSIS: raise KeyError('No such CallGraphAnalyzer: ' + str(key))
     elif key == 'globals': return GlobalVariableTracker(sourceFiles, settings, callGraphBuilder = callGraphBuilder)
