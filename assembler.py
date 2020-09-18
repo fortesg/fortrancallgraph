@@ -103,6 +103,8 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
         return candidates    
     
     def __findCalledSubroutines(self, subroutine, filePath):
+        ompRegEx = re.compile(r'^.*[^a-z0-9_](?P<omp>[a-z0-9_]+\._omp_fn\.\d+).*$', re.IGNORECASE);
+        
         openFile = open(filePath);
         calls = []
         inFunction = False 
@@ -134,12 +136,12 @@ class GNUx86AssemblerCallGraphBuilder(CallGraphBuilder):
                         calls.append((SubroutineFullName(callee),) + self.__findLineNumberAndDiscriminator(lines, i))
                     elif InnerSubroutineName.validInnerSubroutineName(callee):
                         calls.append((InnerSubroutineName(callee, hostForInnerSubroutines),) + self.__findLineNumberAndDiscriminator(lines, i))
-                elif line.startswith('leaq\t') and line.find('._omp_fn.') >= 0:
-                    ompRegion = line.replace('leaq\t', '', 1)
-                    parathPos = ompRegion.find('(')
-                    if parathPos >= 0:
-                        ompRegion = ompRegion[:parathPos] 
-                    calls += self.__findCalledSubroutines(ompRegion, filePath)
+                    elif callee == 'GOMP_parallel':
+                        lineBefore = lines[i - 1].strip()
+                        ompRegExMatch = ompRegEx.match(lineBefore)
+                        if ompRegExMatch is not None:
+                            ompRegion = ompRegExMatch.group('omp')
+                            calls += self.__findCalledSubroutines(ompRegion, filePath)
         openFile.close();            
         return calls             
 
