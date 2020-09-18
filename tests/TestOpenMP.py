@@ -7,6 +7,7 @@ import sys
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 SOURCE_DIR = TEST_DIR + '/samples/openmp'
 ASSEMBLER_DIR = SOURCE_DIR
+ASSEMBLER_DIR_MOD = TEST_DIR + '/samples/openmp-mod-s'
 
 FCG_DIR = TEST_DIR + '/..'
 sys.path.append(FCG_DIR)
@@ -22,9 +23,9 @@ Tests whether assignments of function results are tracked correctly
 '''
 class OpenMPTest(unittest.TestCase):
     def setUp(self):
-        specialModuleFiles = {}
-        callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, specialModuleFiles)
-        self.sourceFiles = SourceFiles(SOURCE_DIR, specialModuleFiles)
+        self.specialModuleFiles = {}
+        callGraphBuilder = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR, self.specialModuleFiles)
+        self.sourceFiles = SourceFiles(SOURCE_DIR, self.specialModuleFiles)
         self.trackerSettings = VariableTrackerSettings()
         self.trackerSettings.excludeModules = ['omp_lib']
         
@@ -76,7 +77,7 @@ class OpenMPTest(unittest.TestCase):
             self.skipTest('Files not there')
         
         self.assertEqual({'start', 'random'}, set([name.getSimpleName() for name in self.callGraph.getAllSubroutineNames()]))
-        
+
     def testArgument(self):
         if not self.filesExist:
             self.skipTest('Files not there')
@@ -96,6 +97,14 @@ class OpenMPTest(unittest.TestCase):
         refs = tracker.trackGlobalVariables(self.callGraph)
         expressions = set([ref.getExpression() for ref in refs])
         self.assertEqual({'tester%var2'}, expressions)
+        
+    def testModifiedAssember(self):
+        if not self.filesExist:
+            self.skipTest('Files not there')
+        
+        callGraphBuilderMod = GNUx86AssemblerCallGraphBuilder(ASSEMBLER_DIR_MOD, self.specialModuleFiles)
+        callGraphMod = callGraphBuilderMod.buildCallGraph(self.start)
+        self.assertEqual({'start', 'random'}, set([name.getSimpleName() for name in callGraphMod.getAllSubroutineNames()]))
          
 if __name__ == "__main__":
     unittest.main()
